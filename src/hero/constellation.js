@@ -11,6 +11,7 @@ import {
 import { createTicketMesh, disposeShared } from './ticket.js';
 import { generateTicketPositions } from './positions.js';
 import { createFeaturedLabels } from './featured-labels.js';
+import { createBloomComposer } from './post.js';
 
 const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -52,6 +53,12 @@ export function createConstellation(canvas) {
   const labelHost = document.querySelector('.hero__labels');
   const featured = labelHost ? createFeaturedLabels(labelHost, meshes, camera, renderer) : null;
 
+  const useBloom = !isMobile();
+  let post = null;
+  if (useBloom) {
+    post = createBloomComposer(renderer, scene, camera, { x: canvas.clientWidth, y: canvas.clientHeight });
+  }
+
   const pointer = new Vector2(0, 0);
   const targetPointer = new Vector2(0, 0);
 
@@ -61,6 +68,7 @@ export function createConstellation(canvas) {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    if (post) post.resize(w, h);
   }
   setSize();
 
@@ -178,7 +186,8 @@ export function createConstellation(canvas) {
     camera.lookAt(0, 0, 0);
 
     if (featured) featured.sync();
-    renderer.render(scene, camera);
+    if (post) post.composer.render();
+    else renderer.render(scene, camera);
     rafId = requestAnimationFrame(tick);
   }
   tick();
