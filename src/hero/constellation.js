@@ -203,6 +203,17 @@ export function createConstellation(canvas) {
     tick();
   }
 
+  const visibilityObserver = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) resume();
+        else pause();
+      }
+    },
+    { threshold: 0 }
+  );
+  visibilityObserver.observe(canvas);
+
   return {
     meshes,
     scene,
@@ -214,6 +225,7 @@ export function createConstellation(canvas) {
     dispose() {
       pause();
       ro.disconnect();
+      visibilityObserver.disconnect();
       window.removeEventListener('pointermove', onMouse);
       window.removeEventListener('pointermove', onHover);
       window.removeEventListener('click', onClick);
