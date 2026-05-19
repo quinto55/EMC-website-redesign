@@ -6,9 +6,11 @@ import './styles/hero.css';
 import { initNav } from './nav.js';
 import { initReveals } from './reveals.js';
 import { initTilt } from './tilt.js';
+import { initCountUp } from './count-up.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   initNav();
   initReveals();
   initTilt();
+  initCountUp();
 });
