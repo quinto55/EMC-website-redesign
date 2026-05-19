@@ -25,7 +25,7 @@ export function createFeaturedLabels(container, meshes, camera, renderer) {
     a.textContent = LABELS[m.userData.service];
     a.dataset.service = m.userData.service;
     container.appendChild(a);
-    return { mesh: m, el: a, visible: false };
+    return { mesh: m, el: a };
   });
 
   const v = new Vector3();

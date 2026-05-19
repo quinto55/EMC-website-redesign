@@ -7,7 +7,7 @@ import {
   Vector2,
   Clock,
 } from 'three';
-import { createTicketMesh } from './ticket.js';
+import { createTicketMesh, disposeShared } from './ticket.js';
 import { generateTicketPositions } from './positions.js';
 import { createFeaturedLabels } from './featured-labels.js';
 
@@ -125,6 +125,8 @@ export function createConstellation(canvas) {
       pause();
       ro.disconnect();
       window.removeEventListener('pointermove', onMouse);
+      for (const m of meshes) m.material.dispose();
+      disposeShared();
       renderer.dispose();
     },
   };
