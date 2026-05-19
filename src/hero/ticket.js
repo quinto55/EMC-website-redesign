@@ -1,5 +1,4 @@
 import {
-  BufferGeometry,
   ExtrudeGeometry,
   Mesh,
   MeshStandardMaterial,
@@ -54,5 +53,3 @@ export function createTicketMesh({ featured = false } = {}) {
 export function disposeShared() {
   sharedGeometry.dispose();
 }
-
-export const __testing__ = { sharedGeometry: () => sharedGeometry instanceof BufferGeometry };
