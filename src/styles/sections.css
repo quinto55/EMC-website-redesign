@@ -1,0 +1,102 @@
+.site-nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px var(--gutter);
+  transition: background 300ms var(--ease), backdrop-filter 300ms var(--ease), border-color 300ms var(--ease);
+  border-bottom: 1px solid transparent;
+}
+
+.site-nav.is-scrolled {
+  background: rgba(7, 9, 15, 0.7);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom-color: var(--border);
+}
+
+.site-nav__brand img { height: 28px; }
+
+.site-nav__links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-nav__links a {
+  font-size: var(--fs-14);
+  color: var(--text-muted);
+  transition: color 200ms var(--ease);
+}
+
+.site-nav__links a:hover,
+.site-nav__links a.is-active {
+  color: var(--text);
+}
+
+.site-nav__cta { font-size: var(--fs-14); padding: 10px 18px; }
+
+@media (max-width: 900px) {
+  .site-nav__links { display: none; }
+}
+
+.site-footer {
+  background: var(--bg-deeper);
+  border-top: 1px solid var(--border);
+  padding: 64px 0 32px;
+}
+
+.site-footer__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  margin-bottom: 48px;
+}
+
+.site-footer__col h4 {
+  font-size: var(--fs-14);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.site-footer__col p,
+.site-footer__col a {
+  color: var(--text-muted);
+  font-size: var(--fs-16);
+  line-height: 1.7;
+}
+
+.site-footer__col a:hover { color: var(--gold-1); }
+
+.site-footer__col ul { list-style: none; padding: 0; margin: 0; }
+
+.site-footer__legal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: var(--fs-12);
+}
+
+@media (max-width: 768px) {
+  .site-footer__grid { grid-template-columns: 1fr; gap: 28px; }
+  .site-footer__legal { flex-direction: column; gap: 12px; }
+}
+
+.section { padding: 96px 0; }
+.section--tight { padding: 64px 0; }
+
+@media (max-width: 768px) {
+  .section { padding: 64px 0; }
+  .section--tight { padding: 40px 0; }
+}
