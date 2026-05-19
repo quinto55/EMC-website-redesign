@@ -1,0 +1,45 @@
+@font-face {
+  font-family: 'Inter Tight';
+  src: url('/fonts/InterTight-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --bg: #07090f;
+  --bg-elev: #0e1224;
+  --bg-deeper: #04060c;
+  --text: #f1f3f8;
+  --text-muted: #b8c1d8;
+  --text-dim: #7a8295;
+  --gold-1: #ffd66b;
+  --gold-2: #ff9c3d;
+  --accent-glow: rgba(255, 170, 80, 0.35);
+  --border: rgba(255, 255, 255, 0.08);
+
+  --fs-12: 12px;
+  --fs-14: 14px;
+  --fs-16: 16px;
+  --fs-18: 18px;
+  --fs-22: 22px;
+  --fs-28: 28px;
+  --fs-40: 40px;
+  --fs-64: 64px;
+  --fs-96: 96px;
+
+  --container: 1200px;
+  --gutter: clamp(20px, 4vw, 40px);
+  --radius-card: 12px;
+  --radius-pill: 999px;
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@media (max-width: 768px) {
+  :root {
+    --fs-96: 64px;
+    --fs-64: 40px;
+    --fs-40: 28px;
+    --fs-28: 22px;
+  }
+}
