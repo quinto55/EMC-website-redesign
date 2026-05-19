@@ -100,3 +100,38 @@
   .section { padding: 64px 0; }
   .section--tight { padding: 40px 0; }
 }
+
+.partners {
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.02) 50%, transparent);
+  border-block: 1px solid var(--border);
+  padding: 28px 0;
+}
+
+.partners__caption {
+  text-align: center;
+  font-size: var(--fs-12);
+  letter-spacing: 0.24em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.partners__row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(32px, 8vw, 96px);
+  flex-wrap: wrap;
+}
+
+.partners__name {
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  font-size: var(--fs-18);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  opacity: 0.85;
+  transition: color 200ms var(--ease), opacity 200ms var(--ease);
+}
+
+.partners__name:hover { color: var(--text-muted); opacity: 1; }
