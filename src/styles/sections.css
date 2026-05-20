@@ -277,7 +277,8 @@
   gap: 56px;
   align-items: start;
 }
-.contact__block h3 { margin-bottom: 8px; }
+.contact__grid > div > h2 { font-size: var(--fs-22); margin-bottom: 16px; }
+.contact__block h2 { font-size: var(--fs-14); letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
 .contact__block p, .contact__block a { font-size: var(--fs-18); color: var(--text-muted); }
 .contact__block a:hover { color: var(--gold-1); }
 .contact__block + .contact__block { margin-top: 28px; }
