@@ -253,8 +253,9 @@
 
 .subhero__video {
   position: relative;
-  aspect-ratio: 4 / 5;
+  width: 100%;
   max-width: 360px;
+  aspect-ratio: 4 / 5;
   justify-self: end;
   border-radius: var(--radius-card);
   overflow: hidden;
