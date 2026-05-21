@@ -251,13 +251,39 @@
 .subhero__head h1 { font-size: var(--fs-64); margin-bottom: 16px; }
 .subhero__head p { font-size: var(--fs-18); max-width: 52ch; }
 
-.subhero__motif {
-  aspect-ratio: 1 / 1;
+.subhero__video {
+  position: relative;
+  aspect-ratio: 4 / 5;
   max-width: 360px;
   justify-self: end;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #05070f;
+  isolation: isolate;
 }
 
-.subhero__motif canvas { width: 100%; height: 100%; display: block; }
+.subhero__video-el {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  background: #05070f;
+}
+.subhero__video-el.is-ready { opacity: 1; }
+
+.subhero__video-tint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(5,7,15,0.25) 0%, rgba(5,7,15,0.55) 75%, rgba(5,7,15,0.85) 100%),
+    radial-gradient(60% 80% at 70% 30%, rgba(212, 160, 23, 0.10), transparent 70%);
+}
 
 .prose { max-width: 70ch; margin-inline: auto; }
 .prose h2 { margin-bottom: 18px; }
@@ -268,7 +294,11 @@
 
 @media (max-width: 768px) {
   .subhero__grid { grid-template-columns: 1fr; gap: 32px; }
-  .subhero__motif { justify-self: start; max-width: 260px; }
+  .subhero__video { justify-self: start; max-width: 260px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .subhero__video-el { display: none; }
 }
 
 .contact__grid {

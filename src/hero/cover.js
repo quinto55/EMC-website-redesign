@@ -1,3 +1,5 @@
+import { wireVideoReady } from '../video-ready.js';
+
 const STAR_COUNT = 140;
 
 function seedStars(wrap) {
@@ -12,19 +14,9 @@ function seedStars(wrap) {
   }
 }
 
-function wireVideo(v) {
-  const reveal = () => v.classList.add('is-ready');
-  if (v.readyState >= 3) reveal();
-  v.addEventListener('canplay', reveal, { once: true });
-  v.addEventListener('loadeddata', reveal, { once: true });
-  v.addEventListener('error', () => { v.style.display = 'none'; });
-  const p = v.play();
-  if (p && p.catch) p.catch(() => {});
-}
-
 export function initHeroCover() {
   const stars = document.querySelector('.hero__stars');
   if (stars && !stars.children.length) seedStars(stars);
   const video = document.querySelector('.hero__video');
-  if (video) wireVideo(video);
+  if (video) wireVideoReady(video);
 }
