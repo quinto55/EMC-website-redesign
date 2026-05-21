@@ -35,29 +35,25 @@
 
   <main>
     <section class="hero" aria-labelledby="hero-title">
-      <canvas class="hero__canvas" aria-hidden="true"></canvas>
+      <div class="hero__night" aria-hidden="true"></div>
+      <div class="hero__horizon" aria-hidden="true"></div>
+      <div class="hero__stars" aria-hidden="true"></div>
+      <video class="hero__video" aria-hidden="true"
+             autoplay muted loop playsinline preload="auto"
+             src="https://videos.pexels.com/video-files/31210326/13331991_2730_1440_24fps.mp4"></video>
+      <div class="hero__tint" aria-hidden="true"></div>
       <div class="hero__overlay container">
-        <div class="hero__inner">
-          <span class="eyebrow hero__eyebrow">Sales · Scanning · Marketing · Advertising</span>
-          <h1 class="hero__title" id="hero-title">
-            <span>One-stop</span>
-            <span class="gold-text">ticket sale management.</span>
-          </h1>
-          <p class="hero__sub">40 years powering festivals, fairs, theme parks and sports venues across the country.</p>
-          <div class="hero__ctas">
-            <a class="btn btn-primary" href="/contact.html">Start an Event Intake</a>
-            <a class="btn btn-ghost" href="#what-we-do">See what we do</a>
-          </div>
+        <div class="hero__headline">
+          <span class="hero__eyebrow">Forty years powering live events</span>
+          <h1 class="hero__brand" id="hero-title">EMC<span class="hero__brand-accent">.</span></h1>
+          <p class="hero__tagline">One stop ticket sale management. Built by operators. Backed by 40 years inside the fair industry.</p>
+          <div class="hero__pillars">SALES <span>·</span> SCANNING <span>·</span> MARKETING <span>·</span> ADVERTISING</div>
+        </div>
+        <div class="hero__bottom">
+          <div class="hero__scroll-cue"><span>Scroll</span></div>
+          <div class="hero__meta">Land O Lakes, FL &nbsp;·&nbsp; emctickets.com</div>
         </div>
       </div>
-      <div class="hero__labels" aria-hidden="true"></div>
-      <ul class="sr-only" aria-label="Service portals">
-        <li><a href="/sell-onsite.html" data-portal="festivals">Festivals — see how we sell</a></li>
-        <li><a href="/sell-onsite.html" data-portal="fairs">Fairs — see how we sell</a></li>
-        <li><a href="/sell-onsite.html" data-portal="theme-parks">Theme parks — see how we sell</a></li>
-        <li><a href="/sell-onsite.html" data-portal="sports">Sports — see how we sell</a></li>
-        <li><a href="/sell-onsite.html" data-portal="box-office">Box office — see how we sell</a></li>
-      </ul>
     </section>
 
     <section class="partners" aria-label="Retail partners">
