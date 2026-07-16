@@ -29,6 +29,15 @@ describe('buildMarqueeTrack', () => {
     expect(groups[1].getAttribute('aria-hidden')).toBe('true');
   });
 
+  it('exposes each partner name to assistive tech exactly once', () => {
+    const track = buildMarqueeTrack(row());
+    const names = [...track.querySelectorAll('.partners__name')];
+    const audible = names.filter(
+      (n) => !n.hasAttribute('aria-hidden') && !n.closest('[aria-hidden="true"]')
+    );
+    expect(audible.map((n) => n.textContent)).toEqual(['Circle K', 'Walgreens', 'Menards']);
+  });
+
   it('leaves the row containing only the track', () => {
     const r = row();
     const track = buildMarqueeTrack(r);

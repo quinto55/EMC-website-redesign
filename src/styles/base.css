@@ -118,26 +118,42 @@ p { margin: 0; color: var(--text-muted); }
 }
 
 /* Gold shimmer — a bright sheen periodically sweeps through gold words
-   (tryashley.ai-style gradient-text shimmer, in EMC gold). currentColor
-   keeps each word's own gold tone as the resting color. */
+   (tryashley.ai-style gradient-text shimmer, in EMC gold). The sheen is a
+   transparent-edged band layered OVER each word's resting fill, swept with
+   no-repeat so the resting state is exactly the word's normal gold. */
+:root {
+  --gold-sheen: linear-gradient(
+    100deg,
+    rgba(255, 239, 196, 0) 0%,
+    rgba(255, 239, 196, 0) 40%,
+    #ffefc4 50%,
+    rgba(255, 239, 196, 0) 60%,
+    rgba(255, 239, 196, 0) 100%
+  );
+}
+
 .eyebrow,
-.gold-text,
 .hero__eyebrow,
 .intro__eyebrow {
-  background-image: linear-gradient(
-    100deg,
-    currentColor 0%,
-    currentColor 38%,
-    #ffefc4 50%,
-    currentColor 62%,
-    currentColor 100%
-  );
+  /* currentColor keeps each word's own gold tone as the resting fill */
+  background-color: currentColor;
+  background-image: var(--gold-sheen);
   background-size: 200% 100%;
+  background-repeat: no-repeat;
   background-position: 200% 0;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: gold-shimmer 4.5s ease-in-out infinite;
+}
+
+.gold-text {
+  /* sheen layer rides on top of the original two-tone gradient */
+  background-image: var(--gold-sheen), linear-gradient(135deg, var(--gold-1), var(--gold-2));
+  background-size: 200% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  background-position: 200% 0, 0 0;
+  animation: gold-shimmer-layered 4.5s ease-in-out infinite;
 }
 
 @keyframes gold-shimmer {
@@ -146,13 +162,25 @@ p { margin: 0; color: var(--text-muted); }
   100% { background-position: -100% 0; }
 }
 
+@keyframes gold-shimmer-layered {
+  0% { background-position: 200% 0, 0 0; }
+  55% { background-position: -100% 0, 0 0; }
+  100% { background-position: -100% 0, 0 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .eyebrow,
-  .gold-text,
   .hero__eyebrow,
   .intro__eyebrow {
+    background-color: transparent;
     background-image: none;
     -webkit-text-fill-color: currentColor;
+    animation: none;
+  }
+  .gold-text {
+    background-image: linear-gradient(135deg, var(--gold-1), var(--gold-2));
+    background-size: 100% 100%;
+    background-position: 0 0;
     animation: none;
   }
 }

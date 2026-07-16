@@ -201,39 +201,6 @@
   .cards { grid-template-columns: 1fr; }
 }
 
-.leader {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 56px;
-  align-items: center;
-}
-
-.leader__num {
-  font-size: var(--fs-96);
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.04em;
-  background: linear-gradient(135deg, var(--gold-1), var(--gold-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  font-variant-numeric: tabular-nums;
-}
-
-.leader__caption {
-  font-size: var(--fs-12);
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  margin-top: 16px;
-}
-
-.leader__body p + p { margin-top: 14px; }
-
-@media (max-width: 768px) {
-  .leader { grid-template-columns: 1fr; gap: 24px; }
-}
-
 .intake {
   text-align: center;
   position: relative;
