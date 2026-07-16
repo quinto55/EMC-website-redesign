@@ -22,9 +22,11 @@ Out of scope: replacing the homepage; audio; WebGL.
 - Canvas frame-sequence technique (NOT `video.currentTime`) — guaranteed-smooth
   scrubbing incl. iOS Safari.
 - Night carnival mood (matches site theme `#07090f` + gold).
-- Footage: three ~10s Seedance segments chained with last-frame→first-frame
-  continuity: (1) entrance gate → midway, (2) midway crowds → games row,
-  (3) rise → ferris wheel orbit finale.
+- Footage: two ~10s Seedance segments (720p std — budget decision 2026-07-16:
+  90 of 110 available credits; 1080p×3 didn't fit) chained with last-frame→
+  first-frame continuity: (1) entrance gate → midway crowds, (2) rise → ferris
+  wheel orbit finale. The five story beats compress onto the ~20s flight.
+  Desktop frame tier is 1280px (720p source) instead of 1600px.
 - EMC pillars as flight stations (copy below, placeholders — Anthony may veto).
 
 ## Architecture
@@ -69,15 +71,15 @@ Every page's nav `<ul>` gains `<li><a href="/experience.html">Experience</a></li
 
 ## Footage pipeline
 
-- Three Seedance prompts authored with the `cinema-worldbuilder` skill
+- Two Seedance prompts authored with the `cinema-worldbuilder` skill
   (drone POV, night carnival, speeds in km/h, FOV-anchored lenses; Last Frame
   blocks composition-matched to the next segment's opening).
-- Generated at 1080p/10s via the Higgsfield MCP connector (Anthony's account +
+- Generated at 720p std/10s via the Higgsfield MCP connector (45 credits each) (Anthony's account +
   credits; retakes expected for continuity). Fallback: Anthony runs the same
   prompts in Higgsfield's UI and drops MP4s into `assets-src/flight/`
   (git-ignored) — the pipeline is identical from there.
 - `scripts/build-flight-frames.py`: reads segment MP4s in order, samples ~10fps,
-  resizes to 1600px (desktop) and 900px (mobile) JPEG q≈72, 6-frame crossfade
+  resizes to 1280px (desktop) and 900px (mobile) JPEG q≈72, 6-frame crossfade
   across each seam, writes frames + manifest + poster (a ferris-orbit frame).
 
 ## Performance & accessibility
@@ -97,7 +99,7 @@ motion branch. The Python script is verified by running it on the real segments.
 
 ## Implementation order (suggested for the plan)
 
-1. Seedance prompts (cinema-worldbuilder) + generation/drop-in of 3 segments.
+1. Seedance prompts (cinema-worldbuilder) + generation/drop-in of 2 segments.
 2. `build-flight-frames.py` + real frame assets + manifest.
 3. `experience.html` + entry + styles + nav links on all pages.
 4. `flight-scrub.js` engine (loader → scrub → beats) + tests.
