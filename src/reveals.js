@@ -11,7 +11,7 @@ export const REVEAL_TWEEN = {
 
 export function revealBatch(gsap, targets) {
   if (!targets.length) return;
-  gsap.fromTo(targets, REVEAL_TWEEN.from, { ...REVEAL_TWEEN.to });
+  gsap.fromTo(targets, { ...REVEAL_TWEEN.from }, { ...REVEAL_TWEEN.to });
   targets.forEach((el) => el.classList.add('is-visible'));
 }
 
