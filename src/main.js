@@ -12,6 +12,7 @@ import { initReveals } from './reveals.js';
 import { initHeroParallax, initCurtains } from './parallax.js';
 import { initHotspot } from './hotspot.js';
 import { initPinnedForty } from './pinned-forty.js';
+import { initEmbers } from './particles.js';
 import { initHeroCover } from './hero/cover.js';
 import { initMagnetic } from './magnetic.js';
 import { initMarquee } from './marquee.js';
@@ -27,5 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initHotspot();
   initMagnetic(ctx);
   initMarquee();
+  initEmbers();
   initHeroCover();
 });
