@@ -4,6 +4,7 @@ import {
   CURTAIN_SECTIONS,
   buildCurtain,
   initHeroParallax,
+  initCurtains,
 } from '../src/parallax.js';
 
 describe('HERO_PARALLAX layer map', () => {
@@ -55,5 +56,34 @@ describe('initHeroParallax', () => {
     expect(vars.scrollTrigger.scrub).toBe(true);
     expect(vars.scrollTrigger.start).toBe('top top');
     expect(vars.scrollTrigger.end).toBe('bottom top');
+  });
+});
+
+describe('initCurtains', () => {
+  it('does nothing when reduced motion is set', () => {
+    document.body.innerHTML = '<section class="partners"></section>';
+    const gsap = { to: vi.fn() };
+    initCurtains({ gsap, reduced: true });
+    expect(gsap.to).not.toHaveBeenCalled();
+    expect(document.querySelector('.curtain')).toBeNull();
+  });
+
+  it('builds one curtain per present section and animates it once at 70% viewport', () => {
+    document.body.innerHTML = `
+      <section class="partners"></section>
+      <section id="what-we-do"></section>
+      <section class="intake"></section>`;
+    const gsap = { to: vi.fn() };
+    initCurtains({ gsap, reduced: false });
+    // #industry-leader absent -> 3 curtains, 3 tweens
+    expect(document.querySelectorAll('.curtain')).toHaveLength(3);
+    expect(gsap.to).toHaveBeenCalledTimes(3);
+    const sections = [...document.querySelectorAll('section')];
+    expect(sections.every((s) => s.classList.contains('has-curtain'))).toBe(true);
+    const vars = gsap.to.mock.calls[0][1];
+    expect(vars.scaleY).toBe(0);
+    expect(vars.duration).toBe(0.9);
+    expect(vars.ease).toBe('power2.inOut');
+    expect(vars.scrollTrigger).toEqual({ trigger: sections[0], start: 'top 70%', once: true });
   });
 });
