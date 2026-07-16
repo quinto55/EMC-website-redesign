@@ -10,7 +10,7 @@ import { initNav } from './nav.js';
 import { initIntro } from './intro.js';
 import { initReveals } from './reveals.js';
 import { initHeroParallax, initCurtains } from './parallax.js';
-import { initTilt } from './tilt.js';
+import { initHotspot } from './hotspot.js';
 import { initPinnedForty } from './pinned-forty.js';
 import { initHeroCover } from './hero/cover.js';
 
@@ -22,6 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initHeroParallax(ctx);
   initCurtains(ctx);
   initPinnedForty(ctx);
-  initTilt();
+  initHotspot();
   initHeroCover();
 });

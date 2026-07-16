@@ -157,15 +157,30 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
   padding: 28px;
-  transition: border-color 250ms var(--ease), box-shadow 250ms var(--ease), transform 250ms var(--ease);
-  transform-style: preserve-3d;
-  will-change: transform;
+  transition: border-color 250ms var(--ease), box-shadow 250ms var(--ease);
 }
 
 .card:hover {
   border-color: rgba(255, 214, 107, 0.35);
   box-shadow: 0 20px 60px -30px var(--accent-glow);
 }
+
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    240px circle at var(--hx, 50%) var(--hy, 50%),
+    rgba(255, 214, 107, 0.10),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 300ms var(--ease);
+}
+
+.card:hover::after { opacity: 1; }
 
 .card__icon {
   width: 40px;
