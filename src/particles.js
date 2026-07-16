@@ -38,16 +38,6 @@ export function initEmbers() {
 
   let w = 0;
   let h = 0;
-  const resize = () => {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    w = canvas.clientWidth;
-    h = canvas.clientHeight;
-    canvas.width = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
-    ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
-  };
-  resize();
-  window.addEventListener('resize', resize);
 
   const draw = () => {
     ctx2d.clearRect(0, 0, w, h);
@@ -59,14 +49,28 @@ export function initEmbers() {
     }
   };
 
-  if (reduced) {
-    draw(); // single static frame
-    return;
-  }
+  const resize = () => {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = canvas.clientWidth;
+    h = canvas.clientHeight;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // Setting canvas dimensions clears the bitmap; repaint the static frame
+    // for reduced-motion users (the rAF loop repaints for everyone else).
+    if (reduced) draw();
+  };
+  resize();
+  window.addEventListener('resize', resize);
 
-  let running = true;
+  if (reduced) return; // resize() above already painted the single static frame
+
+  let intersecting = true;
+  let visible = !document.hidden;
+  let running = false;
   let rafId = 0;
   let last = performance.now();
+
   const loop = (now) => {
     const dt = Math.min((now - last) / 1000, 0.05);
     last = now;
@@ -75,22 +79,30 @@ export function initEmbers() {
     if (running) rafId = requestAnimationFrame(loop);
   };
 
-  const setRunning = (on) => {
-    if (on && !running) {
+  // Run only while the hero is on-screen AND the tab is visible. The two
+  // signals are tracked separately so one resuming can never override the
+  // other's pause (IO only fires on threshold crossings, so a stale shared
+  // boolean would keep the loop running off-screen after a tab round-trip).
+  const sync = () => {
+    const shouldRun = intersecting && visible;
+    if (shouldRun && !running) {
       running = true;
       last = performance.now();
       rafId = requestAnimationFrame(loop);
-    } else if (!on && running) {
+    } else if (!shouldRun && running) {
       running = false;
       cancelAnimationFrame(rafId);
     }
   };
 
-  // Pause while the hero is off-screen or the tab is hidden. (If a hidden-tab
-  // resume happens while scrolled down, the IntersectionObserver re-pauses on
-  // the next frame — one wasted rAF at most.)
-  new IntersectionObserver(([entry]) => setRunning(entry.isIntersecting)).observe(hero);
-  document.addEventListener('visibilitychange', () => setRunning(!document.hidden));
+  new IntersectionObserver(([entry]) => {
+    intersecting = entry.isIntersecting;
+    sync();
+  }).observe(hero);
+  document.addEventListener('visibilitychange', () => {
+    visible = !document.hidden;
+    sync();
+  });
 
-  rafId = requestAnimationFrame(loop);
+  sync();
 }
