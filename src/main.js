@@ -3,6 +3,7 @@ import './styles/base.css';
 import './styles/sections.css';
 import './styles/hero.css';
 import './styles/intro.css';
+import './styles/forty.css';
 
 import { initMotion } from './motion.js';
 import { initNav } from './nav.js';
@@ -10,7 +11,7 @@ import { initIntro } from './intro.js';
 import { initReveals } from './reveals.js';
 import { initHeroParallax, initCurtains } from './parallax.js';
 import { initTilt } from './tilt.js';
-import { initCountUp } from './count-up.js';
+import { initPinnedForty } from './pinned-forty.js';
 import { initHeroCover } from './hero/cover.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -20,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initReveals(document, ctx);
   initHeroParallax(ctx);
   initCurtains(ctx);
+  initPinnedForty(ctx);
   initTilt();
-  initCountUp();
   initHeroCover();
 });
