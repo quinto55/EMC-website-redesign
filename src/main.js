@@ -13,6 +13,7 @@ import { initHeroParallax, initCurtains } from './parallax.js';
 import { initHotspot } from './hotspot.js';
 import { initPinnedForty } from './pinned-forty.js';
 import { initHeroCover } from './hero/cover.js';
+import { initMagnetic } from './magnetic.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const ctx = initMotion();
@@ -23,5 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initCurtains(ctx);
   initPinnedForty(ctx);
   initHotspot();
+  initMagnetic(ctx);
   initHeroCover();
 });
