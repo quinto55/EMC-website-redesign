@@ -50,7 +50,10 @@ p { margin: 0; color: var(--text-muted); }
   background: linear-gradient(135deg, var(--gold-1), var(--gold-2));
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
+  /* Keep a real color so currentColor works in the shimmer gradient below;
+     the visible fill still comes from the clipped background. */
+  color: var(--gold-1);
+  -webkit-text-fill-color: transparent;
 }
 
 .btn {
@@ -112,4 +115,44 @@ p { margin: 0; color: var(--text-muted); }
     transition-duration: 0.001ms !important;
   }
   [data-reveal] { opacity: 1; transform: none; }
+}
+
+/* Gold shimmer — a bright sheen periodically sweeps through gold words
+   (tryashley.ai-style gradient-text shimmer, in EMC gold). currentColor
+   keeps each word's own gold tone as the resting color. */
+.eyebrow,
+.gold-text,
+.hero__eyebrow,
+.intro__eyebrow {
+  background-image: linear-gradient(
+    100deg,
+    currentColor 0%,
+    currentColor 38%,
+    #ffefc4 50%,
+    currentColor 62%,
+    currentColor 100%
+  );
+  background-size: 200% 100%;
+  background-position: 200% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gold-shimmer 4.5s ease-in-out infinite;
+}
+
+@keyframes gold-shimmer {
+  0% { background-position: 200% 0; }
+  55% { background-position: -100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eyebrow,
+  .gold-text,
+  .hero__eyebrow,
+  .intro__eyebrow {
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+    animation: none;
+  }
 }
