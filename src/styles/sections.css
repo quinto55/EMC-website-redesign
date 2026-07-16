@@ -134,7 +134,7 @@
   transition: color 200ms var(--ease), opacity 200ms var(--ease);
 }
 
-.partners__name:hover { color: var(--text-muted); opacity: 1; }
+.partners__name:hover { color: var(--gold-1); opacity: 1; }
 
 .what-we-do__head {
   text-align: center;
@@ -346,4 +346,31 @@
   transform-origin: top center;
   pointer-events: none;
   will-change: transform;
+}
+
+/* Partner marquee */
+.partners__row--marquee {
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+
+.partners__track {
+  display: flex;
+  width: max-content;
+  animation: partners-marquee 30s linear infinite;
+}
+
+.partners__track:hover { animation-play-state: paused; }
+
+.partners__group {
+  display: flex;
+  gap: clamp(32px, 8vw, 96px);
+  padding-right: clamp(32px, 8vw, 96px);
+}
+
+@keyframes partners-marquee {
+  to { transform: translateX(-50%); }
 }

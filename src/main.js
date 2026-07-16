@@ -14,6 +14,7 @@ import { initHotspot } from './hotspot.js';
 import { initPinnedForty } from './pinned-forty.js';
 import { initHeroCover } from './hero/cover.js';
 import { initMagnetic } from './magnetic.js';
+import { initMarquee } from './marquee.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const ctx = initMotion();
@@ -25,5 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initPinnedForty(ctx);
   initHotspot();
   initMagnetic(ctx);
+  initMarquee();
   initHeroCover();
 });
