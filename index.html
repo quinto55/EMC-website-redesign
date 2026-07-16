@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <script>document.documentElement.classList.add('js');</script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>EMC Tickets — One-stop ticket sale management</title>
   <meta name="description" content="40 years powering festivals, fairs, theme parks and sports venues across the country.">
@@ -9,6 +10,22 @@
   <script type="module" src="/src/main.js"></script>
 </head>
 <body>
+  <div class="intro" id="intro" aria-hidden="true">
+    <div class="intro__stage">
+      <video class="intro__video" muted loop playsinline preload="auto"
+             src="https://videos.pexels.com/video-files/31210326/13331991_2730_1440_24fps.mp4"></video>
+    </div>
+    <svg class="intro__svg" aria-hidden="true" focusable="false">
+      <defs>
+        <clipPath id="intro-clip">
+          <text class="intro__letters" text-anchor="middle" dominant-baseline="central">EMC</text>
+        </clipPath>
+      </defs>
+    </svg>
+    <span class="intro__underline"></span>
+    <span class="intro__eyebrow">Forty years powering live events</span>
+  </div>
+
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
       <linearGradient id="gold-grad" x1="0" y1="0" x2="1" y2="1">
@@ -29,7 +46,7 @@
         <li><a href="/sell-social.html">Sell Social</a></li>
         <li><a href="/contact.html">Contact</a></li>
       </ul>
-      <a class="btn btn-primary site-nav__cta" href="/contact.html">Event Intake</a>
+      <a class="btn btn-primary site-nav__cta" data-magnetic href="/contact.html">Event Intake</a>
     </nav>
   </header>
 
@@ -37,7 +54,7 @@
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero__night" aria-hidden="true"></div>
       <div class="hero__horizon" aria-hidden="true"></div>
-      <div class="hero__stars" aria-hidden="true"></div>
+      <canvas class="hero__embers" aria-hidden="true"></canvas>
       <video class="hero__video" aria-hidden="true"
              autoplay muted loop playsinline preload="auto"
              src="https://videos.pexels.com/video-files/31210326/13331991_2730_1440_24fps.mp4"></video>
@@ -60,9 +77,9 @@
       <div class="container">
         <p class="partners__caption">Retail Partners</p>
         <div class="partners__row">
-          <span class="partners__name" data-reveal>Circle K</span>
-          <span class="partners__name" data-reveal>Walgreens</span>
-          <span class="partners__name" data-reveal>Menards</span>
+          <span class="partners__name">Circle K</span>
+          <span class="partners__name">Walgreens</span>
+          <span class="partners__name">Menards</span>
         </div>
       </div>
     </section>
@@ -76,7 +93,7 @@
         </header>
 
         <div class="cards">
-          <article class="card" data-tilt data-reveal>
+          <article class="card" data-hotspot data-reveal>
             <svg class="card__icon" viewBox="0 0 40 40" aria-hidden="true">
               <rect x="4" y="12" width="32" height="16" rx="3" fill="url(#gold-grad)"/>
               <circle cx="20" cy="20" r="2.4" fill="var(--bg)"/>
@@ -85,7 +102,7 @@
             <p class="card__body">Online, mobile, retail, and box-office channels in one inventory.</p>
           </article>
 
-          <article class="card" data-tilt data-reveal>
+          <article class="card" data-hotspot data-reveal>
             <svg class="card__icon" viewBox="0 0 40 40" aria-hidden="true">
               <path d="M8 30 L20 8 L32 30 Z" fill="url(#gold-grad)"/>
             </svg>
@@ -93,7 +110,7 @@
             <p class="card__body">Media buying, promotions, radio, TV, billboards, web, social.</p>
           </article>
 
-          <article class="card" data-tilt data-reveal>
+          <article class="card" data-hotspot data-reveal>
             <svg class="card__icon" viewBox="0 0 40 40" aria-hidden="true">
               <circle cx="20" cy="20" r="14" fill="none" stroke="url(#gold-grad)" stroke-width="4"/>
               <path d="M13 21 L18 26 L28 14" fill="none" stroke="url(#gold-grad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -102,7 +119,7 @@
             <p class="card__body">Fast scanning hardware with friendly UX guests don't fight.</p>
           </article>
 
-          <article class="card" data-tilt data-reveal>
+          <article class="card" data-hotspot data-reveal>
             <svg class="card__icon" viewBox="0 0 40 40" aria-hidden="true">
               <path d="M8 10 H32 V26 H22 L14 32 V26 H8 Z" fill="url(#gold-grad)"/>
             </svg>
@@ -114,16 +131,32 @@
     </section>
 
     <section class="section" id="industry-leader" aria-labelledby="leader-title">
-      <div class="container leader">
-        <div data-reveal>
-          <div class="leader__num" data-countup="40" aria-label="40 years">0</div>
-          <div class="leader__caption">Years in entertainment</div>
-        </div>
-        <div class="leader__body" data-reveal>
-          <span class="eyebrow">Industry Leader</span>
-          <h2 id="leader-title" style="margin: 12px 0 16px;">We've been in your shoes.</h2>
-          <p>Forty years across entertainment, hospitality, ticketing, and advertising means we've sat in the operator's chair as often as the consultant's.</p>
-          <p>From small-town fairs to multi-day festivals, EMC has the knowhow to make your event successful.</p>
+      <div class="forty" data-forty>
+        <div class="container forty__stage">
+          <div class="forty__num" role="img" aria-label="40 years in entertainment">
+            <div class="forty__mask-stage">
+              <video class="forty__video" muted loop playsinline preload="metadata"
+                     src="https://videos.pexels.com/video-files/33945522/14403884_2560_1440_60fps.mp4"></video>
+            </div>
+            <svg class="forty__svg" aria-hidden="true" focusable="false">
+              <defs>
+                <clipPath id="forty-clip">
+                  <text class="forty__digits" text-anchor="middle" dominant-baseline="central">0</text>
+                </clipPath>
+              </defs>
+            </svg>
+            <div class="forty__num-caption" aria-hidden="true">Years in entertainment</div>
+          </div>
+          <div class="forty__body">
+            <span class="eyebrow">Industry Leader</span>
+            <h2 id="leader-title">We've been in your shoes.</h2>
+            <ul class="forty__captions">
+              <li class="forty__caption">Small-town fairs</li>
+              <li class="forty__caption">Multi-day festivals</li>
+              <li class="forty__caption">Theme parks</li>
+              <li class="forty__caption">Sports venues</li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>
@@ -132,7 +165,7 @@
       <div class="container" data-reveal>
         <h2 id="intake-title">Tell us about your event.</h2>
         <p>Share a few details and we'll come back with a sales, scanning, and marketing plan tuned to your audience.</p>
-        <a class="btn btn-primary" href="/contact.html">Start an Event Intake</a>
+        <a class="btn btn-primary" data-magnetic href="/contact.html">Start an Event Intake</a>
       </div>
     </section>
   </main>
