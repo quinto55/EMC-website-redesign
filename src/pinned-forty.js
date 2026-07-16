@@ -68,18 +68,23 @@ export function initPinnedForty(ctx) {
   mm.add('(max-width: 768px)', () => {
     captions.forEach((c) => c.classList.add('is-active'));
     const state = { v: 0 };
+    let countTween = null;
     const st = ctx.ScrollTrigger.create({
       trigger: root,
       start: 'top 70%',
       once: true,
-      onEnter: () =>
-        ctx.gsap.to(state, {
+      onEnter: () => {
+        countTween = ctx.gsap.to(state, {
           v: 40,
           duration: 1.4,
           ease: 'power3.out',
           onUpdate: () => { digits.textContent = String(Math.round(state.v)); },
-        }),
+        });
+      },
     });
-    return () => st.kill();
+    return () => {
+      st.kill();
+      if (countTween) countTween.kill();
+    };
   });
 }
