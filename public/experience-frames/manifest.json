@@ -1,0 +1,15 @@
+{
+  "frames": 236,
+  "chunk": 30,
+  "fps": 10,
+  "tiers": {
+    "desktop": {
+      "path": "/experience-frames/desktop/",
+      "width": 1280
+    },
+    "mobile": {
+      "path": "/experience-frames/mobile/",
+      "width": 900
+    }
+  }
+}
