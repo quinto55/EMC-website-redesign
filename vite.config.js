@@ -19,6 +19,7 @@ export default defineConfig({
         sellOnline: resolve(__dirname, 'sell-online.html'),
         sellSocial: resolve(__dirname, 'sell-social.html'),
         contact: resolve(__dirname, 'contact.html'),
+        experience: resolve(__dirname, 'experience.html'),
         revealHero: resolve(__dirname, 'reveal-hero.html'),
       },
     },
