@@ -101,6 +101,11 @@ p { margin: 0; color: var(--text-muted); }
   transform: none;
 }
 
+/* When GSAP drives reveals, the CSS transition must not double-ease. */
+.gsap-motion [data-reveal] {
+  transition: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

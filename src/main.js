@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const ctx = initMotion();
   initNav();
   initIntro(ctx);
-  initReveals();
+  initReveals(document, ctx);
   initTilt();
   initCountUp();
   initHeroCover();
