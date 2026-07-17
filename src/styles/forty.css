@@ -33,7 +33,7 @@
 .forty__svg { position: absolute; width: 0; height: 0; }
 
 .forty__digits {
-  font-family: 'Inter Tight', system-ui, sans-serif;
+  font-family: var(--font-display);
   font-weight: 800;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;

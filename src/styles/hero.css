@@ -114,6 +114,7 @@
 }
 
 .hero__brand {
+  font-family: var(--font-display);
   font-weight: 900;
   font-size: clamp(96px, 16vw, 200px);
   line-height: 0.92;

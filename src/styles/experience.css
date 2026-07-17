@@ -70,6 +70,7 @@
   font-size: var(--fs-40);
   margin-top: 10px;
   text-shadow: 0 2px 30px rgba(0, 0, 0, 0.7);
+  font-style: italic;
 }
 .flight__cue {
   margin-top: 10px;
