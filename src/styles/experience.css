@@ -77,7 +77,7 @@
   font-size: var(--fs-12);
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--ride);
 }
 .flight__beat--finale { bottom: 18vh; }
 .flight__beat--finale .btn { margin-top: 18px; }
