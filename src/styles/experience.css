@@ -81,12 +81,15 @@
 .flight__beat--finale { bottom: 18vh; }
 .flight__beat--finale .btn { margin-top: 18px; }
 
-/* Static fallback: reduced motion or engine unavailable */
-.flight--static { height: auto; min-height: 100vh; }
+/* Static fallback: reduced motion, engine unavailable, or JS disabled */
+.flight--static,
+html:not(.js) .flight { height: auto; min-height: 100vh; }
 .flight--static .flight__canvas,
-.flight--static .flight__loader { display: none; }
-.flight--static .flight__poster { position: absolute; }
-.flight--static .flight__beat {
+.flight--static .flight__loader,
+html:not(.js) .flight .flight__canvas,
+html:not(.js) .flight .flight__loader { display: none; }
+.flight--static .flight__beat,
+html:not(.js) .flight .flight__beat {
   position: relative;
   left: auto;
   bottom: auto;
@@ -97,12 +100,14 @@
   padding: 48px var(--gutter) 0;
   max-width: var(--container);
 }
-.flight--static::after {
+.flight--static::after,
+html:not(.js) .flight::after {
   content: '';
   display: block;
   height: 48px;
 }
-.flight--static .flight__beat:first-of-type { padding-top: 55vh; }
+.flight--static .flight__beat:first-of-type,
+html:not(.js) .flight .flight__beat:first-of-type { padding-top: 55vh; }
 
 @media (max-width: 768px) {
   .flight__beat h2 { font-size: var(--fs-28); }
