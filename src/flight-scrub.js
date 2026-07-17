@@ -160,7 +160,9 @@ export async function initFlightScrub(ctx) {
         b.el.classList.toggle('is-active', state.p >= b.start && state.p <= b.end)
       );
     },
-    scrollTrigger: { trigger: stage, start: 'top top', end: '+=400%', pin: true, scrub: 1 },
+    // Runway length is the scroll-per-flight knob: shorter = each wheel tick
+    // advances more of the flight. 250% ≈ 27 ticks for the full flight.
+    scrollTrigger: { trigger: stage, start: 'top top', end: '+=250%', pin: true, scrub: 1 },
   });
 
   window.addEventListener('resize', () => {
