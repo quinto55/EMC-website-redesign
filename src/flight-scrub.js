@@ -12,6 +12,16 @@ export function nearestLoaded(index, loadedFlags) {
   return -1;
 }
 
+export function nearestPending(target, loadedFlags, inflightFlags) {
+  const n = loadedFlags.length;
+  const pending = (i) => !loadedFlags[i] && !inflightFlags[i];
+  for (let d = 0; d < n; d++) {
+    if (target - d >= 0 && pending(target - d)) return target - d;
+    if (target + d < n && pending(target + d)) return target + d;
+  }
+  return -1;
+}
+
 export function coverRect(cw, ch, iw, ih) {
   const s = Math.max(cw / iw, ch / ih);
   const w = iw * s;
@@ -81,9 +91,15 @@ export async function initFlightScrub(ctx) {
     new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
-        images[i] = img;
-        loaded[i] = true;
-        resolve(true);
+        // Pre-decode so the first draw of this frame never does a synchronous
+        // JPEG decode on the main thread mid-scrub.
+        const finish = () => {
+          images[i] = img;
+          loaded[i] = true;
+          resolve(true);
+        };
+        if (img.decode) img.decode().then(finish, finish);
+        else finish();
       };
       img.onerror = () => resolve(false);
       img.src = urlFor(i);
@@ -111,17 +127,34 @@ export async function initFlightScrub(ctx) {
   }
   draw(0);
 
-  // Stream the remaining frames in the background, in order.
-  (async () => {
-    for (let i = gate; i < total; i++) await loadFrame(i);
-  })();
+  // Stream the remaining frames with a small worker pool that always fetches
+  // the pending frame nearest the current scrub position — on a slow
+  // connection the loading frontier follows the visitor instead of the
+  // visitor outrunning a sequential queue and freezing at its edge.
+  let targetIndex = 0;
+  // attempted[i] marks a frame as claimed by a worker (or already failed once)
+  // so each frame is fetched at most once — same try-once semantics as a
+  // sequential pass, without a failed URL being re-picked forever.
+  const attempted = loaded.map(Boolean);
+  const workers = 6;
+  for (let w = 0; w < workers; w++) {
+    (async () => {
+      for (;;) {
+        const i = nearestPending(targetIndex, loaded, attempted);
+        if (i === -1) return;
+        attempted[i] = true;
+        await loadFrame(i);
+      }
+    })();
+  }
 
   const state = { p: 0 };
   ctx.gsap.to(state, {
     p: 1,
     ease: 'none',
     onUpdate: () => {
-      const idx = nearestLoaded(frameIndexFor(state.p, total), loaded);
+      targetIndex = frameIndexFor(state.p, total);
+      const idx = nearestLoaded(targetIndex, loaded);
       if (idx !== -1 && idx !== current) draw(idx);
       beats.forEach((b) =>
         b.el.classList.toggle('is-active', state.p >= b.start && state.p <= b.end)

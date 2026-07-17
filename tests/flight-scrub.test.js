@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
   frameIndexFor,
+  nearestPending,
   nearestLoaded,
   coverRect,
   beatRangesFrom,
@@ -137,5 +138,30 @@ describe('initFlightScrub failure degradation', () => {
     expect(gsap.to).not.toHaveBeenCalled();
     const loader = stage.querySelector('.flight__loader');
     expect(loader.classList.contains('is-done')).toBe(true);
+  });
+});
+
+describe('nearestPending (priority loader)', () => {
+  it('returns the target itself when unloaded and not in flight', () => {
+    expect(nearestPending(3, [true, true, true, false, false], [])).toBe(3);
+  });
+
+  it('prefers the closest pending frame to the target, either side', () => {
+    const loaded = [false, true, true, false, true];
+    expect(nearestPending(2, loaded, [])).toBe(3);
+    expect(nearestPending(1, loaded, [])).toBe(0);
+  });
+
+  it('skips frames already in flight', () => {
+    const loaded = [true, false, true, false, true];
+    const inflight = [];
+    inflight[1] = true;
+    expect(nearestPending(1, loaded, inflight)).toBe(3);
+  });
+
+  it('returns -1 when everything is loaded or in flight', () => {
+    expect(nearestPending(0, [true, true], [])).toBe(-1);
+    const inflight = [false, true];
+    expect(nearestPending(0, [true, false], inflight)).toBe(-1);
   });
 });
