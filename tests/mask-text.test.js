@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { positionMaskText, introFontSize, fortyFontSize } from '../src/mask-text.js';
+import { positionMaskText, fortyFontSize } from '../src/mask-text.js';
 
 describe('positionMaskText', () => {
   it('centers the text element and applies font size', () => {
@@ -12,11 +12,6 @@ describe('positionMaskText', () => {
 });
 
 describe('font sizing', () => {
-  it('intro letters scale with viewport width, capped by height', () => {
-    expect(introFontSize(1000, 1000)).toBe(280); // 0.28 * width
-    expect(introFontSize(2000, 500)).toBe(250);  // capped at 0.5 * height
-  });
-
   it('forty digits fill 70% of stage height', () => {
     expect(fortyFontSize(1200, 700)).toBe(490);
   });

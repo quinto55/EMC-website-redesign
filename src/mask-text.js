@@ -4,10 +4,6 @@ export function positionMaskText(textEl, width, height, fontSize) {
   textEl.style.fontSize = `${fontSize}px`;
 }
 
-export function introFontSize(width, height) {
-  return Math.round(Math.min(width * 0.28, height * 0.5));
-}
-
 export function fortyFontSize(width, height) {
   return Math.round(height * 0.7);
 }

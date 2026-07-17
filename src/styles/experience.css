@@ -30,6 +30,7 @@
 .flight__loader.is-done { opacity: 0; visibility: hidden; }
 
 .flight__loader-mark {
+  font-family: var(--font-display);
   font-weight: 900;
   font-size: 40px;
   letter-spacing: -0.04em;

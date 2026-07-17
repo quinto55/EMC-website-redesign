@@ -2,12 +2,12 @@ import './styles/tokens.css';
 import './styles/base.css';
 import './styles/sections.css';
 import './styles/hero.css';
-import './styles/intro.css';
+import './styles/experience.css';
 import './styles/forty.css';
 
 import { initMotion } from './motion.js';
 import { initNav } from './nav.js';
-import { initIntro } from './intro.js';
+import { initFlightScrub } from './flight-scrub.js';
 import { initReveals } from './reveals.js';
 import { initHeroParallax, initCurtains } from './parallax.js';
 import { initHotspot } from './hotspot.js';
@@ -20,7 +20,6 @@ import { initMarquee } from './marquee.js';
 document.addEventListener('DOMContentLoaded', () => {
   const ctx = initMotion();
   initNav();
-  initIntro(ctx);
   initReveals(document, ctx);
   initHeroParallax(ctx);
   initCurtains(ctx);
@@ -29,5 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initMagnetic(ctx);
   initMarquee();
   initEmbers();
+  initFlightScrub(ctx);
   initHeroCover();
 });
