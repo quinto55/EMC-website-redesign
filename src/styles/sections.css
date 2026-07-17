@@ -35,6 +35,8 @@
   transition: color 200ms var(--ease);
 }
 
+/* Order matters: is-active is declared after :hover so an active link
+   stays neutral even while hovered (equal specificity, source order wins). */
 .site-nav__links a:hover { color: var(--ride); }
 .site-nav__links a.is-active { color: var(--text); }
 
@@ -337,7 +339,6 @@
 }
 
 .subhero--cinematic .subhero__head h1 { max-width: 18ch; }
-.subhero--cinematic .subhero__head p { max-width: 52ch; font-size: var(--fs-18); }
 
 .subhero__head h1 { font-size: var(--fs-64); margin-bottom: 16px; }
 .subhero__head p { font-size: var(--fs-18); max-width: 52ch; }

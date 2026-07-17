@@ -34,7 +34,7 @@
 
 .forty__digits {
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
 }
@@ -88,6 +88,7 @@
      without the mask, so show a static gradient number instead. */
   .forty__mask-stage::after {
     content: '40';
+    font-family: var(--font-display);
     font-size: var(--fs-96);
     font-weight: 800;
     letter-spacing: -0.04em;

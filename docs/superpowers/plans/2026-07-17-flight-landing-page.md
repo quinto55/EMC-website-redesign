@@ -52,6 +52,7 @@ Apply these exact changes:
 1. Remove the line `import './styles/intro.css';` and add in its place `import './styles/experience.css';`
 2. Remove `import { initIntro } from './intro.js';` and add `import { initFlightScrub } from './flight-scrub.js';`
 3. In the DOMContentLoaded handler: remove the `initIntro(ctx);` call, and add `initFlightScrub(ctx);` directly after `initEmbers();`.
+4. In `src/styles/experience.css`, add `font-family: var(--font-display);` to the `.flight__loader-mark` rule — the loader's EMC. becomes the site's first brand frame and must match the Fraunces wordmarks (identity final-review carry-over).
 
 - [ ] **Step 3: Retire the session gate in motion.js + tests**
 

@@ -80,7 +80,9 @@ temporary file — deleted as part of this work).
 ## Constraints
 
 - All 61 existing tests pass unmodified (no JS API changes).
-- Fonts ≤ ~120KB added total (two latin woff2), preloaded, swap.
+- Fonts: two latin woff2, preloaded, swap. Actual 145KB (final-review decision
+  2026-07-17: accepted over the original ~120KB target — the overage retains the
+  full opsz 9-144 + wght 100-900 axes that give Fraunces its display character).
 - Existing effects (shimmer, reveals, hotspot, magnetic, curtains, parallax,
   intro, forty, flight) keep working visually with the new type — the intro
   letter sizing (`mask-text.js`) is font-agnostic (measures viewport, not
