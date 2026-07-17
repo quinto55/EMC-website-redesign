@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
   frameIndexFor,
   nearestLoaded,
@@ -69,5 +69,73 @@ describe('initFlightScrub reduced-motion branch', () => {
     expect(stage.classList.contains('flight--static')).toBe(true);
     const beats = [...document.querySelectorAll('.flight__beat')];
     expect(beats.every((b) => b.classList.contains('is-active'))).toBe(true);
+  });
+});
+
+describe('initFlightScrub failure degradation', () => {
+  const flightDom = () => {
+    document.body.innerHTML = `
+      <section class="flight" data-flight>
+        <canvas class="flight__canvas"></canvas>
+        <div class="flight__loader"><span class="flight__loader-bar"></span></div>
+        <div class="flight__beat" data-start="0" data-end="0.08"></div>
+      </section>`;
+    return document.querySelector('[data-flight]');
+  };
+
+  let originalGetContext;
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    if (originalGetContext) {
+      HTMLCanvasElement.prototype.getContext = originalGetContext;
+      originalGetContext = undefined;
+    }
+  });
+
+  it('degrades to static when the manifest fetch fails', async () => {
+    const stage = flightDom();
+    vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('offline'))));
+    await initFlightScrub({ reduced: false, gsap: { to: vi.fn() }, ScrollTrigger: {} });
+    expect(stage.classList.contains('flight--static')).toBe(true);
+  });
+
+  it('degrades to static when every gate frame fails to load', async () => {
+    const stage = flightDom();
+    // happy-dom (v13.10.1 here) does not implement HTMLCanvasElement#getContext at all,
+    // so calling it throws before the all-failed gate is ever reached. Stub a minimal
+    // 2D context (only the methods `draw()` touches) so the engine can run this path
+    // the way a real browser would; production code is untouched.
+    originalGetContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = () => ({
+      setTransform: () => {},
+      drawImage: () => {},
+    });
+    vi.stubGlobal('fetch', vi.fn(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            frames: 4,
+            chunk: 2,
+            fps: 10,
+            tiers: {
+              desktop: { path: '/x/', width: 1280 },
+              mobile: { path: '/x/', width: 900 },
+            },
+          }),
+      })
+    ));
+    class FailingImage {
+      set src(_) {
+        setTimeout(() => this.onerror && this.onerror(), 0);
+      }
+    }
+    vi.stubGlobal('Image', FailingImage);
+    const gsap = { to: vi.fn() };
+    await initFlightScrub({ reduced: false, gsap, ScrollTrigger: {} });
+    expect(stage.classList.contains('flight--static')).toBe(true);
+    expect(gsap.to).not.toHaveBeenCalled();
+    const loader = stage.querySelector('.flight__loader');
+    expect(loader.classList.contains('is-done')).toBe(true);
   });
 });

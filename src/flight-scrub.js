@@ -94,15 +94,21 @@ export async function initFlightScrub(ctx) {
   const bar = stage.querySelector('.flight__loader-bar');
   const gate = Math.min(manifest.chunk, total);
   let done = 0;
+  let ok = 0;
   await Promise.all(
     Array.from({ length: gate }, (_, i) =>
-      loadFrame(i).then(() => {
+      loadFrame(i).then((success) => {
+        if (success) ok += 1;
         done += 1;
         if (bar) bar.style.transform = `scaleX(${done / gate})`;
       })
     )
   );
   if (loader) loader.classList.add('is-done');
+  if (ok === 0) {
+    goStatic(); // frame tier unreachable: poster + stacked copy
+    return;
+  }
   draw(0);
 
   // Stream the remaining frames in the background, in order.
