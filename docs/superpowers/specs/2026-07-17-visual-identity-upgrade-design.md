@@ -20,7 +20,7 @@ temporary file — deleted as part of this work).
 - Self-host Fraunces (latin subset, woff2, variable): roman + italic files in
   `public/fonts/`, declared in `src/styles/tokens.css` with
   `font-display: swap`; `<link rel="preload">` for both files added to every
-  page `<head>` (7 pages + reveal-hero).
+  page `<head>` (7 pages; reveal-hero preview page untouched).
 - Token: `--font-display: 'Fraunces', Georgia, serif;` (Inter Tight remains
   the default body/UI face).
 - Fraunces applies to: `h1, h2, h3`; `.hero__brand`; `.intro__letters` (the
