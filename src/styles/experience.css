@@ -70,13 +70,14 @@
   font-size: var(--fs-40);
   margin-top: 10px;
   text-shadow: 0 2px 30px rgba(0, 0, 0, 0.7);
+  font-style: italic;
 }
 .flight__cue {
   margin-top: 10px;
   font-size: var(--fs-12);
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--ride);
 }
 .flight__beat--finale { bottom: 18vh; }
 .flight__beat--finale .btn { margin-top: 18px; }

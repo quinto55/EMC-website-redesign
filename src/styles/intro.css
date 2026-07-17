@@ -34,7 +34,7 @@ body.intro-lock { overflow: hidden; }
 }
 
 .intro__letters {
-  font-family: 'Inter Tight', system-ui, sans-serif;
+  font-family: var(--font-display);
   font-weight: 900;
   letter-spacing: -0.04em;
 }
