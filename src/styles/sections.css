@@ -202,10 +202,34 @@
 
 .card:hover::after { opacity: 1; }
 
+/* Ticket-stub perforation: dashed tear line bleeding to the card edges,
+   with a punched semicircular notch at each end (page background shows
+   through, reading as a die-cut). */
+.card__perf {
+  position: relative;
+  height: 0;
+  border-top: 2px dashed rgba(255, 255, 255, 0.16);
+  margin: 20px -28px;
+}
+
+.card__perf::before,
+.card__perf::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.card__perf::before { left: -8px; }
+.card__perf::after { right: -8px; }
+
 .card__icon {
   width: 40px;
   height: 40px;
-  margin-bottom: 18px;
 }
 
 .card__title {
@@ -232,6 +256,26 @@
   background: radial-gradient(40% 60% at 50% 50%, var(--accent-glow), transparent 70%);
   z-index: -1;
   pointer-events: none;
+}
+
+.intake__admit {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--gold-deck);
+  margin-bottom: 14px;
+}
+
+.intake__admit::before,
+.intake__admit::after {
+  content: '';
+  width: 26px;
+  height: 1px;
+  background: var(--gold-deck);
 }
 
 .intake h2 { margin-bottom: 14px; }
