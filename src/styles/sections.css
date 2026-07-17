@@ -52,9 +52,29 @@
 
 .site-footer__grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
   gap: 40px;
   margin-bottom: 48px;
+}
+
+.site-footer__wordmark {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 34px;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.site-footer__wordmark span { color: var(--red); }
+
+.site-footer__pillars {
+  margin-top: 12px;
+  font-size: var(--fs-12);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-dim);
 }
 
 .site-footer__col h4 {
@@ -401,3 +421,28 @@
 @keyframes partners-marquee {
   to { transform: translateX(-50%); }
 }
+
+/* Fairs strip — real events, typographic treatment */
+.fairs { padding: 72px 0 24px; text-align: center; }
+
+.fairs__eyebrow { display: block; margin-bottom: 18px; }
+
+.fairs__names {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 12px 18px;
+  margin: 0 auto;
+  max-width: 900px;
+}
+
+.fairs__name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(20px, 2.6vw, 30px);
+  color: var(--text-muted);
+}
+
+.fairs__dot { color: var(--gold-deck); font-size: 22px; }
