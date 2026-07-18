@@ -363,13 +363,6 @@
 }
 .subhero__video-el.is-ready { opacity: 1; }
 
-.prose { max-width: 70ch; margin-inline: auto; }
-.prose h2 { margin-bottom: 18px; }
-.prose h2 + p { margin-bottom: 18px; }
-.prose p + p { margin-top: 14px; }
-.prose ul { margin: 18px 0; padding-left: 20px; color: var(--text-muted); }
-.prose li + li { margin-top: 6px; }
-
 @media (prefers-reduced-motion: reduce) {
   .subhero__video-el { display: none; }
 }
