@@ -67,11 +67,15 @@
   transform: translateY(0);
   pointer-events: auto;
 }
-.flight__beat h2 {
+.flight__beat-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-style: italic;
   font-size: var(--fs-40);
+  line-height: 1.1;
+  color: var(--text);
   margin-top: 10px;
   text-shadow: 0 2px 30px rgba(0, 0, 0, 0.7);
-  font-style: italic;
 }
 .flight__cue {
   margin-top: 10px;
@@ -112,5 +116,5 @@ html:not(.js) .flight::after {
 html:not(.js) .flight .flight__beat:first-of-type { padding-top: 55vh; }
 
 @media (max-width: 768px) {
-  .flight__beat h2 { font-size: var(--fs-28); }
+  .flight__beat-title { font-size: var(--fs-28); }
 }
