@@ -21,13 +21,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const ctx = initMotion();
   initNav();
   initReveals(document, ctx);
-  initHeroParallax(ctx);
-  initCurtains(ctx);
-  initPinnedForty(ctx);
   initHotspot();
   initMagnetic(ctx);
   initMarquee();
   initEmbers();
-  initFlightScrub(ctx);
   initHeroCover();
+  // Scroll-position-dependent triggers (pins, curtains, parallax) must be
+  // created AFTER the flight pin inserts its ~250vh runway — measuring the
+  // page before that leaves every trigger start stale by the runway height
+  // (the forty scene then pins mid-page over other content).
+  initFlightScrub(ctx).then(() => {
+    initHeroParallax(ctx);
+    initCurtains(ctx);
+    initPinnedForty(ctx);
+  });
 });
