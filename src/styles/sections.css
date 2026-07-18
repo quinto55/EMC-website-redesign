@@ -265,6 +265,13 @@
   .cards { grid-template-columns: 1fr; }
 }
 
+/* Tightened rhythm at the page close: cards -> forty -> intake sit close.
+   Scoped to the homepage sections; the global .section padding is untouched
+   for sub-pages. */
+#what-we-do.section { padding-bottom: 48px; }
+#industry-leader.section { padding: 0; }
+.section.intake { padding-top: 48px; }
+
 .intake {
   text-align: center;
   position: relative;
