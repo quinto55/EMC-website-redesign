@@ -499,7 +499,7 @@
 
 .stat-pull {
   text-align: center;
-  padding: 72px 0 24px;
+  padding: 48px 0 24px;
 }
 
 .stat-pull__figure {
@@ -568,6 +568,7 @@
 
 @media (max-width: 768px) {
   .feature-grid { grid-template-columns: 1fr; }
+  .stat-pull { padding-top: 32px; }
   .flow { grid-template-columns: 1fr; gap: 24px; }
   .flow::before { display: none; }
 }
