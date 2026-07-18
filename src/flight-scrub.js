@@ -169,6 +169,14 @@ export async function initFlightScrub(ctx) {
     scrollTrigger: { trigger: stage, start: 'top top', end: '+=250%', pin: true, scrub: 1 },
   });
 
+  // The flight pin is created seconds after load (post frame-gate), which
+  // inserts ~250vh above everything measured earlier. Recalculate every
+  // trigger (forty pin, curtains, hero parallax) against the real layout,
+  // or they fire hundreds of vh too early.
+  if (ctx.ScrollTrigger && typeof ctx.ScrollTrigger.refresh === 'function') {
+    ctx.ScrollTrigger.refresh();
+  }
+
   window.addEventListener('resize', () => {
     if (current >= 0) {
       const i = current;
