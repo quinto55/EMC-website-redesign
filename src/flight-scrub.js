@@ -105,7 +105,10 @@ export async function initFlightScrub(ctx) {
       img.src = urlFor(i);
     });
 
-  // Chunk 1 gates interactivity; its progress drives the loader bar.
+  // Chunk 1 gates interactivity; its progress drives the loader bar. Scroll
+  // is locked for the gate so the pin can't be created below a user's scroll
+  // position and yank them back (the retired intro's lock, now loader-owned).
+  document.body.classList.add('flight-lock');
   const loader = stage.querySelector('.flight__loader');
   const bar = stage.querySelector('.flight__loader-bar');
   const gate = Math.min(manifest.chunk, total);
@@ -121,6 +124,7 @@ export async function initFlightScrub(ctx) {
     )
   );
   if (loader) loader.classList.add('is-done');
+  document.body.classList.remove('flight-lock');
   if (ok === 0) {
     goStatic(); // frame tier unreachable: poster + stacked copy
     return;

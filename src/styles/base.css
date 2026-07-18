@@ -139,8 +139,7 @@ p { margin: 0; color: var(--text-muted); }
 }
 
 .eyebrow,
-.hero__eyebrow,
-.intro__eyebrow {
+.hero__eyebrow {
   /* currentColor keeps each word's own gold tone as the resting fill */
   background-color: currentColor;
   background-image: var(--gold-sheen);
@@ -176,8 +175,7 @@ p { margin: 0; color: var(--text-muted); }
 
 @media (prefers-reduced-motion: reduce) {
   .eyebrow,
-  .hero__eyebrow,
-  .intro__eyebrow {
+  .hero__eyebrow {
     background-color: transparent;
     background-image: none;
     -webkit-text-fill-color: currentColor;
