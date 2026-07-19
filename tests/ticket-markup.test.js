@@ -7,15 +7,20 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const PAGES = [
-  { file: 'index.html', container: '.cards', mini: false,
+  { file: 'index.html', container: '.cards', mini: false, rollClass: null,
+    railText: 'ADMIT ONE ★',
     serials: ['№ 047291', '№ 047292', '№ 047293', '№ 047294'] },
-  { file: 'what-we-do.html', container: '.feature-grid', mini: true,
+  { file: 'what-we-do.html', container: '.feature-grid', mini: true, rollClass: 'roll-amber',
+    railText: 'ALL ACCESS ★',
     serials: ['№ 047295', '№ 047296', '№ 047297', '№ 047298'] },
-  { file: 'sell-onsite.html', container: '.feature-grid', mini: true,
+  { file: 'sell-onsite.html', container: '.feature-grid', mini: true, rollClass: 'roll-blue',
+    railText: 'GATE PASS ★',
     serials: ['№ 047299', '№ 047300', '№ 047301', '№ 047302'] },
-  { file: 'sell-online.html', container: '.feature-grid', mini: true,
+  { file: 'sell-online.html', container: '.feature-grid', mini: true, rollClass: 'roll-teal',
+    railText: 'E-TICKET ★',
     serials: ['№ 047303', '№ 047304', '№ 047305', '№ 047306'] },
-  { file: 'sell-social.html', container: '.feature-grid', mini: true,
+  { file: 'sell-social.html', container: '.feature-grid', mini: true, rollClass: 'roll-magenta',
+    railText: 'VIP PASS ★',
     serials: ['№ 047307', '№ 047308', '№ 047309', '№ 047310'] },
 ];
 
@@ -75,4 +80,25 @@ describe('the roll', () => {
     expect(all).toHaveLength(20);
     expect(new Set(all).size).toBe(20);
   });
+});
+
+describe('roll stocks', () => {
+  for (const { file, doc, rollClass, railText, container } of docs) {
+    it(`${file}: body carries ${rollClass ?? 'no roll class'}`, () => {
+      const classes = Array.from(doc.body.classList);
+      if (rollClass) {
+        expect(classes).toContain(rollClass);
+      } else {
+        expect(classes.filter((c) => c.startsWith('roll-'))).toEqual([]);
+      }
+    });
+
+    it(`${file}: all rails read the page's ticket type`, () => {
+      const rails = [...doc.querySelectorAll(`${container} .card__rail`)];
+      expect(rails).toHaveLength(8);
+      for (const rail of rails) {
+        expect(rail.textContent).toBe(railText);
+      }
+    });
+  }
 });
