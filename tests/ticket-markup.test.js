@@ -87,7 +87,7 @@ describe('roll stocks', () => {
     it(`${file}: body carries ${rollClass ?? 'no roll class'}`, () => {
       const classes = Array.from(doc.body.classList);
       if (rollClass) {
-        expect(classes).toContain(rollClass);
+        expect(classes.filter((c) => c.startsWith('roll-'))).toEqual([rollClass]);
       } else {
         expect(classes.filter((c) => c.startsWith('roll-'))).toEqual([]);
       }
