@@ -198,7 +198,7 @@
   padding: 28px 56px;
   color: var(--cream);
   box-shadow: 0 22px 55px -22px var(--red-glow);
-  transition: transform 250ms var(--ease), box-shadow 250ms var(--ease);
+  transition: translate 250ms var(--ease), box-shadow 250ms var(--ease);
   isolation: isolate;
 }
 
@@ -255,7 +255,7 @@
 }
 
 .card:hover {
-  transform: translateY(-4px);
+  translate: 0 -4px;
   box-shadow: 0 30px 70px -24px var(--red-glow);
 }
 
@@ -278,7 +278,7 @@
 .card:hover::after { opacity: 1; }
 
 @media (prefers-reduced-motion: reduce) {
-  .card:hover { transform: none; }
+  .card:hover { translate: none; }
 }
 
 /* Ticket-stub perforation: dashed tear line bleeding to the card edges,
