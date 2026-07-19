@@ -22,7 +22,9 @@ function injectScript(src, doc) {
 export function loadVendors(doc = document) {
   const w = doc.defaultView || window;
   if (POSTHOG_KEY && !w.posthog) {
-    // Official stub: queue init until the SDK script arrives.
+    // Condensed loader (NOT the vendor-verbatim snippet): queues init until
+    // array.js arrives. Inert while POSTHOG_KEY is empty — before pasting a
+    // real key, verify against the official snippet on a staging host.
     const ph = (w.posthog = []);
     ph._i = [];
     ph.init = (key, cfg) => ph._i.push([key, cfg]);
@@ -58,7 +60,8 @@ export function loadVendors(doc = document) {
 
 export function initAnalytics(doc = document, hostname = location.hostname) {
   if (!PROD_HOSTNAMES.includes(hostname)) return;
-  if (getConsent() === 'accepted') {
+  if (getConsent() === 'declined') return;
+  if (trackingAllowed(hostname)) {
     loadVendors(doc);
     return;
   }

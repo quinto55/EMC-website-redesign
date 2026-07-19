@@ -76,4 +76,31 @@ describe('with test IDs', () => {
     setConsent('accepted');
     expect(scriptSrcs().length).toBe(4);
   });
+
+  it('loadVendors is idempotent — a second call injects nothing new', async () => {
+    const { setConsent } = await import('../src/consent.js');
+    const { loadVendors } = await import('../src/analytics.js');
+    setConsent('accepted');
+    loadVendors(document);
+    const after = scriptSrcs().length;
+    loadVendors(document);
+    expect(scriptSrcs().length).toBe(after);
+  });
+
+  it('accepted consent off prod host injects nothing via initAnalytics', async () => {
+    const { setConsent } = await import('../src/consent.js');
+    const { initAnalytics } = await import('../src/analytics.js');
+    setConsent('accepted');
+    initAnalytics(document, 'localhost');
+    expect(scriptSrcs()).toEqual([]);
+  });
+
+  it('declined visitors stay inert even if the event later fires', async () => {
+    const { setConsent } = await import('../src/consent.js');
+    const { initAnalytics } = await import('../src/analytics.js');
+    setConsent('declined');
+    initAnalytics(document, 'emctickets.com');
+    document.dispatchEvent(new CustomEvent('emc:consent-accepted'));
+    expect(scriptSrcs()).toEqual([]);
+  });
 });
