@@ -16,6 +16,8 @@ import { initEmbers } from './particles.js';
 import { initHeroCover } from './hero/cover.js';
 import { initMagnetic } from './magnetic.js';
 import { initMarquee } from './marquee.js';
+import { initConsentBanner } from './consent.js';
+import { initAnalytics } from './analytics.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const ctx = initMotion();
@@ -35,4 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initCurtains(ctx);
     initPinnedForty(ctx);
   });
+  initConsentBanner();
+  initAnalytics();
 });
