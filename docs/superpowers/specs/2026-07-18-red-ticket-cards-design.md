@@ -87,7 +87,11 @@ rgba(249,237,216,0.32)`. Margins widen to the new padding:
   the GSAP reveal leaves an inline `transform` on revealed cards, which would
   mask a `transform`-based lift; `translate` composes with it); shadow
   deepens to `0 30px 70px -24px var(--red-glow)`. Transition on translate +
-  box-shadow, 250ms `var(--ease)`.
+  box-shadow, 250ms `var(--ease)` — restored on the GSAP path by a scoped
+  `.gsap-motion .card[data-reveal]` rule, because base.css's
+  `.gsap-motion [data-reveal] { transition: none }` (which stops CSS
+  transitions fighting the reveal tween) would otherwise win on specificity
+  and make the lift snap.
 - The cursor-tracking sheen (`.card::after`, driven by the existing
   `--hx`/`--hy` custom props from `src/hotspot.js`) recolors from gold to
   cream: `rgba(249, 237, 216, 0.14)`, same 240px radial, fade-in on hover.

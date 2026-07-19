@@ -277,6 +277,13 @@
 
 .card:hover::after { opacity: 1; }
 
+/* .gsap-motion [data-reveal] sets transition: none so CSS never fights the
+   reveal tween (transform/opacity); restore only the hover pair the tween
+   never touches, at higher specificity. */
+.gsap-motion .card[data-reveal] {
+  transition: translate 250ms var(--ease), box-shadow 250ms var(--ease);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card:hover { translate: none; }
 }
