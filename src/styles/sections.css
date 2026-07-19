@@ -193,11 +193,11 @@
   position: relative;
   background:
     repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
-    linear-gradient(160deg, var(--red-hi), var(--red-deep) 55%, var(--red-ink));
+    linear-gradient(160deg, var(--roll-hi), var(--roll-deep) 55%, var(--roll-ink));
   border-radius: var(--radius-card);
   padding: 28px 56px;
   color: var(--cream);
-  box-shadow: 0 22px 55px -22px var(--red-glow);
+  box-shadow: 0 22px 55px -22px var(--roll-glow);
   transition:
     opacity 700ms var(--ease),
     transform 700ms var(--ease),
@@ -260,7 +260,7 @@
 
 .card:hover {
   translate: 0 -4px;
-  box-shadow: 0 30px 70px -24px var(--red-glow);
+  box-shadow: 0 30px 70px -24px var(--roll-glow);
 }
 
 .card::after {
@@ -295,10 +295,10 @@
 /* Scaled ticket for sub-page feature grids — anatomy inherited from .card. */
 .card--mini {
   padding: 20px 44px;
-  box-shadow: 0 16px 40px -18px var(--red-glow);
+  box-shadow: 0 16px 40px -18px var(--roll-glow);
 }
 
-.card--mini:hover { box-shadow: 0 24px 52px -18px var(--red-glow); }
+.card--mini:hover { box-shadow: 0 24px 52px -18px var(--roll-glow); }
 
 .card--mini .card__frame {
   inset: 6px;
