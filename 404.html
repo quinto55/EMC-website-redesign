@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>404 — EMC Tickets</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#07090f">
+  <script type="module">
+    import '/src/styles/tokens.css';
+    import '/src/styles/base.css';
+    import '/src/styles/sections.css';
+  </script>
+  <style>
+    .void-stage { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+    .void-wrap { text-align: center; }
+    .void-ticket { max-width: 420px; margin: 0 auto 32px; text-align: left; }
+    .void-ticket .card__stamp {
+      position: absolute; inset: 0; display: grid; place-items: center;
+      font-weight: 800; font-size: 64px; letter-spacing: 0.3em;
+      color: rgba(249, 237, 216, 0.28); transform: rotate(-14deg);
+      pointer-events: none; font-family: var(--font-display);
+    }
+    .void-title { font-family: var(--font-display); font-size: var(--fs-40); margin: 0 0 8px; }
+    .void-copy { color: var(--text-muted); margin: 0 0 28px; }
+    .void-btn {
+      display: inline-block; padding: 12px 28px; border-radius: var(--radius-pill);
+      background: linear-gradient(135deg, var(--gold-1), var(--gold-2));
+      color: #241a05; font-weight: 600; text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <main id="main" class="void-stage">
+    <div class="void-wrap">
+      <article class="card void-ticket" aria-hidden="true">
+        <span class="card__frame"></span>
+        <span class="card__rail card__rail--l">ADMIT&nbsp;ONE&nbsp;&#9733;</span>
+        <span class="card__rail card__rail--r">ADMIT&nbsp;ONE&nbsp;&#9733;</span>
+        <div class="card__serial"><span>EMC TICKETS</span><span>№ 000404</span></div>
+        <div class="card__perf"></div>
+        <h3 class="card__title">This ticket isn't valid</h3>
+        <p class="card__body">The page you're looking for has left the fairgrounds.</p>
+        <span class="card__stamp">VOID</span>
+      </article>
+      <h1 class="void-title">404</h1>
+      <p class="void-copy">Let's get you back through the gate.</p>
+      <a class="void-btn" href="/">Back to the midway</a>
+    </div>
+  </main>
+</body>
+</html>

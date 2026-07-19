@@ -258,6 +258,11 @@
   margin-bottom: 14px;
 }
 
+.card__rail,
+.card__serial {
+  user-select: none;
+}
+
 .card:hover {
   translate: 0 -4px;
   box-shadow: 0 30px 70px -24px var(--roll-glow);
@@ -673,3 +678,39 @@
   .flow { grid-template-columns: 1fr; gap: 24px; }
   .flow::before { display: none; }
 }
+
+/* Long-form legal prose (privacy, terms). */
+.legal {
+  max-width: 72ch;
+  margin: 0 auto;
+  padding: 144px var(--gutter) 96px;
+}
+
+.legal h1 {
+  font-size: var(--fs-40);
+  margin-bottom: 8px;
+}
+
+.legal__updated {
+  color: var(--text-dim);
+  font-size: var(--fs-14);
+  margin-bottom: 40px;
+}
+
+.legal h2 {
+  font-size: var(--fs-22);
+  margin: 36px 0 10px;
+}
+
+.legal p, .legal li {
+  font-size: var(--fs-16);
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+.legal ul {
+  padding-left: 22px;
+  margin: 10px 0;
+}
+
+.legal a { color: var(--gold-1); }

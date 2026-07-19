@@ -593,7 +593,7 @@ Head:
 </main>
 ```
 
-Both pages use the same head boilerplate as `contact.html` (charset, js-class script, viewport, favicon, font preloads, `<script type="module" src="/src/sub.js"></script>`).
+Both pages use the same head boilerplate as `contact.html` (charset, viewport, favicon, font preloads, `<script type="module" src="/src/sub.js"></script>`).
 
 - [ ] **Step 4: Footer legal links on the six existing chrome pages**
 
