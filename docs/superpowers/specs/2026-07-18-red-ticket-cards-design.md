@@ -44,8 +44,8 @@ still use them.
 - **Base shadow:** `0 22px 55px -22px var(--red-glow)`.
 - **Icons:** existing SVG paths untouched; add
   `.card__icon { stroke: var(--cream); }` (CSS `stroke` beats the
-  `stroke="url(#gold-grad)"` attribute). The `#gold-grad` def stays — footer
-  and other icons still reference it.
+  `stroke="url(#gold-grad)"` attribute). The `#gold-grad` def stays as the
+  no-CSS fallback for the card icons; sub-pages carry their own inline defs.
 
 ## Print detail (markup additions per card, `index.html`)
 
@@ -83,17 +83,23 @@ rgba(249,237,216,0.32)`. Margins widen to the new padding:
 
 ## Hover — "lift + torn-edge glow"
 
-- Ticket lifts: `transform: translateY(-4px)`; shadow deepens to
-  `0 30px 70px -24px var(--red-glow)`. Transition on transform + box-shadow,
-  250ms `var(--ease)`.
+- Ticket lifts: `translate: 0 -4px` (the independent `translate` property —
+  the GSAP reveal leaves an inline `transform` on revealed cards, which would
+  mask a `transform`-based lift; `translate` composes with it); shadow
+  deepens to `0 30px 70px -24px var(--red-glow)`. Transition on translate +
+  box-shadow, 250ms `var(--ease)` — restored on the GSAP path by a scoped
+  `.gsap-motion .card[data-reveal]` rule, because base.css's
+  `.gsap-motion [data-reveal] { transition: none }` (which stops CSS
+  transitions fighting the reveal tween) would otherwise win on specificity
+  and make the lift snap.
 - The cursor-tracking sheen (`.card::after`, driven by the existing
   `--hx`/`--hy` custom props from `src/hotspot.js`) recolors from gold to
   cream: `rgba(249, 237, 216, 0.14)`, same 240px radial, fade-in on hover.
   Zero JS changes — `hotspot.js` already skips reduced-motion and
   hover-incapable devices.
 - The current gold `border-color` hover rule is deleted (no border anymore).
-- Under `@media (prefers-reduced-motion: reduce)`: no lift (transform
-  removed). The shadow deepen and sheen fade stay — they are opacity/shadow
+- Under `@media (prefers-reduced-motion: reduce)`: no lift (`translate:
+  none`). The shadow deepen and sheen fade stay — they are opacity/shadow
   changes, not motion (and the cursor-tracked sheen is already static there
   because `hotspot.js` bails out).
 

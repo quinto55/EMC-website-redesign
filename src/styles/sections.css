@@ -191,19 +191,72 @@
 
 .card {
   position: relative;
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+    linear-gradient(160deg, var(--red-hi), var(--red-deep) 55%, var(--red-ink));
   border-radius: var(--radius-card);
-  padding: 28px;
-  transition: border-color 250ms var(--ease), box-shadow 250ms var(--ease);
+  padding: 28px 56px;
+  color: var(--cream);
+  box-shadow: 0 22px 55px -22px var(--red-glow);
+  transition: translate 250ms var(--ease), box-shadow 250ms var(--ease);
   isolation: isolate;
 }
 
+.card__frame {
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(249, 237, 216, 0.5);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.card__frame::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px dashed rgba(249, 237, 216, 0.32);
+  border-radius: 6px;
+}
+
+.card__rail {
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.42em;
+  color: rgba(249, 237, 216, 0.8);
+}
+
+.card__rail--l {
+  left: 8px;
+  transform: rotate(180deg);
+  border-left: 1px dashed rgba(249, 237, 216, 0.38);
+}
+
+.card__rail--r {
+  right: 8px;
+  border-left: 1px dashed rgba(249, 237, 216, 0.38);
+}
+
+.card__serial {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: rgba(249, 237, 216, 0.72);
+  margin-bottom: 14px;
+}
+
 .card:hover {
-  border-color: rgba(255, 214, 107, 0.35);
-  box-shadow:
-    0 20px 60px -30px var(--accent-glow),
-    0 10px 44px -26px rgba(255, 77, 158, 0.35);
+  translate: 0 -4px;
+  box-shadow: 0 30px 70px -24px var(--red-glow);
 }
 
 .card::after {
@@ -214,7 +267,7 @@
   pointer-events: none;
   background: radial-gradient(
     240px circle at var(--hx, 50%) var(--hy, 50%),
-    rgba(255, 214, 107, 0.10),
+    rgba(249, 237, 216, 0.14),
     transparent 65%
   );
   opacity: 0;
@@ -224,14 +277,25 @@
 
 .card:hover::after { opacity: 1; }
 
+/* .gsap-motion [data-reveal] sets transition: none so CSS never fights the
+   reveal tween (transform/opacity); restore only the hover pair the tween
+   never touches, at higher specificity. */
+.gsap-motion .card[data-reveal] {
+  transition: translate 250ms var(--ease), box-shadow 250ms var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card:hover { translate: none; }
+}
+
 /* Ticket-stub perforation: dashed tear line bleeding to the card edges,
    with a punched semicircular notch at each end (page background shows
    through, reading as a die-cut). */
 .card__perf {
   position: relative;
   height: 0;
-  border-top: 2px dashed rgba(255, 255, 255, 0.16);
-  margin: 20px -28px;
+  border-top: 2px dashed rgba(249, 237, 216, 0.4);
+  margin: 18px -56px;
 }
 
 .card__perf::before,
@@ -243,7 +307,7 @@
   height: 16px;
   border-radius: 50%;
   background: var(--bg);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(249, 237, 216, 0.32);
 }
 
 .card__perf::before { left: -8px; }
@@ -252,6 +316,7 @@
 .card__icon {
   width: 40px;
   height: 40px;
+  stroke: var(--cream);
 }
 
 .card__title {
@@ -259,7 +324,10 @@
   margin-bottom: 8px;
 }
 
-.card__body { font-size: var(--fs-16); }
+.card__body {
+  font-size: var(--fs-16);
+  color: rgba(249, 237, 216, 0.82);
+}
 
 @media (max-width: 768px) {
   .cards { grid-template-columns: 1fr; }
