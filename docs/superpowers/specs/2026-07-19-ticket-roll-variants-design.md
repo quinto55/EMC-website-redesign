@@ -34,11 +34,16 @@ Theme classes (also in tokens.css, after the `:root` block — they are token
 definitions, not component styles):
 
 ```css
-.roll-amber   { --roll-hi: #d88015; --roll-deep: #9a570c; --roll-ink: #7d460a; --roll-glow: rgba(216, 128, 21, 0.5); }
+.roll-amber   { --roll-hi: #d88015; --roll-deep: #7d460a; --roll-ink: #6a3b08; --roll-glow: rgba(216, 128, 21, 0.5); }
 .roll-blue    { --roll-hi: #2547e0; --roll-deep: #1a34ad; --roll-ink: #142a8f; --roll-glow: rgba(37, 71, 224, 0.5); }
-.roll-teal    { --roll-hi: #0e9c84; --roll-deep: #0a7463; --roll-ink: #085c4f; --roll-glow: rgba(14, 156, 132, 0.45); }
+.roll-teal    { --roll-hi: #0e9c84; --roll-deep: #085c4f; --roll-ink: #06493f; --roll-glow: rgba(14, 156, 132, 0.45); }
 .roll-magenta { --roll-hi: #e01d78; --roll-deep: #ad1058; --roll-ink: #8f0b49; --roll-glow: rgba(224, 29, 120, 0.5); }
 ```
+
+(Amber and teal deep/ink were darkened one step from the mockup values
+after the final whole-branch review caught an alpha-compositing error in
+this spec's original contrast math — see Accessibility. Hues and `--hi`
+tones are unchanged from the approved mockups.)
 
 ## `.card` consumption swap (`src/styles/sections.css`)
 
@@ -85,11 +90,16 @@ copy change.
 
 ## Accessibility
 
-Cream print on each stock's `--roll-deep` midtone: amber ≈4.7:1 (the
-deepened values exist precisely for this), teal ≈4.9:1, blue ≈6.5:1,
-magenta ≈6:1, red unchanged ≈6:1 — all clear AA for the 0.82-alpha body
-text; titles higher. Rails/serials decorative and exempt. No focus,
-keyboard, or reveal-behavior changes.
+Body-text contrast must be computed with the text's real color: cream at
+0.82 alpha COMPOSITED over the stock (this spec's first version forgot the
+compositing and overstated amber/teal by ~1 point; the final review caught
+it and the amber/teal deep/ink tones were darkened in response). With the
+corrected values, composited 0.82-alpha cream on each stock's
+`--roll-deep`: amber ≈5.0:1, teal ≈5.2:1, blue ≈6.5:1, magenta ≈4.5:1 at
+the deep midtone and ≈5.0:1 at the deep→ink zone where body text actually
+sits, red unchanged — all clearing AA (4.5:1) at the rendered backdrop;
+titles higher. Rails/serials decorative (`aria-hidden`) and exempt. No
+focus, keyboard, or reveal-behavior changes.
 
 ## Testing
 

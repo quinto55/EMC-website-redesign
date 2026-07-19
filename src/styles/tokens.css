@@ -37,6 +37,11 @@
   --red-ink: #8f0b20;
   --cream: #f9edd8;
   --red-glow: rgba(216, 21, 49, 0.5);
+  /* active roll — a body class overrides these; default is carnival red */
+  --roll-hi: var(--red-hi);
+  --roll-deep: var(--red-deep);
+  --roll-ink: var(--red-ink);
+  --roll-glow: var(--red-glow);
   --ride: #ff4d9e;
   --accent-glow: rgba(255, 170, 80, 0.35);
   --border: rgba(255, 255, 255, 0.08);
@@ -69,3 +74,9 @@
     --fs-28: 22px;
   }
 }
+
+/* Ticket roll stocks — one class on <body> reprints the page's tickets. */
+.roll-amber   { --roll-hi: #d88015; --roll-deep: #7d460a; --roll-ink: #6a3b08; --roll-glow: rgba(216, 128, 21, 0.5); }
+.roll-blue    { --roll-hi: #2547e0; --roll-deep: #1a34ad; --roll-ink: #142a8f; --roll-glow: rgba(37, 71, 224, 0.5); }
+.roll-teal    { --roll-hi: #0e9c84; --roll-deep: #085c4f; --roll-ink: #06493f; --roll-glow: rgba(14, 156, 132, 0.45); }
+.roll-magenta { --roll-hi: #e01d78; --roll-deep: #ad1058; --roll-ink: #8f0b49; --roll-glow: rgba(224, 29, 120, 0.5); }
