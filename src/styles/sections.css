@@ -255,10 +255,8 @@
 }
 
 .card:hover {
-  border-color: rgba(255, 214, 107, 0.35);
-  box-shadow:
-    0 20px 60px -30px var(--accent-glow),
-    0 10px 44px -26px rgba(255, 77, 158, 0.35);
+  transform: translateY(-4px);
+  box-shadow: 0 30px 70px -24px var(--red-glow);
 }
 
 .card::after {
@@ -269,7 +267,7 @@
   pointer-events: none;
   background: radial-gradient(
     240px circle at var(--hx, 50%) var(--hy, 50%),
-    rgba(255, 214, 107, 0.10),
+    rgba(249, 237, 216, 0.14),
     transparent 65%
   );
   opacity: 0;
@@ -278,6 +276,10 @@
 }
 
 .card:hover::after { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card:hover { transform: none; }
+}
 
 /* Ticket-stub perforation: dashed tear line bleeding to the card edges,
    with a punched semicircular notch at each end (page background shows
