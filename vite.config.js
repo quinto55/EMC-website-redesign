@@ -23,6 +23,7 @@ export default defineConfig({
         terms: resolve(__dirname, 'terms.html'),
         experience: resolve(__dirname, 'experience.html'),
         revealHero: resolve(__dirname, 'reveal-hero.html'),
+        notFound: resolve(__dirname, '404.html'),
       },
     },
   },

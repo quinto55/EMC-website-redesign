@@ -258,6 +258,11 @@
   margin-bottom: 14px;
 }
 
+.card__rail,
+.card__serial {
+  user-select: none;
+}
+
 .card:hover {
   translate: 0 -4px;
   box-shadow: 0 30px 70px -24px var(--roll-glow);
