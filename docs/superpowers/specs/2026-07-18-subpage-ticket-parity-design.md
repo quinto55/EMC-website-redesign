@@ -85,7 +85,11 @@ transition becomes the union —
 ```
 
 - Sub-pages (legacy path): reveal eases 700ms on opacity/transform; hover
-  eases 250ms on translate/box-shadow. One list serves both.
+  eases 250ms on translate/box-shadow. One list serves both. (Historical
+  note: before this branch the old `.feature` rule's own transition list
+  already clobbered the reveal transition, so tiles snapped in — the union
+  doesn't just preserve the ease, it introduces it. The 700ms entrance is
+  the intended behavior, not a pre-existing baseline to "restore" away.)
 - Homepage (GSAP path): `.gsap-motion [data-reveal] { transition: none }`
   still suppresses everything and the existing scoped
   `.gsap-motion .card[data-reveal]` restore keeps the hover pair — no change

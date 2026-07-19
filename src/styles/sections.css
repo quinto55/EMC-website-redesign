@@ -574,7 +574,8 @@
 
 .fairs__dot { color: var(--gold-deck); font-size: 22px; }
 
-/* --- Sub-page body kit: lede, feature tiles, stat pull, flow strip --- */
+/* --- Sub-page body kit: lede, stat pull, flow strip (tiles live in the
+   .card--mini block above) --- */
 .body-lede {
   text-align: center;
   max-width: 760px;
