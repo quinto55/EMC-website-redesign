@@ -165,12 +165,7 @@
      track that percentage is circular and collapses the images to 0px. */
   max-width: none;
   display: block;
-  opacity: 0.85;
-  transition: opacity 250ms var(--ease);
-}
-
-.partners__name:hover img {
-  opacity: 1;
+  /* rest-dim + hover-lift come from .partners__name's own opacity rules */
 }
 
 .what-we-do__head {
