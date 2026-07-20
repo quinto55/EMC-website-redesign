@@ -156,9 +156,8 @@
 
 .partners__name:hover { color: var(--gold-1); opacity: 1; }
 
-/* Partner logos: light monochrome silhouettes at rest (brand colors are
-   designed for light backgrounds and would sink into the dark theme),
-   lifting to near-white on hover. */
+/* Partner logos in full brand color (Anthony's call, 2026-07-19) — assets
+   are pre-masked for the dark theme, slightly dimmed at rest. */
 .partners__name img {
   height: 30px;
   width: auto;
@@ -166,12 +165,12 @@
      track that percentage is circular and collapses the images to 0px. */
   max-width: none;
   display: block;
-  filter: brightness(0) invert(0.62);
-  transition: filter 250ms var(--ease);
+  opacity: 0.85;
+  transition: opacity 250ms var(--ease);
 }
 
 .partners__name:hover img {
-  filter: brightness(0) invert(0.95);
+  opacity: 1;
 }
 
 .what-we-do__head {
