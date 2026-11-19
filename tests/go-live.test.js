@@ -617,3 +617,35 @@ describe('runChecks: files, stray index pages and http-first redirects', () => {
     expect(read('scripts/check-live.mjs')).toContain('${results.length} checks (${phase})');
   });
 });
+
+describe('the runbook wording', () => {
+  const guide = read('deploy/GO-LIVE.md');
+  it('says to download every clashing file before anything is overwritten', () => {
+    const item3 = guide.slice(guide.indexOf('3. **Build the package'), guide.indexOf('4. **Read the real `.htaccess`.**'));
+    expect(item3).toMatch(/CLASH/);
+    expect(item3).toMatch(/download a copy of (every|each)[^.]*clash[^.]*before[^.]*overwrit/i);
+  });
+  it('searches the old pages for href="/? as well as the other terms', () => {
+    const item5 = guide.slice(guide.indexOf('5. **Look at how the four old pages talk to `/`.**'), guide.indexOf('6. **Look for stray front pages.**'));
+    for (const term of ['`emctickets.com/?`', '`href="/?`', '`action="/"`', '`action="https://emctickets.com/"`']) expect(item5, term).toContain(term);
+    expect(item5).toMatch(/`href="\/\?` address/);
+  });
+  it('pairs the /?s=test search check with a status check', () => {
+    const item2 = guide.slice(guide.indexOf('2. **WordPress still gets its own addresses at `/`.**'), guide.indexOf('3. Look at the site by eye'));
+    expect(item2).toContain("curl -s -o /dev/null -w '%{http_code}\\n' 'https://emctickets.com/?s=test'");
+    expect(item2).toContain("curl -s 'https://emctickets.com/?s=test' | grep -c 'name=\"emc-site\"'");
+    expect(item2).toMatch(/prints `200`/);
+    expect(item2).toMatch(/prints `0`/);
+  });
+  it('keeps its section and item numbering and has no em dash', () => {
+    expect(guide).not.toContain('\u2014');
+    expect(guide).not.toContain('&mdash;');
+    const sections = [...guide.matchAll(/^## (\d+)\. /gm)].map((m) => Number(m[1]));
+    expect(sections).toEqual(sections.map((_, i) => i + 1));
+    expect(sections.length).toBeGreaterThanOrEqual(7);
+    const sec2 = guide.slice(guide.indexOf('## 2.'), guide.indexOf('## 3.'));
+    expect([...sec2.matchAll(/^(\d+)\. \*\*/gm)].map((m) => Number(m[1]))).toEqual([1, 2, 3, 4, 5, 6, 7]);
+    const sec5 = guide.slice(guide.indexOf('## 5.'), guide.indexOf('## 6.'));
+    expect([...sec5.matchAll(/^(\d+)\. /gm)].map((m) => Number(m[1]))).toEqual([1, 2, 3, 4, 5]);
+  });
+});

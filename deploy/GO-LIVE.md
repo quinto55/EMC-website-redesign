@@ -41,7 +41,7 @@ Work on a computer that has this repository, Node 22, bash and python3 (the buil
 
    It first prints how many names it read and which package names it compared, then builds. It stops, builds nothing and leaves no zip if the listing is empty, in long format, does not look like a WordPress web root, or has a name clash (case does not matter). The check sees only real files and folders in the web root. It cannot see WordPress's own pages, such as a WordPress page called About: a new page folder replaces a WordPress page of the same address the moment it is uploaded (intended for `/about/`).
 
-   Good: it ends with `Package ready: dist-host/ (62 files, 23M) and dist-host.zip (22M)` (the numbers can differ a little) and a top-level line naming exactly twelve entries. **If it prints `CLASH` for any name, stop.** That name already exists on the host and uploading would overwrite it. Do not go on until the controller has decided what to do.
+   Good: it ends with `Package ready: dist-host/ (62 files, 23M) and dist-host.zip (22M)` (the numbers can differ a little) and a top-level line naming exactly twelve entries. **If it prints `CLASH` for any name, stop.** That name already exists on the host and uploading would overwrite it. Download a copy of every file or folder reported as a clash before anything is overwritten, and keep the copies with your backups. Do not go on until the controller has decided what to do.
 
 4. **Read the real `.htaccess`.** Open the file you downloaded and look for two things.
 
@@ -57,9 +57,9 @@ Work on a computer that has this repository, Node 22, bash and python3 (the buil
 
    Write down what you found (cache plugin: yes or no, and which; `DirectoryIndex`: yes or no).
 
-5. **Look at how the four old pages talk to `/`.** The block hands WordPress back its own addresses at `/`: anything sent to `/` with POST, and any `/?` address that carries one of these names: `s`, `p`, `page_id`, `preview`, `rest_route`, `gf_page`, `wc-ajax`, `feed`, `jet_form_builder_submit` (a name is the word just before an `=`). Open each old page in a browser (`/event-intake-form/`, `/event-list/`, `/circle-k-video/`, `/greater-jacksonville-fair/`), view its source (Ctrl+U) and use Find for `emctickets.com/?`, `action="/"` and `action="https://emctickets.com/"`.
+5. **Look at how the four old pages talk to `/`.** The block hands WordPress back its own addresses at `/`: anything sent to `/` with POST, and any `/?` address that carries one of these names: `s`, `p`, `page_id`, `preview`, `rest_route`, `gf_page`, `wc-ajax`, `feed`, `jet_form_builder_submit` (a name is the word just before an `=`). Open each old page in a browser (`/event-intake-form/`, `/event-list/`, `/circle-k-video/`, `/greater-jacksonville-fair/`), view its source (Ctrl+U) and use Find for `emctickets.com/?`, `href="/?`, `action="/"` and `action="https://emctickets.com/"`.
 
-   - Every `emctickets.com/?` address found must carry at least one name from the list.
+   - Every `emctickets.com/?` address and every `href="/?` address found must carry at least one name from the list.
    - A form whose `action` is `/` or `https://emctickets.com/` and that says `method="post"` needs nothing. One that does not say `method="post"` sends its fields as names: at least one field's `name` must be in the list.
 
    If a name is missing, add it to the block's second `RewriteCond` line before you paste it: inside the brackets, with a `|` in front of it (for example `...|feed|jet_form_builder_submit|newname)=`). Write down that you did. Good: nothing found, or everything found is covered by the list.
@@ -114,10 +114,11 @@ Good: opening https://emctickets.com/ in a private browser window shows the new 
 2. **WordPress still gets its own addresses at `/`.** Run:
 
    ```
+   curl -s -o /dev/null -w '%{http_code}\n' 'https://emctickets.com/?s=test'
    curl -s 'https://emctickets.com/?s=test' | grep -c 'name="emc-site"'
    ```
 
-   Good: it prints `0` (the search reached WordPress, not the new home page). If it prints anything else, **undo first** (section 6), then investigate: the old pages' forms and search may not be reaching WordPress.
+   Good: the first command prints `200` (the site answered the search) and the second prints `0` (the search reached WordPress, not the new home page). The `0` alone proves nothing, because an error page also prints `0`. If either prints anything else, **undo first** (section 6), then investigate: the old pages' forms and search may not be reaching WordPress.
 
 3. Look at the site by eye in a private window, on a phone and on a computer: the home page, Platform, Contact.
 
