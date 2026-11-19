@@ -109,7 +109,7 @@ Good: opening https://emctickets.com/ in a private browser window shows the new 
    node scripts/check-live.mjs https://emctickets.com --post
    ```
 
-   Good: every line starts with `OK` and the last line says `0 FAIL`. This repeats the section 2 checks (event sites, old pages, app links) and adds: each new page answers 200 and carries the new site's marker, each of the eight old addresses answers with a permanent redirect to the right place, and the three QR links answer. If any line says `FAIL`, read what it expected and what came back. If an event site or old page fails, **undo first** (section 6), then investigate.
+   Good: every line starts with `OK` and the last line says `50 OK, 0 FAIL`. This repeats the section 2 checks (event sites, old pages, app links; an event site also fails here if its page is the new site's, which means a stray front page was promoted) and adds: each new page answers 200 and carries the new site's marker, each of the eight old addresses answers with a permanent redirect to the right place, the three QR links answer, `robots.txt` and `sitemap.xml` answer, the home page's stylesheet and one video answer, and the opening picture of the home page's curtain (`fair-poster.jpg`) answers. A redirect that first answers over http with the right address is shown as `OK` with a note. If any line says `FAIL`, read what it expected and what came back; the line says what to check. If an event site or old page fails, **undo first** (section 6), then investigate.
 
 2. **WordPress still gets its own addresses at `/`.** Run:
 
@@ -144,7 +144,7 @@ When the site changes after go-live:
 1. `bash scripts/build-host.sh` (no listing needed this time).
 2. Upload the same set as section 4, items 1 to 4, replacing what is there.
 3. Do not touch `.htaccess`: the block stays as it is.
-4. Run `node scripts/check-live.mjs https://emctickets.com --post`. Good: `0 FAIL`.
+4. Run `node scripts/check-live.mjs https://emctickets.com --post`. Good: `50 OK, 0 FAIL`.
 
 The videos are cached for one hour only, so a replaced video shows up within the hour. Hashed files under `emc-site/assets/` get new names each build; the old ones may be left in place.
 

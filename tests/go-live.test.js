@@ -11,7 +11,7 @@ import { checkListing } from '../scripts/check-listing.mjs';
 import { PAGES } from '../build/pages.js';
 import sitePlugin from '../build/vite-plugin-site.js';
 import {
-  EVENT_SITES, OLD_PAGES, REDIRECTS, NEW_PAGES, QR_LINKS, APP_LINKS, runChecks, sameAddress,
+  EVENT_SITES, OLD_PAGES, REDIRECTS, NEW_PAGES, QR_LINKS, APP_LINKS, SITE_FILES, CURTAIN_STILL, runChecks, sameAddress, redirectMatch,
 } from '../scripts/check-live.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -412,7 +412,8 @@ describe('runChecks', () => {
     server = http.createServer((req, res) => {
       const u = new URL(req.url, 'http://x');
       const p = u.pathname;
-      const mark = '<html><head><meta name="emc-site" content="relaunch"></head></html>';
+      const mark = '<html><head><meta name="emc-site" content="relaunch"><link rel="stylesheet" href="/emc-site/assets/home-abc.css"></head></html>';
+      if (p === '/robots.txt' || p === '/sitemap.xml' || p === '/emc-site/assets/home-abc.css' || p === CURTAIN_STILL || p.startsWith('/emc-site/video/')) { res.writeHead(200); return res.end('file'); }
       if (p === '/coastalcarolinafair/') { res.writeHead(301, { Location: 'http://' + req.headers.host + '/coastalcarolinafair' }); return res.end(); }
       if (p === '/coastalcarolinafair') { res.writeHead(200); return res.end('wp'); }
       if (p === '/scstatefair/') { res.writeHead(301, { Location: 'http://' + req.headers.host + '/scstatefair' }); return res.end(); }
@@ -468,5 +469,123 @@ describe('runChecks', () => {
     expect(reds.find((r) => r.url === base + '/events/').ok).toBe(true);
     const qr = rs.filter((r) => r.name.includes('QR'));
     expect(qr).toHaveLength(3);
+  });
+});
+
+// ---- what the live check now catches ----
+describe('runChecks: files, stray index pages and http-first redirects', () => {
+  const MARK = '<html><head><meta name="emc-site" content="relaunch"><link rel="stylesheet" href="/emc-site/assets/home-abc.css"></head></html>';
+  /** A local stand-in for the live host. `broken` maps a path to what that path does instead of answering 200. */
+  async function host(broken = {}) {
+    const server = http.createServer((req, res) => {
+      const p = new URL(req.url, 'http://x').pathname;
+      if (broken[p]) { const [status, body, headers] = broken[p]; res.writeHead(status, headers); return res.end(body ?? ''); }
+      if (EVENT_SITES.includes(p) || OLD_PAGES.includes(p)) { res.writeHead(200); return res.end('wp'); }
+      if (NEW_PAGES.includes(p)) { res.writeHead(200); return res.end(MARK); }
+      const r = REDIRECTS.find(([f]) => f === p);
+      if (r) { res.writeHead(301, { Location: r[1] }); return res.end(); }
+      if (SITE_FILES.some((f) => f === p) || p === '/emc-site/assets/home-abc.css' || p === CURTAIN_STILL || p.startsWith('/emc-site/video/')) { res.writeHead(200); return res.end('file'); }
+      res.writeHead(404); res.end('nope');
+    });
+    await new Promise((ok) => server.listen(0, '127.0.0.1', ok));
+    return { base: `http://127.0.0.1:${server.address().port}`, close: () => new Promise((ok) => server.close(ok)) };
+  }
+  const run = async (broken, phase = 'post') => {
+    const h = await host(broken);
+    try { return { rs: await runChecks(h.base, { phase, pauseMs: 0 }), base: h.base }; } finally { await h.close(); }
+  };
+  const failures = (rs) => rs.filter((r) => !r.ok);
+
+  it('a healthy host passes every check: 25 before go-live, 50 after', async () => {
+    const pre = await run({}, 'pre');
+    expect(pre.rs).toHaveLength(25);
+    expect(failures(pre.rs)).toEqual([]);
+    const post = await run({}, 'post');
+    expect(post.rs).toHaveLength(50);
+    expect(failures(post.rs)).toEqual([]);
+  });
+
+  it('post also asks for /robots.txt, /sitemap.xml, one stylesheet, one video and the curtain\'s still, each of them 200', async () => {
+    expect(SITE_FILES).toEqual(['/robots.txt', '/sitemap.xml']);
+    expect(CURTAIN_STILL).toBe('/emc-site/curtain/fair-poster.jpg');
+    const { rs, base } = await run({});
+    for (const f of [...SITE_FILES, CURTAIN_STILL, '/emc-site/assets/home-abc.css']) expect(rs.find((r) => r.url === base + f), f).toMatchObject({ ok: true });
+    const video = rs.find((r) => r.name === 'video');
+    expect(video.url).toMatch(/\/emc-site\/video\/[\w-]+\.mp4$/);
+    expect(rs.find((r) => r.name === 'stylesheet').url).toBe(base + '/emc-site/assets/home-abc.css');
+    expect(rs.filter((r) => r.name === 'site file')).toHaveLength(2);
+  });
+
+  it('none of those files are asked for before go-live', async () => {
+    const { rs } = await run({}, 'pre');
+    expect(rs.map((r) => r.name).filter((n) => n !== 'event site' && n !== 'old page' && n !== 'app link')).toEqual([]);
+  });
+
+  it('a missing robots.txt, sitemap.xml, curtain still or video fails and says which file and what to do', async () => {
+    for (const [path, word] of [['/robots.txt', 'robots.txt'], ['/sitemap.xml', 'sitemap.xml'], [CURTAIN_STILL, 'fair-poster.jpg']]) {
+      const { rs, base } = await run({ [path]: [404, 'nope'] });
+      const bad = failures(rs);
+      expect(bad, path).toHaveLength(1);
+      expect(bad[0].url).toBe(base + path);
+      expect(bad[0].detail, path).toMatch(/404/);
+      expect(bad[0].detail, path).toMatch(/upload|emc-site|root/i);
+      expect(bad[0].url).toContain(word);
+    }
+    const { rs } = await run({ '/emc-site/video/emc-online-ordering.mp4': [404, 'nope'] });
+    const bad = failures(rs);
+    expect(bad).toHaveLength(1);
+    expect(bad[0].name).toBe('video');
+    expect(bad[0].detail).toMatch(/404/);
+  });
+
+  it('a home page with no stylesheet link, or a stylesheet that does not answer, fails and says so', async () => {
+    let { rs } = await run({ '/': [200, '<html><head><meta name="emc-site" content="relaunch"></head></html>'] });
+    let bad = failures(rs).filter((r) => r.name === 'stylesheet');
+    expect(bad).toHaveLength(1);
+    expect(bad[0].detail).toMatch(/no stylesheet/i);
+    ({ rs } = await run({ '/emc-site/assets/home-abc.css': [500, 'boom'] }));
+    bad = failures(rs).filter((r) => r.name === 'stylesheet');
+    expect(bad).toHaveLength(1);
+    expect(bad[0].url).toMatch(/home-abc\.css$/);
+    expect(bad[0].detail).toMatch(/500/);
+  });
+
+  it('an event site whose page carries the new site\'s marker fails, in both phases, and says what to do', async () => {
+    for (const phase of ['pre', 'post']) {
+      const { rs, base } = await run({ '/flstatefair/': [200, MARK] }, phase);
+      const bad = failures(rs);
+      expect(bad, phase).toHaveLength(1);
+      expect(bad[0].url).toBe(base + '/flstatefair/');
+      expect(bad[0].name).toBe('event site');
+      expect(bad[0].detail).toMatch(/emc-site/);
+      expect(bad[0].detail).toMatch(/index\.html/);
+      expect(bad[0].detail).toMatch(/download|copy/i);
+    }
+  });
+
+  it('an event site that answers 200 with its own page is still fine', async () => {
+    const { rs } = await run({ '/flstatefair/': [200, '<html><title>Florida State Fair</title></html>'] });
+    expect(failures(rs)).toEqual([]);
+  });
+
+  it('a redirect that answers correctly over http before https is OK with a note; a wrong one still fails', () => {
+    const want = 'https://emctickets.com/platform/';
+    expect(redirectMatch('https://emctickets.com/platform/', want)).toEqual({ ok: true, note: '' });
+    expect(redirectMatch('http://emctickets.com/platform/', want)).toMatchObject({ ok: true });
+    expect(redirectMatch('http://emctickets.com/platform/', want).note).toMatch(/http first/i);
+    expect(redirectMatch('http://emctickets.com/platform/#online-sales', 'https://emctickets.com/platform/#online-sales').ok).toBe(true);
+    expect(redirectMatch('http://emctickets.com/marketing/', want)).toEqual({ ok: false, note: '' });
+    expect(redirectMatch('http://emctickets.com/platform/', 'http://emctickets.com/platform/')).toEqual({ ok: true, note: '' });
+    expect(redirectMatch('https://emctickets.com/platform/', 'http://emctickets.com/platform/').ok).toBe(false);
+    expect(redirectMatch(null, want).ok).toBe(false);
+  });
+
+  it('the runbook states the real number of checks, and the script\'s last line prints it', () => {
+    const guide = read('deploy/GO-LIVE.md');
+    expect(guide).toContain('`25 OK, 0 FAIL`');
+    expect(guide).toContain('`50 OK, 0 FAIL`');
+    expect(guide).not.toMatch(/\b45 OK\b/);
+    for (const f of ['robots.txt', 'sitemap.xml', 'stylesheet', 'video', 'fair-poster.jpg']) expect(guide, f).toContain(f);
+    expect(read('scripts/check-live.mjs')).toContain('${results.length} checks (${phase})');
   });
 });
