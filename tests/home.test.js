@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { renderAll, visibleText, ROOT } from './helpers/pages.js';
+import { pageByKey } from '../build/pages.js';
 
 const { doc, html } = renderAll().find((r) => r.page.key === 'home');
 const main = doc.querySelector('main');
@@ -70,6 +71,63 @@ describe('home page', () => {
       expect(Number(img.getAttribute('width')), img.getAttribute('alt')).toBeGreaterThan(0);
       expect(Number(img.getAttribute('height')), img.getAttribute('alt')).toBeGreaterThan(0);
     }
+  });
+
+  it('shows the full dashboard in its own section under the proof strip', () => {
+    const section = main.querySelector('section#live-board');
+    expect(section).not.toBeNull();
+    expect(section.matches('.sec.live-board')).toBe(true);
+    expect(section.getAttribute('aria-labelledby')).toBe('live-board-h');
+
+    // In <main>: the hero, the proof strip, this section, then Sell. Scan. Count.
+    const hero = main.querySelector('h1').closest('section');
+    const proof = main.querySelector('.proof');
+    const tools = byText(main, 'h2', 'Sell. Scan. Count.').closest('section');
+    const follows = (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(follows(hero, proof)).toBe(true);
+    expect(proof.nextElementSibling).toBe(section);
+    expect(section.nextElementSibling).toBe(tools);
+
+    expect(text(section.querySelector('.kicker'))).toBe('Live dashboard');
+    const h2 = section.querySelector('h2');
+    expect(h2.id).toBe('live-board-h');
+    expect(text(h2)).toBe('Every ticket, as it happens.');
+    expect(byText(section, 'p.lede', 'Real-time validation. 24/7 dashboard. Watch tickets sold, scanned in and sales as they happen.')).not.toBeNull();
+
+    const dash = section.querySelectorAll('[data-dashboard]');
+    expect(dash).toHaveLength(1);
+    expect(dash[0].matches('[data-sample]')).toBe(true);
+    expect(main.querySelectorAll('[data-dashboard]')).toHaveLength(1);
+    // Its panels sit under the section's h2, so they are h3s.
+    expect(dash[0].querySelectorAll('h1, h2')).toHaveLength(0);
+
+    const last = section.lastElementChild;
+    expect(last.matches('a[href="#talk"]')).toBe(true);
+    expect(text(last)).toBe("Let's talk about your fair");
+    expect(last.querySelector('.arrow')).not.toBeNull();
+
+    // No words but the approved ones around the board.
+    const words = section.cloneNode(true);
+    words.querySelector('[data-dashboard]').remove();
+    expect(text(words)).toBe("Live dashboard Every ticket, as it happens. Real-time validation. 24/7 dashboard. Watch tickets sold, scanned in and sales as they happen. Let's talk about your fair");
+
+    // The hero keeps its compact board and chip; each board keeps its own name; nothing is announced as it ticks.
+    expect(hero.querySelector('[data-board]')).not.toBeNull();
+    expect(hero.querySelector('[data-dashboard]')).toBeNull();
+    expect(byText(hero, 'p', 'Running right now')).not.toBeNull();
+    const board = hero.querySelector('[data-board]');
+    expect([board.getAttribute('role'), board.getAttribute('aria-label')]).toEqual(['group', 'Sample live sales board']);
+    expect([dash[0].getAttribute('role'), dash[0].getAttribute('aria-label')]).toEqual(['group', 'Sample live board']);
+    expect(html).not.toContain('aria-live');
+  });
+
+  it('loads the dashboard styles and script, and the hero photo still comes first', () => {
+    expect(pageByKey('home').styles).toContain('/src/styles/dashboard.css');
+    expect(pageByKey('home').entry).toBe('/src/entry/home.js');
+    const scripts = [...html.matchAll(/<script\b[^>]*\bsrc="[^"]*"[^>]*>/g)].map((m) => m[0]);
+    expect(scripts.length).toBeGreaterThan(0);
+    for (const s of scripts) expect(s).toContain('type="module"');
+    expect(doc.querySelector('picture img').getAttribute('fetchpriority')).toBe('high');
   });
 
   it('Sell, Scan, Count cards link to the right places', () => {
@@ -154,6 +212,6 @@ describe('home page', () => {
 
   it('draws its arrows instead of typing them (the self-hosted fonts have no arrow glyph)', () => {
     expect(visibleText(doc)).not.toMatch(/[←-⇿⟰-⟿⤀-⥿]/);
-    expect(main.querySelectorAll('.arrow').length).toBe(6);
+    expect(main.querySelectorAll('.arrow').length).toBe(7); // the six card rows and the live dashboard's link
   });
 });

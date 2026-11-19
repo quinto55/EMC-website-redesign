@@ -4,7 +4,7 @@ export const PAGES = [
   { key: 'home', file: 'index.html', path: '/', nav: null, ask: 'talk', tone: 'photo', indexable: true,
     title: 'EMC Tickets | Ticketing for fairs and festivals',
     description: 'One system from first ticket to final report. Sell everywhere, scan at any gate and watch every ticket count as it happens.',
-    styles: [SITE_CSS, '/src/styles/board.css', '/src/styles/home.css'], entry: '/src/entry/home.js' },
+    styles: [SITE_CSS, '/src/styles/board.css', '/src/styles/dashboard.css', '/src/styles/home.css'], entry: '/src/entry/home.js' },
   { key: 'platform', file: 'platform/index.html', path: '/platform/', nav: 'platform', ask: 'talk', tone: 'cream', indexable: true,
     title: 'The platform | EMC Tickets',
     description: 'See the EMC ticketing platform work: online sales, the box office and a live dashboard you can try. No sign-up.',

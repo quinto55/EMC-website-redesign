@@ -10,9 +10,9 @@ export function boardFigures(snap) {
   return { sold: count(snap.tickets), scanned: count(snap.scanned), money: money(snap.sales) };
 }
 
-/** One sale in the feed. */
+/** One sale in the feed. Its data-id lets the board view keep the rows it already shows. */
 export function feedRowHTML(s) {
-  return `<li><b>${s.qty} × ${esc(s.typeName)}</b><span>${esc(s.place)}</span></li>`;
+  return `<li data-id="${esc(s.id)}"><b>${s.qty} × ${esc(s.typeName)}</b><span>${esc(s.place)}</span></li>`;
 }
 
 /** Everything inside the board's root element. */
