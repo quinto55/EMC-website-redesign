@@ -86,6 +86,13 @@ describe('with JavaScript off', () => {
       expect(board.textContent, s).toContain(s);
     }
     for (const s of ['Sample data', 'Demo County Fair', 'Latest sales', 'AI brief']) expect(dash.textContent, s).toContain(s);
+    // The two shares agree too: Online = Online card, Box office = Box-office card + Cash, and the bars follow them.
+    const pct = (el) => Number(el.textContent.replace('%', ''));
+    const shown = [...board.querySelectorAll('.ch em')].map(pct);
+    const tender = (id) => pct(dash.querySelector(`[data-f="tender-${id}-share"]`));
+    expect(shown).toEqual([62, 38]);
+    expect(shown).toEqual([tender('card_online'), tender('card_present') + tender('cash')]);
+    expect([...board.querySelectorAll('.ch i')].map((i) => i.getAttribute('style'))).toEqual(['--w:62%', '--w:38%']);
     expect(dash.querySelectorAll('[data-panel="feed"] li').length).toBe(4);
     expect(dash.querySelector('[data-panel="pace"] svg path')).not.toBeNull();
     expect(dash.querySelector('button').hasAttribute('hidden')).toBe(true);

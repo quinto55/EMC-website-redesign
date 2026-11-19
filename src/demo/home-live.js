@@ -5,13 +5,22 @@ import { createDashboardView } from './dashboard-view.js';
 import { runWhileVisible } from './lifecycle.js';
 
 /**
+ * The compact board's two channel percents, taken from the dashboard's Money panel rather than rounded again: Online
+ * is the Online card share, Box office the Box-office card share plus the Cash share. They sum to 100.
+ */
+function channelShares(snap) {
+  const share = (id) => snap.tenders.find((x) => x.id === id).share;
+  return [share('card_online'), share('card_present') + share('cash')];
+}
+
+/**
  * Brings the hero's compact board (`boardEl`, its [data-board] root) and the full dashboard (`dashEl`, its
  * [data-dashboard] root) to life on one sample day: one dashboard state, one timer. Each tick advances the day once
  * and shows it on both, the dashboard from its snapshot and the compact board from the board state the dashboard
- * wraps, so their figures always agree (the dashboard's count up to them). It ticks while the tab is showing and at
- * least one of the two is on screen, and never catches up on ticks it missed. An off-screen dashboard takes its new
- * figures at once, so no animation frame runs for a board nobody sees. Either element may be missing; the other still
- * works. After destroy() nothing runs.
+ * wraps, with its two percents from the dashboard's Money panel, so their figures always agree (the dashboard's
+ * count up to them). It ticks while the tab is showing and at least one of the two is on screen, and never catches up
+ * on ticks it missed. An off-screen dashboard takes its new figures at once, so no animation frame runs for a board
+ * nobody sees. Either element may be missing; the other still works. After destroy() nothing runs.
  */
 export function mountHomeLive({ boardEl = null, dashEl = null, intervalMs = 1700, rng = Math.random } = {}) {
   let state = createDashState();
@@ -24,9 +33,10 @@ export function mountHomeLive({ boardEl = null, dashEl = null, intervalMs = 1700
   function tick() {
     if (destroyed) return;
     state = advance(state, rng, { seconds: intervalMs / 1000 });
-    board?.render(state.board);
+    const snap = dashSnapshot(state);
+    board?.render(state.board, { shares: channelShares(snap) });
     if (dash) {
-      dash.render(dashSnapshot(state));
+      dash.render(snap);
       if (!dashInView) dash.settle();
     }
   }

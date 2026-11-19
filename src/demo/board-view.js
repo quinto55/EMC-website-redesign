@@ -13,16 +13,19 @@ const setText = (node, text) => {
  * sale is one new row at the top (it slides in as the feed's first row) and the oldest leaves; a state with no new
  * sale changes nothing; a board that starts its day again shows its opening rows again. Nothing else is rebuilt, so
  * a screen reader keeps its place in the board and the figures can be selected.
+ *
+ * `shares`, when given, are the two channel percents to show (Online, then Box office) in place of the board's own
+ * rounding; the bars follow them. The home page passes the dashboard's, so the two boards' percents never differ.
  */
 export function createBoardView(el, { feedSize = 3 } = {}) {
-  function render(state) {
+  function render(state, { shares } = {}) {
     const snap = snapshot(state, { feedSize });
     for (const [k, text] of Object.entries(boardFigures(snap))) setText(el.querySelector(`[data-k="${k}"]`), text);
     el.querySelectorAll('.ch').forEach((row, i) => {
-      const channel = snap.channels[i];
-      if (!channel) return;
-      row.querySelector('i')?.style.setProperty('--w', `${channel.share}%`);
-      setText(row.querySelector('em'), `${channel.share}%`);
+      const share = shares ? shares[i] : snap.channels[i]?.share;
+      if (share === undefined) return;
+      row.querySelector('i')?.style.setProperty('--w', `${share}%`);
+      setText(row.querySelector('em'), `${share}%`);
     });
     const feed = el.querySelector('.feed');
     if (!feed) return;

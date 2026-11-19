@@ -135,13 +135,27 @@ describe('the home page boards on one sample day', () => {
     expect(c.scanned).toBe(d.admitted);
     expect(c.sales).toBe(d.gross);
     expect(boardEl.querySelector('[data-k="money"]').textContent).toMatch(/^\$\d{1,3}(,\d{3})+$/); // whole dollars
-    expect(c.online).toBe(d.online);
-    expect(c.box).toBe(d.boxCard + d.cash);
     expect(c.sale).not.toBeNull();
     expect(c.sale).toBe(d.sale);
     expect(c.rows).toBe(3);
     live.destroy();
   });
+
+  it('the compact board\'s two shares are the Money panel\'s, on every tick of 3,000', () => {
+    reduced = true;
+    const { boardEl, dashEl } = loadHome();
+    const live = mountHomeLive({ boardEl, dashEl, rng: mulberry32(1) });
+    const widths = () => [...boardEl.querySelectorAll('.ch i')].map((i) => i.style.getPropertyValue('--w'));
+    for (let tick = 1; tick <= 3000; tick++) {
+      live.tick();
+      const c = compact(boardEl);
+      const d = dashboard(dashEl);
+      // Online = Online card; Box office = Box-office card + Cash; the two sum to 100. The bars show the same two.
+      expect([c.online, c.box, c.online + c.box], `tick ${tick}`).toEqual([d.online, d.boxCard + d.cash, 100]);
+      expect(widths(), `tick ${tick}`).toEqual([`${c.online}%`, `${c.box}%`]);
+    }
+    live.destroy();
+  }, 120000);
 
   it('there is one timer: a tick interval produces exactly one sale on both boards', () => {
     reduced = true;
