@@ -13,6 +13,14 @@ function channelShares(snap) {
   return [share('card_online'), share('card_present') + share('cash')];
 }
 
+function attempt(step) {
+  try {
+    step();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 /**
  * Brings the hero's compact board (`boardEl`, its [data-board] root) and the full dashboard (`dashEl`, its
  * [data-dashboard] root) to life on one sample day: one dashboard state, one timer. Each tick advances the day once
@@ -25,8 +33,14 @@ function channelShares(snap) {
 export function mountHomeLive({ boardEl = null, dashEl = null, intervalMs = 1700, rng = Math.random } = {}) {
   let state = createDashState();
   const board = boardEl ? createBoardView(boardEl) : null;
-  const dash = dashEl ? createDashboardView(dashEl) : null;
-  dash?.render(dashSnapshot(state)); // what the board already shows: this only fits its chart to its box
+  let dash = dashEl ? createDashboardView(dashEl) : null;
+  try {
+    dash?.render(dashSnapshot(state)); // what the board already shows: this only fits its chart to its box
+  } catch (err) {
+    console.error(err);
+    dash.destroy(); // a dashboard that cannot start is left as served; the compact board still runs
+    dash = null;
+  }
   let dashInView = true;
   let destroyed = false;
 
@@ -34,10 +48,13 @@ export function mountHomeLive({ boardEl = null, dashEl = null, intervalMs = 1700
     if (destroyed) return;
     state = advance(state, rng, { seconds: intervalMs / 1000 });
     const snap = dashSnapshot(state);
-    board?.render(state.board, { shares: channelShares(snap) });
+    // Each board is drawn on its own: one failing cannot skip the other.
+    attempt(() => board?.render(state.board, { shares: channelShares(snap) }));
     if (dash) {
-      dash.render(snap);
-      if (!dashInView) dash.settle();
+      attempt(() => {
+        dash.render(snap);
+        if (!dashInView) dash.settle();
+      });
     }
   }
 
@@ -65,7 +82,7 @@ export function mountHomeLive({ boardEl = null, dashEl = null, intervalMs = 1700
   });
   const cleanups = [];
   if (boardEl) cleanups.push(watch(boardEl));
-  if (dashEl) {
+  if (dash) {
     cleanups.push(watch(dashEl, (shown) => {
       dashInView = shown;
       if (!shown) dash.settle();

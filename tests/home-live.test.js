@@ -375,4 +375,56 @@ describe('the home page boards on one sample day', () => {
       delete document.fullscreenEnabled;
     }
   });
+
+  describe('one board failing cannot stop the other', () => {
+    let errors;
+    beforeEach(() => { errors = vi.spyOn(console, 'error').mockImplementation(() => {}); });
+    afterEach(() => errors.mockRestore());
+
+    it('a compact board that throws on a tick still lets the dashboard take the sale', () => {
+      reduced = true;
+      const { boardEl, dashEl } = loadHome();
+      const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
+      boardEl.querySelector = () => { throw new Error('board failed'); };
+      expect(() => vi.advanceTimersByTime(1000)).not.toThrow();
+      expect(dashboard(dashEl).orders).toBe(1513);
+      vi.advanceTimersByTime(1000);
+      expect(dashboard(dashEl).orders).toBe(1514);
+      expect(errors).toHaveBeenCalled();
+      live.destroy();
+    });
+
+    it('a dashboard that throws on a tick still lets the compact board take the sale', () => {
+      reduced = true;
+      const { boardEl, dashEl } = loadHome();
+      const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
+      const sales = compact(boardEl).sales;
+      dashEl.querySelector = () => { throw new Error('dashboard failed'); };
+      expect(() => vi.advanceTimersByTime(1000)).not.toThrow();
+      expect(compact(boardEl).sales).not.toBe(sales);
+      expect(errors).toHaveBeenCalled();
+      live.destroy();
+    });
+
+    it('a dashboard whose first render throws is undone and the compact board keeps ticking', () => {
+      reduced = true;
+      const { boardEl, dashEl } = loadHome();
+      Object.defineProperty(document, 'fullscreenEnabled', { configurable: true, get: () => true });
+      dashEl.querySelector('.db-screen').requestFullscreen = vi.fn(() => Promise.resolve());
+      dashEl.querySelector('.db-chart svg').querySelector = () => { throw new Error('chart failed'); };
+      try {
+        const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
+        expect(errors).toHaveBeenCalled();
+        expect(dashEl.querySelector('[data-fullscreen]').hasAttribute('hidden')).toBe(true);
+        const sales = compact(boardEl).sales;
+        vi.advanceTimersByTime(1000);
+        expect(compact(boardEl).sales).not.toBe(sales);
+        expect(dashboard(dashEl).orders).toBe(1512); // left as served
+        live.destroy();
+        expect(vi.getTimerCount()).toBe(0);
+      } finally {
+        delete document.fullscreenEnabled;
+      }
+    });
+  });
 });

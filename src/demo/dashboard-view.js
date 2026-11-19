@@ -258,7 +258,12 @@ export function mountDashboard(el, { intervalMs = 1700, rng = Math.random } = {}
     el.innerHTML = `<div class="db-screen">${renderDashboardInner(dashSnapshot(state))}</div><div class="db-stand" aria-hidden="true"></div>`;
   }
   const view = createDashboardView(el);
-  view.render(dashSnapshot(state)); // what the board already shows: this only fits the chart to its box
+  try {
+    view.render(dashSnapshot(state)); // what the board already shows: this only fits the chart to its box
+  } catch (err) {
+    view.destroy(); // nothing of the view's setup stays behind
+    throw err;
+  }
   let destroyed = false;
 
   function tick() {

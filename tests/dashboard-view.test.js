@@ -368,4 +368,27 @@ describe('the live dashboard', () => {
       delete document.fullscreenEnabled;
     }
   });
+
+  it('if the first render throws, the Full screen setup is undone and the error is raised', () => {
+    const el = boardEl();
+    Object.defineProperty(document, 'fullscreenEnabled', { configurable: true, get: () => true });
+    const screen = el.querySelector('.db-screen');
+    screen.requestFullscreen = vi.fn(() => Promise.resolve());
+    // The chart's svg fails the first time it is drawn.
+    el.querySelector('.db-chart svg').querySelector = () => { throw new Error('chart failed'); };
+    const removed = vi.spyOn(document, 'removeEventListener');
+    try {
+      expect(() => mountDashboard(el)).toThrow('chart failed');
+      const button = el.querySelector('[data-fullscreen]');
+      expect(button.hasAttribute('hidden')).toBe(true);
+      button.click();
+      expect(screen.requestFullscreen).not.toHaveBeenCalled();
+      expect(removed.mock.calls.map((c) => c[0])).toEqual(expect.arrayContaining(['fullscreenchange', 'webkitfullscreenchange']));
+      expect(frames.size).toBe(0);
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      removed.mockRestore();
+      delete document.fullscreenEnabled;
+    }
+  });
 });
