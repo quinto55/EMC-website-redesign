@@ -15,15 +15,38 @@ const MARKUP = `
 let toggle;
 let menu;
 beforeEach(() => {
+  document.documentElement.classList.remove('nav-ready');
   document.body.innerHTML = MARKUP;
   initNav(document);
   toggle = document.querySelector('[data-menu-toggle]');
   menu = document.getElementById('site-menu');
 });
 
+const ready = () => document.documentElement.classList.contains('nav-ready');
 const pressEscape = () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 
 describe('initNav', () => {
+  it('sets nav-ready on <html>, the mark the phone menu button waits for, once the toggle works', () => {
+    document.documentElement.classList.remove('nav-ready');
+    document.body.innerHTML = MARKUP;
+    expect(ready()).toBe(false);
+    initNav(document);
+    expect(ready()).toBe(true);
+    // the toggle really works at that moment
+    document.querySelector('[data-menu-toggle]').click();
+    expect(document.getElementById('site-menu').hidden).toBe(false);
+  });
+
+  it('does not set nav-ready when there is no toggle or no menu to open', () => {
+    document.documentElement.classList.remove('nav-ready');
+    document.body.innerHTML = '<p>No menu here</p>';
+    initNav(document);
+    expect(ready()).toBe(false);
+    document.body.innerHTML = '<button type="button" data-menu-toggle aria-controls="site-menu" aria-expanded="false"></button>';
+    initNav(document);
+    expect(ready()).toBe(false);
+  });
+
   it('the toggle opens and closes the menu and reports it', () => {
     toggle.click();
     expect(toggle.getAttribute('aria-expanded')).toBe('true');

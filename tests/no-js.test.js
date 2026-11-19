@@ -76,14 +76,32 @@ describe('with JavaScript off', () => {
     }
   });
 
-  it('on phones the menu button gives way to the menu laid out in the header', () => {
+  it('on phones the menu button shows only once initNav has marked the page, and until then the links are laid out in the header', () => {
     // CSS is not applied in happy-dom, so this checks the rules the phone header relies on.
     const rules = phoneRules('src/styles/chrome.css');
-    expect(declsFor(rules, '.menu'), 'the button shows on phones when JavaScript is on').toMatch(/display: block/);
+    expect(declsFor(rules, '.menu'), 'the button is laid out on phones').toMatch(/display: block/);
     expect(declsFor(rules, 'html:not(.js) .menu'), 'no dead button without JavaScript').toMatch(/display: none/);
-    const panel = declsFor(rules, 'html:not(.js) #site-menu[hidden]');
-    expect(panel, 'the menu shows without JavaScript, beating [hidden]').toMatch(/display: block !important/);
+    // JavaScript on but the script not (yet) running: the button keeps its place and cannot be seen or used.
+    expect(declsFor(rules, 'html.js:not(.nav-ready) .menu'), 'no dead button before initNav').toMatch(/visibility: hidden/);
+    // The links are laid out whenever initNav has not run, whether the head marked JavaScript or not.
+    const panel = declsFor(rules, 'html:not(.nav-ready) #site-menu[hidden]');
+    expect(panel, 'the menu shows until initNav has run, beating [hidden]').toMatch(/display: block !important/);
     expect(panel, 'in the flow of the header, not over the page').toMatch(/position: static/);
+    for (const sel of ['.menu-card', '.menu-pages', '.menu-pages a']) {
+      expect(declsFor(rules, `html:not(.nav-ready) ${sel}`), sel).not.toBe('');
+    }
+    // Nothing of the phone menu is keyed on the head's early `js` mark any more, except hiding the dead button itself.
+    const css = readFileSync(resolve(ROOT, 'src/styles/chrome.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    const keyedOnJs = [...css.matchAll(/html:not\(\.js\)[^{,]*/g)].map((m) => m[0].trim());
+    expect(keyedOnJs.filter((s) => !/\.menu$|data-cookie-settings/.test(s))).toEqual([]);
+  });
+
+  it('on a normal load the header does not jump: the links wait two seconds for the script before they show, even under reduced motion', () => {
+    const { rules, keyframes } = cssRules('src/styles/chrome.css');
+    const late = rules.filter((r) => r.selectors.includes('html.js:not(.nav-ready) #site-menu[hidden]')).map((r) => r.decls).join('; ');
+    expect(late).toMatch(/animation: menu-late 0s 2s both !important/); // !important: base.css switches decorative animation off for reduced motion
+    expect(keyframes['menu-late']).toMatch(/from ?\{[^}]*max-height: 0/);
+    expect(keyframes['menu-late']).toMatch(/to ?\{[^}]*max-height: 100vh/);
   });
 
   it('the header and footer links are plain links in the HTML', () => {

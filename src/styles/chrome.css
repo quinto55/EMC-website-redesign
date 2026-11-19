@@ -256,15 +256,20 @@ html:not(.js) [data-cookie-settings] { display: none; }
   .top .btn { padding: 11px 18px; font-size: 15px; box-shadow: 0 4px 0 var(--red-shadow); }
   .menu { display: block; }
 
-  /* Without JavaScript the menu button could not open anything, so phones get the menu
-     laid out under the bar instead: the pages as pills, then the two utilities.
-     The head sets html.js before this sheet loads, so pages with JavaScript never see this. */
+  /* The menu button does nothing until the script has run initNav, which then puts nav-ready on <html>. Until then, and
+     if the script never loads, the menu is laid out under the bar instead: the pages as pills, then the two utilities.
+     With JavaScript off (no js mark at all) the button is not there. With JavaScript on, the script is normally
+     there in a moment, so the button keeps its place unseen and the links wait two seconds before they show (a
+     header that jumped taller and shorter on every load would be worse than two seconds of a bar with no menu). */
   html:not(.js) .menu { display: none; }
-  html:not(.js) #site-menu[hidden] { display: block !important; position: static; }
-  html:not(.js) .menu-card { padding: 0 0 14px; border-radius: 0; background: none; box-shadow: none; animation: none; }
-  html:not(.js) .top[data-tone="photo"] .menu-card { --focus: #fff; }
-  html:not(.js) .menu-pages { display: flex; flex-wrap: wrap; gap: 8px; }
-  html:not(.js) .menu-pages a {
+  html.js:not(.nav-ready) .menu { visibility: hidden; }
+  html:not(.nav-ready) #site-menu[hidden] { display: block !important; position: static; }
+  html.js:not(.nav-ready) #site-menu[hidden] { animation: menu-late 0s 2s both !important; } /* !important: reduced motion must not stop this timer */
+  @keyframes menu-late { from { max-height: 0; overflow: hidden; visibility: hidden; } to { max-height: 100vh; overflow: visible; visibility: visible; } }
+  html:not(.nav-ready) .menu-card { padding: 0 0 14px; border-radius: 0; background: none; box-shadow: none; animation: none; }
+  html:not(.nav-ready) .top[data-tone="photo"] .menu-card { --focus: #fff; }
+  html:not(.nav-ready) .menu-pages { display: flex; flex-wrap: wrap; gap: 8px; }
+  html:not(.nav-ready) .menu-pages a {
     min-height: 44px;
     padding: 0 16px;
     border: 0;
@@ -274,8 +279,8 @@ html:not(.js) [data-cookie-settings] { display: none; }
     font: 600 15px/1.2 var(--font-text);
     letter-spacing: 0;
   }
-  html:not(.js) .menu-pages a::after { display: none; }
-  html:not(.js) .menu-pages a[aria-current="page"] { background: var(--hover); color: var(--ink); }
+  html:not(.nav-ready) .menu-pages a::after { display: none; }
+  html:not(.nav-ready) .menu-pages a[aria-current="page"] { background: var(--hover); color: var(--ink); }
 
   .ask { grid-template-columns: minmax(0, 1fr); padding: 30px 22px; gap: 26px; border-radius: 24px; margin-bottom: 40px; }
   .ask h2 { font-size: 38px; }
