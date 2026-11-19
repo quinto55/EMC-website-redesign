@@ -100,6 +100,30 @@ describe('with JavaScript off', () => {
     expect(home.doc.querySelector('#live-board > a[href="#talk"]')).not.toBeNull();
   });
 
+  it('the home page shows "40+" in the proof strip with nothing in the strip hidden', () => {
+    const home = rendered.find((r) => r.page.key === 'home');
+    const proof = home.doc.querySelector('main .proof');
+    expect(proof).not.toBeNull();
+    expect(proof.querySelector('.yrs-num').textContent).toBe('40+');
+    for (const s of ['years in the industry', 'Florida State Fair', 'all run their retail ticketing through EMC.']) expect(proof.textContent, s).toContain(s);
+    expect(proof.querySelectorAll('.logos img')).toHaveLength(3);
+    expect(proof.querySelector('[hidden]')).toBeNull();
+    expect(proof.querySelector('[style]')).toBeNull();
+    expect(proof.className).toBe('proof');
+
+    // CSS is not applied in happy-dom, so this checks the rules: only the starting state the script sets while it
+    // plays (.is-armed) hides anything in the strip, and nothing hides it on the strength of the early `js` class.
+    const css = readFileSync(resolve(ROOT, 'src/styles/home.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
+    const hiding = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+      .filter(([, , decls]) => /opacity: ?0(?![.\d%])|scale(?:X|Y)?\(0\)|visibility: ?hidden|display: ?none/.test(decls))
+      .flatMap(([, sel]) => sel.split(',').map((s) => s.trim()))
+      .filter((s) => /proof|yrs|logos/.test(s));
+    expect(hiding.length).toBeGreaterThan(0);
+    for (const sel of hiding) expect(sel).toMatch(/^\.proof\.is-armed |::before$/);
+    expect(hiding.filter((s) => !s.startsWith('.proof.is-armed '))).toEqual(['.yrs-digits::before']); // the invisible "40" that holds the figures' width
+    expect(css).not.toMatch(/\.js[^\w-][^{}]*(proof|yrs|logos)/);
+  });
+
   it('the platform page already carries the whole sample dashboard', () => {
     const platform = rendered.find((r) => r.page.key === 'platform');
     const board = platform.doc.querySelector('#live-dashboard [data-dashboard][data-sample]');
