@@ -1138,3 +1138,75 @@ it('shows the full dashboard in its own section under the proof strip', () => {
 - [ ] **Step 7: Look at it.** `npm run dev`; `node .superpowers/tools/shots.mjs --widths 360,390,768,1024,1280,1440 /` and again with `--nojs`. The hero is unchanged from before this task (compare the first screen at 1280 and 390 with `.superpowers/shots/final/home-1280-part1.png` and `home-390-part1.png`). The dashboard section matches the Platform page's board. No sideways scroll at 360. In a real browser, with the dashboard scrolled into view, the compact board's three figures and the dashboard's tiles show the same numbers (write a few lines of Playwright that read both after ten seconds and print them).
 
 - [ ] **Step 8: Commit** `feat(home): the full live dashboard on the home page, on the same sample day as the hero board`.
+
+---
+
+### Task 13: The proof strip draws the eye
+
+*Added 2026-11-19. Anthony, about the home page's proof strip: "lets add some animation and make the 40 years larger to draw more attention. Lets make the fairs used smaller".*
+
+**Files:**
+- Create: `src/proof-count.js`, `tests/proof-count.test.js`
+- Modify: `index.html` (the proof strip's markup only), `src/styles/home.css` (the proof strip's rules only), `src/entry/home.js`, `tests/home.test.js`, `tests/no-js.test.js`
+
+**Interfaces:**
+- Produces:
+  ```js
+  // src/proof-count.js
+  export function countFrames(to, steps): number[]          // whole numbers from 0 up to `to`: never decreasing, never above `to`, the last one exactly `to`
+  export function initProofCount(doc = document, { reducedMotion, now } = {}): { destroy(): void }
+  ```
+
+**What changes, and what does not:**
+- The words do not change: "40+", "years in the industry", and the sentence "The Florida State Fair, South Carolina State Fair and Coastal Carolina Fair all run their retail ticketing through EMC." stay exactly as they are, in the HTML as served. The three logos keep their size.
+- "40+" becomes the strip's focal point: Bricolage Grotesque 700 in EMC red, 96px on computers (1001px and wider) and 72px on phones. "years in the industry" sits beside it at 22px (computers) and 19px (phones), weight 700, ink color, on at most two lines.
+- The fairs sentence becomes smaller and quieter: 15px on computers and 14px on phones, muted color, line height 1.45, at most about 360px wide; the fair names stay semibold in ink.
+- On computers the strip still overlaps the bottom of the hero by 44px and covers none of the hero's content.
+
+**The animation** (once per page view, when at least 60% of the strip is on screen; if it is already on screen at load, after 300 ms):
+1. The number counts from 0 up to 40 in about 1.2 seconds, fast at first and settling at the end.
+2. The "+" pops in (from 60% size to full, with a slight overshoot, about 250 ms).
+3. A marker underline in the site's highlight yellow (`#ffd66b`) draws from left to right under "40+" in about 500 ms.
+4. "years in the industry" slides up 8px and fades in; then the fairs sentence and the logos fade in, 150 ms apart.
+It plays once and never loops.
+
+**Rules for the animation:**
+- The page as served shows the final state: "40+" with its underline, everything visible. The script first "arms" the strip (sets the starting state), then plays. If the script fails or never loads, nothing is hidden. A safety timer forces the final state 2.5 seconds after arming, whatever happened.
+- With reduced motion, with no `IntersectionObserver`, or with JavaScript off: the final state at once, no animation.
+- The digits use tabular figures and the number keeps the width of "40" throughout, so nothing moves while it counts.
+- The number never shows more than 40 and always ends on exactly 40, also if the tab is hidden or the strip leaves the screen while it is counting.
+- A screen reader reads "40+ years in the industry" once. The animated digits are hidden from assistive technology (`aria-hidden="true"`) beside a visually hidden "40+"; nothing has `aria-live`.
+
+- [ ] **Step 1: Write the failing tests.**
+
+`tests/proof-count.test.js`:
+```js
+it('counts from 0 to the target without ever passing it', () => {
+  const f = countFrames(40, 72);
+  expect(f[0]).toBe(0); expect(f.at(-1)).toBe(40); expect(f).toHaveLength(72);
+  for (let i = 1; i < f.length; i++) { expect(f[i]).toBeGreaterThanOrEqual(f[i - 1]); expect(f[i]).toBeLessThanOrEqual(40); }
+  expect(Number.isInteger(f[30])).toBe(true);
+});
+it('a single step goes straight to the target', () => { expect(countFrames(40, 1)).toEqual([40]); });
+it('as served, the strip reads 40+ and nothing is hidden', () => {
+  // rendered home page: the strip's visible text contains '40+' and 'years in the industry'; no element in it has hidden, opacity 0 inline, or an "armed" class
+});
+it('with reduced motion it shows the final state at once and never arms', () => {});
+it('with no IntersectionObserver it shows the final state at once', () => {});
+it('plays once when the strip comes into view and ends on exactly 40', () => {
+  // stubbed IntersectionObserver and requestAnimationFrame with fake timers: arm -> in view -> digits pass through values <= 40 -> end '40'; the strip gets its "done" class
+});
+it('does not play again when the strip leaves and re-enters the screen', () => {});
+it('finishes on 40 if the tab is hidden while counting', () => {});
+it('the safety timer forces the final state if the strip never reports being in view', () => { /* 2.5 s after arming: final state, digits '40' */ });
+it('a screen reader gets "40+" once: the animated digits are aria-hidden beside a visually hidden 40+', () => {});
+it('destroy() cancels frames, timers and the observer and leaves the final state', () => {});
+```
+
+`tests/home.test.js`: the existing proof-strip test keeps passing (same three texts, same logos). `tests/no-js.test.js`, add: the home page as served shows "40+" in the proof strip with nothing in the strip hidden.
+
+- [ ] **Step 2: Run** the new test file. Expected: FAIL.
+- [ ] **Step 3: Implement** the markup change, the styles and `src/proof-count.js`; `src/entry/home.js` calls `initProofCount()` guarded like its other steps.
+- [ ] **Step 4: Run** `npm test`. Expected: PASS, exit 0.
+- [ ] **Step 5: Look at it.** `npm run dev`; screenshots of the strip at 360, 390, 768, 1024, 1280 x 800, 1366 x 650, 1440 x 900 and 1920 x 1080, in its final state and (with a few lines of Playwright) at three moments of the animation; with `--nojs`; with reduced motion. "40+" must be the first thing the eye lands on in the strip; the strip must not cover the hero's buttons or board at any of those sizes.
+- [ ] **Step 6: Commit** `feat(home): the proof strip leads with a large animated 40+ and a quieter fairs line`.

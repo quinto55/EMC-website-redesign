@@ -61,6 +61,8 @@ describe('home page', () => {
     expect(proof).not.toBeNull();
     expect(byText(proof, '*', '40+')).not.toBeNull();
     expect(byText(proof, '*', 'years in the industry')).not.toBeNull();
+    // The years claim leads (phones stack the strip in this order), then the fairs line, then the logos.
+    expect([...proof.children].map((el) => el.className)).toEqual(['yrs', 'proof-line', 'logos']);
 
     const label = [...proof.querySelectorAll('*')].find((el) => !el.children.length && text(el) === 'Tickets on sale at');
     expect(label).toBeTruthy();
