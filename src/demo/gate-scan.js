@@ -59,10 +59,14 @@ export function scanResult(state) {
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+/** A viewfinder: four corners and the scan line. */
+const SCAN_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+  '<path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16M7 12h10"/></svg>';
+
 /**
  * Inside the demo, as served: the phone with the sample ticket and an empty result, and the buttons, hidden until the
- * view takes over (so with JavaScript off nothing looks pressable). The result is the one status element, there from
- * the start, so each scan is announced.
+ * view takes over (so with JavaScript off nothing looks pressable), and the resting line that holds the result's place
+ * waits for the view too. The result is the one status element, there from the start, so each scan is announced.
  */
 export function renderGateScanInner(t = SAMPLE_TICKET) {
   return '<div class="gs-phone"><div class="gs-screen">' +
@@ -76,7 +80,11 @@ export function renderGateScanInner(t = SAMPLE_TICKET) {
     `<p class="gs-ticket__order">Order ${esc(t.orderNumber)}</p>` +
     `<p class="gs-ticket__note">${esc(t.note)}</p>` +
     '</div></div>' +
+    // The result's place: a resting line (not part of the status) until the first scan, then the status's result.
+    '<div class="gs-slot">' +
+    `<p class="gs-rest" data-gs-rest hidden>${SCAN_ICON}Ready to scan</p>` +
     '<div class="gs-result" role="status" data-gs-result></div>' +
+    '</div>' +
     '</div></div>' +
     '<div class="gs-controls">' +
     '<button type="button" class="btn gs-scan" data-gs-scan hidden>Scan ticket</button>' +

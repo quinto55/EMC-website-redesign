@@ -48,9 +48,9 @@ export const LIVE_BASELINE = {
 };
 
 /**
- * One closed day for the sample daily report: Thursday, about one and a half times the boards' opening figures. 4,321
- * tickets plus 419 parking and 1,178 rides, $91,854; 3,927 admitted (Admission tickets only, so never more than the
- * 4,321 sold).
+ * One closed day for the sample daily report: Thursday, about one and a half times the boards' opening figures. 5,918
+ * sold (4,321 Admission tickets, 419 parking, 1,178 rides), $91,854; 3,927 admitted (Admission tickets only, so never
+ * more than the 4,321 Admission tickets sold).
  */
 export const DAY_REPORT = {
   day: 'Thursday',

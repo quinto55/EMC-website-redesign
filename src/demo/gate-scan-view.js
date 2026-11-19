@@ -45,8 +45,9 @@ function resultHTML(r, kind, scan) {
  * Takes over the demo the page was served with (`el` is its [data-demo="gate-scanning"] root; an empty one is filled
  * first) and shows its buttons. "Scan ticket" scans the sample ticket, its label then becoming "Scan the same ticket
  * again"; focus stays on it. "Start over" appears after the first scan; when it is pressed it goes away, so focus moves
- * to the scan button. Each result replaces the last inside the one status element. After destroy() the buttons are
- * hidden again and the demo is as it was served.
+ * to the scan button. Each result replaces the last inside the one status element; before the first, a resting line
+ * (outside the status) holds its place. After destroy() the buttons and the resting line are hidden again and the demo
+ * is as it was served.
  */
 export function mountGateScan(el) {
   if (!el.querySelector('[data-gs-scan]')) el.innerHTML = renderGateScanInner();
@@ -54,6 +55,7 @@ export function mountGateScan(el) {
   const resetButton = el.querySelector('[data-gs-reset]');
   const status = el.querySelector('[data-gs-result]');
   const note = el.querySelector('[data-gs-note]');
+  const rest = el.querySelector('[data-gs-rest]');
   let state = initialScanState();
   let lastScan = null;
   let destroyed = false;
@@ -67,6 +69,7 @@ export function mountGateScan(el) {
     scanButton.textContent = state.step === 'ready' ? 'Scan ticket' : 'Scan the same ticket again';
     resetButton.hidden = state.step === 'ready';
     note.hidden = state.step !== 'refused';
+    rest.hidden = state.step !== 'ready';
   }
 
   function onScan() {
@@ -99,6 +102,7 @@ export function mountGateScan(el) {
     lastScan = null;
     render();
     scanButton.hidden = true;
+    rest.hidden = true;
   }
 
   return { destroy };

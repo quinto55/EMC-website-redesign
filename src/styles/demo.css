@@ -64,10 +64,25 @@
 .gs .gs-ticket .gs-ticket__order { margin-top: 8px; font: 500 13px var(--font-mono); }
 .gs .gs-ticket .gs-ticket__note { margin-top: 4px; font: 500 12px/1.35 var(--font-mono); color: var(--sample-ink); }
 
+/* The result's place under the ticket: a quiet resting line until the first scan, then the result over the same space
+   (the space is kept, so nothing moves). The resting line is not part of the status element. */
+.gs .gs-slot { display: grid; }
+.gs .gs-slot > * { grid-area: 1 / 1; }
+.gs .gs-slot .gs-rest {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: center;
+  margin: 0;
+  font: 500 13px var(--font-mono);
+  color: var(--mut);
+}
+.gs .gs-rest svg { flex: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
 /* The gate's answer: a word and an icon, then the answer itself, then where and when. Color only repeats them. */
 .gs .gs-result { display: grid; align-content: start; gap: 5px; border-radius: 16px; }
 .js .gs .gs-result { min-height: 116px; padding: 12px 14px; }
-.js .gs .gs-result:empty { box-shadow: inset 0 0 0 2px var(--line); }
 .gs .gs-result[data-result="admitted"] { background: var(--live-tint); color: var(--live-ink); box-shadow: inset 0 0 0 1.5px var(--live); }
 .gs .gs-result[data-result="refused"] { background: var(--tint-red); color: var(--red-shadow); box-shadow: inset 0 0 0 1.5px var(--red); }
 .gs .gs-result p { margin: 0; color: inherit; animation: gs-in .25s ease-out; }
@@ -110,7 +125,7 @@
 }
 .dr .dr-title { font: 700 24px/1.15 var(--font-head); letter-spacing: -.015em; }
 
-/* The day's totals. */
+/* The day's totals, and the note on what they count. */
 .dr .dr-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 18px; }
 .dr .dr-tile { display: grid; align-content: start; gap: 2px; padding: 14px 16px; border-radius: 14px; background: var(--cream); }
 .dr .dr-tile__label { font: 500 12px var(--font-mono); color: var(--mut); }
@@ -142,10 +157,9 @@
 .dr .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink); }
 .dr tfoot th,
 .dr tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700; color: var(--ink); }
-.dr .dr-sub { display: block; font-size: 13px; font-weight: 500; line-height: 1.35; white-space: normal; color: var(--mut); }
-.dr .dr-keep { white-space: nowrap; }
-.dr .dr-tile .dr-sub { margin-top: 2px; }
 .dr .dr-note { margin-top: 10px; font-size: 14px; color: var(--mut); }
+/* Each type's kind under its name: drawn only on narrow screens (below), where the Kind column folds away. */
+.dr .dr-kind-under { display: none; }
 
 /* ---------- phones and tablets ---------- */
 @media (max-width: 1000px) {
@@ -155,17 +169,32 @@
   .dr .dr-body { grid-template-columns: minmax(0, 1fr); gap: 24px; margin-top: 22px; }
   .dr table { font-size: 14px; }
 }
+/* Phones: "By ticket type" reads name and kind, Sold, Gross to event across the width. The Kind column folds to
+   nothing on screen, but its words stay in the table (clipped, not removed), so a screen reader still reads each kind
+   once, in its column; the copy under the name is hidden from screen readers. */
 @media (max-width: 600px) {
   .dr { padding: 16px 12px 14px; }
   .dr th,
   .dr td { padding: 8px 7px; }
   .dr thead th,
   .dr thead .num { white-space: normal; }
-  .dr .dr-sub { font-size: 12px; }
-}
-@media (max-width: 600px) {
+  .dr .dr-kind-under { display: block; margin-top: 1px; font-size: 12px; font-weight: 500; line-height: 1.3; color: var(--mut); }
+  .dr th.dr-kind,
+  .dr td.dr-kind { position: relative; width: 0; padding: 0; }
+  .dr .dr-kind__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
   .dr .dr-tiles { grid-template-columns: minmax(0, 1fr); gap: 8px; }
   .dr .dr-tile { grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; column-gap: 12px; padding: 10px 14px; }
   .dr .dr-tile__value { grid-row: 1; grid-column: 2; font-size: 24px; }
-  .dr .dr-tile .dr-sub { grid-column: 1 / -1; }
 }

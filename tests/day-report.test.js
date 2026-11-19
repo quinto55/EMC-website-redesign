@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { ROOT } from './helpers/pages.js';
 import { renderDayReportHTML } from '../src/demo/day-report.js';
 import { DAY_REPORT, LIVE_BASELINE, TICKET_TYPES, TICKET_KIND_LABEL, GATES, totals } from '../src/demo/sample-fair.js';
 
@@ -23,16 +26,24 @@ function table(section) {
   };
 }
 const col = (t, label) => t.head.indexOf(label);
-/** A tickets cell: the Admission tickets figure, and the add-ons named on the line under it. */
-function ticketsCell(cell) {
-  const sub = cell.querySelector('.dr-sub');
-  const main = text(cell).replace(sub ? text(sub) : '', '').trim();
-  const m = sub ? text(sub).match(/^plus ([\d,]+) parking and ([\d,]+) rides$/) : null;
-  return { tickets: num(main.replace(/ tickets$/, '')), main, parking: m ? num(m[1]) : null, rides: m ? num(m[2]) : null };
+/** What a screen reader gets from a cell: its text without the parts hidden from it. */
+function spoken(cell) {
+  const copy = cell.cloneNode(true);
+  copy.querySelectorAll('[aria-hidden="true"]').forEach((n) => n.remove());
+  return text(copy);
+}
+/** A figure cell: one plain number, nothing under it. */
+function plain(cell) {
+  expect(cell.children, text(cell)).toHaveLength(0);
+  expect(text(cell)).toMatch(/^\$?[\d,]+$/);
+  return num(text(cell));
 }
 
 const T = totals(DAY_REPORT.sold);
 const admitted = Object.values(DAY_REPORT.scannedByGate).reduce((a, n) => a + n, 0);
+/** Everything sold, add-ons included: what the real Sales report counts as tickets sold. */
+const allSold = T.byType.reduce((a, x) => a + x.tickets, 0);
+const NOTE = 'Tickets sold counts add-ons too. Admitted counts admission tickets only.';
 
 beforeAll(() => {
   root = mount();
@@ -69,15 +80,31 @@ describe('the sample daily report', () => {
     expect(root.querySelectorAll('h1, h2')).toHaveLength(0);
   });
 
-  it('opens with the day\'s totals', () => {
+  it('opens with the day\'s totals, counted as the real Sales report counts them', () => {
     const tile = (k) => root.querySelector(`[data-total="${k}"]`);
     expect(text(tile('tickets').querySelector('.dr-tile__label'))).toBe('Tickets sold');
-    expect(text(tile('tickets').querySelector('.dr-tile__value'))).toBe(fmt(T.tickets));
-    expect(text(tile('tickets').querySelector('.dr-sub'))).toBe('plus 419 parking and 1,178 rides');
+    // Everything sold, add-ons included (the real tile's count), and nothing under it.
+    expect(allSold).toBe(5918);
+    expect(text(tile('tickets').querySelector('.dr-tile__value'))).toBe(fmt(allSold));
+    expect(text(tile('tickets'))).toBe(`Tickets sold ${fmt(allSold)}`);
     expect(text(tile('gross').querySelector('.dr-tile__label'))).toBe('Gross to event');
     expect(text(tile('gross').querySelector('.dr-tile__value'))).toBe(`$${fmt(T.sales)}`);
     expect(text(tile('admitted').querySelector('.dr-tile__label'))).toBe('Admitted');
     expect(text(tile('admitted').querySelector('.dr-tile__value'))).toBe(fmt(admitted));
+  });
+
+  it('says what the totals count, in the real portal\'s words, directly under the tiles and nowhere else', () => {
+    const tiles = root.querySelector('.dr-tiles');
+    const note = tiles.nextElementSibling;
+    expect(note.tagName).toBe('P');
+    expect(text(note)).toBe(NOTE);
+    expect(text(root).split('Admitted counts admission tickets only.')).toHaveLength(2); // said once
+    expect(text(root.querySelector('[data-section="gates"]'))).not.toContain('admission tickets only');
+  });
+
+  it('names no add-ons on a line of their own anywhere: no "plus" line', () => {
+    expect(root.querySelectorAll('.dr-sub')).toHaveLength(0);
+    expect(text(root)).not.toMatch(/\bplus\b/i);
   });
 
   it('"By ticket type" lists the five types with their kind, tickets sold and sales, and they sum to the totals row', () => {
@@ -85,10 +112,10 @@ describe('the sample daily report', () => {
     expect(text(sec.querySelector('h4'))).toBe('By ticket type');
     const t = table('types');
     expect(t.head).toEqual(['Ticket type', 'Kind', 'Sold', 'Gross to event']);
-    expect(t.rows.map((r) => text(r[0]))).toEqual(TICKET_TYPES.map((x) => x.name));
+    expect(t.rows.map((r) => spoken(r[0]))).toEqual(TICKET_TYPES.map((x) => x.name));
     expect(t.rows.map((r) => text(r[col(t, 'Kind')]))).toEqual(TICKET_TYPES.map((x) => TICKET_KIND_LABEL[x.kind]));
-    const sold = t.rows.map((r) => num(text(r[col(t, 'Sold')])));
-    const gross = t.rows.map((r) => num(text(r[col(t, 'Gross to event')])));
+    const sold = t.rows.map((r) => plain(r[col(t, 'Sold')]));
+    const gross = t.rows.map((r) => plain(r[col(t, 'Gross to event')]));
     TICKET_TYPES.forEach((x, i) => {
       const by = DAY_REPORT.sold[x.id];
       expect(sold[i], x.name).toBe(by.online + by.box);
@@ -99,15 +126,36 @@ describe('the sample daily report', () => {
     const foot = t.foot[0];
     expect(text(foot[0])).toBe('Total');
     expect(text(foot[col(t, 'Kind')])).toBe('');
-    // Admission tickets are the tickets; the add-ons are named on their own, as on the live board.
-    const c = ticketsCell(foot[col(t, 'Sold')]);
-    const ofKind = (kind) => TICKET_TYPES.reduce((a, x, i) => a + (x.kind === kind ? sold[i] : 0), 0);
-    expect(c.main).toBe(`${fmt(ofKind('admission'))} tickets`);
-    expect(c.parking).toBe(ofKind('parking'));
-    expect(c.rides).toBe(ofKind('rides'));
-    expect(c.tickets + c.parking + c.rides).toBe(sold.reduce((a, n) => a + n, 0));
-    expect(num(text(foot[col(t, 'Gross to event')]))).toBe(gross.reduce((a, n) => a + n, 0));
+    // The real total row: every type's sold added up, add-ons included, as a plain number.
+    expect(plain(foot[col(t, 'Sold')])).toBe(sold.reduce((a, n) => a + n, 0));
+    expect(plain(foot[col(t, 'Sold')])).toBe(allSold);
+    expect(plain(foot[col(t, 'Gross to event')])).toBe(gross.reduce((a, n) => a + n, 0));
     expect(num(text(foot[col(t, 'Gross to event')]))).toBe(T.sales);
+  });
+
+  it('on a narrow screen each type\'s kind can show under its name, and a screen reader still gets it once, in the Kind column', () => {
+    const t = table('types');
+    t.rows.forEach((r, i) => {
+      const kind = TICKET_KIND_LABEL[TICKET_TYPES[i].kind];
+      const under = r[0].querySelectorAll('.dr-kind-under');
+      expect(under, TICKET_TYPES[i].name).toHaveLength(1);
+      expect(text(under[0])).toBe(kind);
+      expect(under[0].getAttribute('aria-hidden')).toBe('true'); // the copy for the eye only
+      expect(spoken(r[0])).toBe(TICKET_TYPES[i].name);
+      const cell = r[col(t, 'Kind')];
+      expect(cell.tagName).toBe('TD');
+      expect(spoken(cell)).toBe(kind);
+      expect(cell.classList.contains('dr-kind')).toBe(true);
+    });
+    expect(t.el.querySelector('thead th.dr-kind')).not.toBeNull();
+    expect(t.foot[0][col(t, 'Kind')].classList.contains('dr-kind')).toBe(true);
+    // The rules: wide, the copy is not drawn; narrow, it is, and the Kind column folds away visually but stays readable.
+    const css = readFileSync(resolve(ROOT, 'src/styles/demo.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
+    expect(css).toMatch(/\.dr \.dr-kind-under \{[^}]*display: none/);
+    const narrow = css.slice(css.indexOf('@media (max-width: 600px)'));
+    expect(narrow).toMatch(/\.dr \.dr-kind-under \{[^}]*display: block/);
+    expect(narrow).toMatch(/\.dr-kind__text \{[^}]*clip-path: inset\(50%\)/);
+    expect(narrow).not.toMatch(/\.dr-kind[^{]*\{[^}]*display: none/);
   });
 
   it('"By channel" has exactly Online and Box office, and they sum to the same totals', () => {
@@ -116,23 +164,22 @@ describe('the sample daily report', () => {
     const t = table('channels');
     expect(t.head).toEqual(['Channel', 'Tickets', 'Gross to event']);
     expect(t.rows.map((r) => text(r[0]))).toEqual(['Online', 'Box office']);
-    const cells = t.rows.map((r) => ticketsCell(r[col(t, 'Tickets')]));
-    const gross = t.rows.map((r) => num(text(r[col(t, 'Gross to event')])));
+    // Tickets counts everything sold on the channel, add-ons included, as the real channel table does.
+    const tickets = t.rows.map((r) => plain(r[col(t, 'Tickets')]));
+    const gross = t.rows.map((r) => plain(r[col(t, 'Gross to event')]));
     ['online', 'box'].forEach((ch, i) => {
-      const of = (kind) => TICKET_TYPES.reduce((a, x) => a + (x.kind === kind ? DAY_REPORT.sold[x.id][ch] : 0), 0);
-      expect(cells[i], ch).toMatchObject({ tickets: of('admission'), parking: of('parking'), rides: of('rides') });
+      expect(tickets[i], ch).toBe(TICKET_TYPES.reduce((a, x) => a + DAY_REPORT.sold[x.id][ch], 0));
       expect(gross[i], ch).toBe(TICKET_TYPES.reduce((a, x) => a + DAY_REPORT.sold[x.id][ch] * x.price, 0));
     });
+    expect(tickets).toEqual([3663, 2255]);
     const foot = t.foot[0];
     expect(text(foot[0])).toBe('Total');
-    const total = ticketsCell(foot[col(t, 'Tickets')]);
-    const sum = (k) => cells.reduce((a, c) => a + c[k], 0);
-    expect(total).toMatchObject({ tickets: sum('tickets'), parking: sum('parking'), rides: sum('rides') });
-    expect(num(text(foot[col(t, 'Gross to event')]))).toBe(gross[0] + gross[1]);
-    // The same totals as "By ticket type".
-    const types = ticketsCell(table('types').foot[0][2]);
-    expect(total).toMatchObject({ tickets: types.tickets, parking: types.parking, rides: types.rides });
-    expect(num(text(foot[col(t, 'Gross to event')]))).toBe(T.sales);
+    expect(plain(foot[col(t, 'Tickets')])).toBe(tickets[0] + tickets[1]);
+    expect(plain(foot[col(t, 'Gross to event')])).toBe(gross[0] + gross[1]);
+    // The same totals as "By ticket type" and the tiles.
+    expect(plain(foot[col(t, 'Tickets')])).toBe(plain(table('types').foot[0][2]));
+    expect(plain(foot[col(t, 'Tickets')])).toBe(allSold);
+    expect(plain(foot[col(t, 'Gross to event')])).toBe(T.sales);
   });
 
   it('"At the gates" lists the three gates, and they sum to the admitted total', () => {
@@ -146,8 +193,6 @@ describe('the sample daily report', () => {
     expect(text(t.foot[0][0])).toBe('Total');
     expect(num(text(t.foot[0][1]))).toBe(each.reduce((a, n) => a + n, 0));
     expect(num(text(t.foot[0][1]))).toBe(admitted);
-    expect(admitted).toBeLessThanOrEqual(ticketsCell(table('types').foot[0][2]).tickets);
-    expect(text(sec)).toContain('Admitted counts admission tickets only.');
   });
 
   it('has no fee, tax, net or refund column, and never says "fee"', () => {
@@ -160,11 +205,10 @@ describe('the sample daily report', () => {
   it('every number it shows comes from DAY_REPORT', () => {
     const allowed = new Set();
     const add = (n) => allowed.add(fmt(n));
-    add(T.tickets); add(T.sales); add(admitted);
-    for (const a of T.addOns) add(a.sold);
+    add(allSold); add(T.sales); add(admitted);
     for (const x of T.byType) { add(x.tickets); add(x.sales); }
     for (const ch of ['online', 'box']) {
-      for (const kind of ['admission', 'parking', 'rides']) add(TICKET_TYPES.reduce((a, x) => a + (x.kind === kind ? DAY_REPORT.sold[x.id][ch] : 0), 0));
+      add(TICKET_TYPES.reduce((a, x) => a + DAY_REPORT.sold[x.id][ch], 0));
       add(TICKET_TYPES.reduce((a, x) => a + DAY_REPORT.sold[x.id][ch] * x.price, 0));
     }
     for (const n of Object.values(DAY_REPORT.scannedByGate)) add(n);
@@ -182,8 +226,7 @@ describe('the sample daily report', () => {
     };
     const el = mount(small);
     expect(text(el.querySelector('.dr-title'))).toBe('Demo County Fair, Monday');
-    expect(text(el.querySelector('[data-total="tickets"] .dr-tile__value'))).toBe('8');
-    expect(text(el.querySelector('[data-total="tickets"] .dr-sub'))).toBe('plus 4 parking and 3 rides');
+    expect(text(el.querySelector('[data-total="tickets"] .dr-tile__value'))).toBe('15');
     expect(text(el.querySelector('[data-total="gross"] .dr-tile__value'))).toBe('$276');
     expect(text(el.querySelector('[data-total="admitted"] .dr-tile__value'))).toBe('7');
     root = mount();

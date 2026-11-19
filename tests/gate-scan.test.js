@@ -100,6 +100,7 @@ describe('the sample ticket', () => {
     for (const b of root.querySelectorAll('button')) expect(b.hasAttribute('hidden'), b.textContent).toBe(true);
     expect(root.querySelectorAll('[role="status"]')).toHaveLength(1);
     expect(root.querySelector('[role="status"]').textContent.trim()).toBe('');
+    expect(root.querySelector('[data-gs-rest]').hasAttribute('hidden')).toBe(true); // the resting line waits for the script too
     document.body.innerHTML = '';
   });
 });

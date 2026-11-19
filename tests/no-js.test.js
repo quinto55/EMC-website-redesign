@@ -223,7 +223,9 @@ describe('the platform page\'s gate scan and sample report with JavaScript off',
     const t = text(report);
     for (const s of ['Demo County Fair, Thursday', 'Sample data', 'By ticket type', 'By channel', 'At the gates',
       'Adult admission', 'Child admission', 'Ride wristband', 'Family 4-pack', 'Parking pass', 'Online', 'Box office',
-      'Main Gate', 'North Gate', 'Midway Gate', '4,321', 'plus 419 parking and 1,178 rides', '$91,854', '3,927']) expect(t, s).toContain(s);
+      'Main Gate', 'North Gate', 'Midway Gate', '5,918', '3,663', '2,255', '$91,854', '3,927',
+      'Tickets sold counts add-ons too. Admitted counts admission tickets only.']) expect(t, s).toContain(s);
+    expect(t).not.toMatch(/\bplus\b/);
     expect(report.querySelectorAll('table')).toHaveLength(3);
     expect(report.querySelectorAll('tbody tr')).toHaveLength(5 + 2 + 3);
   });
@@ -244,6 +246,7 @@ describe('the platform page\'s gate scan and sample report with JavaScript off',
     expect(text(demo.querySelector('[role="status"]'))).toBe('');
     expect(t).not.toMatch(/Admitted|Duplicate/);
     expect(demo.querySelector('[data-gs-note]').hasAttribute('hidden')).toBe(true);
+    expect(demo.querySelector('[data-gs-rest]').hasAttribute('hidden')).toBe(true);
   });
 });
 

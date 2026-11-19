@@ -50,6 +50,28 @@ describe('the gate scan demo', () => {
     expect(text(el.querySelector('[role="status"]'))).toBe('');
   });
 
+  it('before a scan the result\'s place shows a quiet resting line, outside the status element, gone once a result shows', () => {
+    const { el, scan, reset, status } = mounted();
+    const rest = el.querySelector('[data-gs-rest]');
+    expect(rest).not.toBeNull();
+    expect(rest.hidden).toBe(false);
+    expect(text(rest)).toBe('Ready to scan');
+    expect(rest.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+    expect(status.contains(rest)).toBe(false);
+    expect(rest.contains(status)).toBe(false);
+    expect(text(status)).toBe('');
+    // It sits in the phone, in the result's place.
+    expect(rest.closest('.gs-screen')).toBe(status.closest('.gs-screen'));
+    expect(rest.parentElement).toBe(status.parentElement);
+    scan.click();
+    expect(rest.hidden).toBe(true);
+    scan.click();
+    expect(rest.hidden).toBe(true);
+    reset.click();
+    expect(rest.hidden).toBe(false);
+    expect(text(status)).toBe('');
+  });
+
   it('the first press admits the ticket: green, a check, "Admitted" and the answer the gate gets', () => {
     const { el, scan, reset } = mounted();
     scan.click();
@@ -176,6 +198,7 @@ describe('the gate scan demo', () => {
     view.destroy();
     for (const b of el.querySelectorAll('button')) expect(b.hidden).toBe(true);
     expect(text(el.querySelector('[role="status"]'))).toBe('');
+    expect(el.querySelector('[data-gs-rest]').hidden).toBe(true);
     scan.click();
     expect(text(el.querySelector('[role="status"]'))).toBe('');
     view.destroy(); // twice is harmless
