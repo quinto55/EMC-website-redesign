@@ -53,22 +53,20 @@ function syncRows(list, items, html) {
 }
 
 /**
- * Takes over the dashboard the page was served with (`el` is its [data-dashboard] root). The served markup already
- * shows the opening board; each tick makes one sale and changes text and attributes in place, never the board or a
- * panel. Ticks only while the board is on screen and the tab is showing; the tiles count up with animation frames
- * only while they are counting. After destroy() nothing runs.
+ * Shows dashboard snapshots on the dashboard the page was served with (`el` is its [data-dashboard] root), changing
+ * text and attributes in place, never the board or a panel. The four tiles count up to each new figure over about
+ * 800 ms (reduced motion jumps), asking for animation frames only while they are counting; settle() finishes a count
+ * at once. Until its first render() the view knows only the figures the markup shows, so render what the board was
+ * served with first: that draws the pace chart at its box's own size. After destroy() nothing runs.
  */
-export function mountDashboard(el, { intervalMs = 1700, rng = Math.random } = {}) {
-  let state = createDashState();
-  let snap = dashSnapshot(state);
-  if (!el.querySelector('.db-screen')) {
-    el.innerHTML = `<div class="db-screen">${renderDashboardInner(snap)}</div><div class="db-stand" aria-hidden="true"></div>`;
-  }
+export function createDashboardView(el) {
   const screen = el.querySelector('.db-screen');
   const fields = new Map([...el.querySelectorAll('[data-f]')].map((n) => [n.getAttribute('data-f'), n]));
-  const tiles = TILES.map(([key, , value]) => ({
-    key, value, box: el.querySelector(`[data-tile="${key}"]`), out: fields.get(key), shown: value(snap.totals), target: value(snap.totals), frames: null,
-  }));
+  const tiles = TILES.map(([key, , value]) => {
+    const out = fields.get(key);
+    const shown = Number(out.textContent.replace(/\D/g, ''));
+    return { key, value, box: el.querySelector(`[data-tile="${key}"]`), out, shown, target: shown, frames: null };
+  });
   const feedList = el.querySelector('.db-feed__list');
   const tryList = el.querySelector('.db-fraud__list');
   const alertsRow = el.querySelector('.db-alerts');
@@ -80,6 +78,7 @@ export function mountDashboard(el, { intervalMs = 1700, rng = Math.random } = {}
     li, flag: li.querySelector('.db-flag'), parts: new Map([...li.querySelectorAll('svg [data-c]')].map((n) => [n.getAttribute('data-c'), n])),
   }]));
   let chartSize = { ...CHART_SIZE };
+  let snap = null;
   let destroyed = false;
 
   const applyParts = (map, parts) => {
@@ -92,6 +91,7 @@ export function mountDashboard(el, { intervalMs = 1700, rng = Math.random } = {}
   };
 
   function drawChart() {
+    if (!snap) return;
     const model = paceChartParts(snap.pace, chartSize);
     setAttr(chartSvg, 'viewBox', model.viewBox);
     const gold = chartSvg.querySelector('#db-gold');
@@ -161,7 +161,9 @@ export function mountDashboard(el, { intervalMs = 1700, rng = Math.random } = {}
     raf = requestAnimationFrame(step);
   }
 
-  function render() {
+  function render(next) {
+    if (destroyed) return;
+    snap = next;
     for (const [key, text] of Object.entries(dashFields(snap))) setText(fields.get(key), text);
     setAttr(clockTime, 'datetime', snap.clock.datetime);
 
@@ -202,13 +204,6 @@ export function mountDashboard(el, { intervalMs = 1700, rng = Math.random } = {}
     drawChart();
   }
 
-  function tick() {
-    if (destroyed) return;
-    state = advance(state, rng, { seconds: intervalMs / 1000 });
-    snap = dashSnapshot(state);
-    render();
-  }
-
   // ── Full screen, where the browser has the Fullscreen API (Safari on iPad: the webkit one). ──
   const fsButton = el.querySelector('[data-fullscreen]');
   const doc = document;
@@ -231,19 +226,8 @@ export function mountDashboard(el, { intervalMs = 1700, rng = Math.random } = {}
   const resizes = typeof ResizeObserver === 'function' ? new ResizeObserver(() => measureChart()) : null;
   resizes?.observe(chartBox);
 
-  let timer = null;
-  const cleanup = runWhileVisible(el, {
-    start: () => { timer = setInterval(tick, intervalMs); },
-    stop: () => {
-      clearInterval(timer);
-      timer = null;
-      finishCount();
-    },
-  });
-
   function destroy() {
     if (destroyed) return;
-    cleanup();
     finishCount();
     destroyed = true;
     resizes?.disconnect();
@@ -253,6 +237,51 @@ export function mountDashboard(el, { intervalMs = 1700, rng = Math.random } = {}
       doc.removeEventListener('webkitfullscreenchange', onFullscreen);
       setAttr(fsButton, 'hidden', true);
     }
+  }
+
+  function settle() {
+    if (!destroyed) finishCount();
+  }
+
+  return { render, settle, destroy };
+}
+
+/**
+ * Takes over the dashboard the page was served with (`el` is its [data-dashboard] root). The served markup already
+ * shows the opening board; each tick makes one sale and changes text and attributes in place, never the board or a
+ * panel. Ticks only while the board is on screen and the tab is showing; the tiles count up with animation frames
+ * only while they are counting. After destroy() nothing runs.
+ */
+export function mountDashboard(el, { intervalMs = 1700, rng = Math.random } = {}) {
+  let state = createDashState();
+  if (!el.querySelector('.db-screen')) {
+    el.innerHTML = `<div class="db-screen">${renderDashboardInner(dashSnapshot(state))}</div><div class="db-stand" aria-hidden="true"></div>`;
+  }
+  const view = createDashboardView(el);
+  view.render(dashSnapshot(state)); // what the board already shows: this only fits the chart to its box
+  let destroyed = false;
+
+  function tick() {
+    if (destroyed) return;
+    state = advance(state, rng, { seconds: intervalMs / 1000 });
+    view.render(dashSnapshot(state));
+  }
+
+  let timer = null;
+  const cleanup = runWhileVisible(el, {
+    start: () => { timer = setInterval(tick, intervalMs); },
+    stop: () => {
+      clearInterval(timer);
+      timer = null;
+      view.settle();
+    },
+  });
+
+  function destroy() {
+    if (destroyed) return;
+    cleanup();
+    view.destroy();
+    destroyed = true;
   }
 
   return { tick, destroy };

@@ -142,6 +142,19 @@
 .logos { display: flex; align-items: center; gap: 24px; }
 .logos img { width: auto; height: 26px; }
 
+/* ---------- Live dashboard: the full sample board, under the proof strip ----------
+   The board stands on the cream page at the wrap's full width, in its monitor frame on computers and as a dark card
+   on phones (dashboard.css), as on the platform page. The section ends at its link; the next section's top padding
+   is the gap below it, so every home section starts the same distance after the one before. */
+.live-board { padding-bottom: 0; }
+.live-board > .db { margin: 36px 0 26px; }
+.talk-link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; color: var(--red); }
+/* On computers the script shows the board's Full screen button (40px tall, the bar's tallest item). With JavaScript
+   on, the bar has that height from the first paint, so nothing below it moves if the script arrives late. */
+@media (min-width: 1001px) {
+  .js .live-board .db .db-bar { min-height: calc(40px + var(--db-pad) * 1.4 + 1px); }
+}
+
 /* ---------- Sell. Scan. Count. ---------- */
 .mods { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 34px; }
 .mod { padding: 26px 26px 10px; }
@@ -226,6 +239,8 @@
   .yrs span { max-width: none; }
   .logos { flex-wrap: wrap; gap: 14px 20px; }
   .logos img { height: 22px; }
+
+  .live-board > .db { margin: 24px 0 14px; }
 
   .mods,
   .guest-cards { grid-template-columns: minmax(0, 1fr); }

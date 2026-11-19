@@ -75,6 +75,31 @@ describe('with JavaScript off', () => {
     expect(board.querySelectorAll('.feed li').length).toBe(3);
   });
 
+  it('the home page also carries the whole sample dashboard, on the same figures as the hero board', () => {
+    const home = rendered.find((r) => r.page.key === 'home');
+    const dash = home.doc.querySelector('#live-board [data-dashboard][data-sample]');
+    const board = home.doc.querySelector('.hero [data-board][data-sample]');
+    expect(dash).not.toBeNull();
+    expect(board).not.toBeNull();
+    for (const s of ['3,947', '$61,284']) {
+      expect(dash.textContent, s).toContain(s);
+      expect(board.textContent, s).toContain(s);
+    }
+    for (const s of ['Sample data', 'Demo County Fair', 'Latest sales', 'AI brief']) expect(dash.textContent, s).toContain(s);
+    // The two shares agree too: Online = Online card, Box office = Box-office card + Cash, and the bars follow them.
+    const pct = (el) => Number(el.textContent.replace('%', ''));
+    const shown = [...board.querySelectorAll('.ch em')].map(pct);
+    const tender = (id) => pct(dash.querySelector(`[data-f="tender-${id}-share"]`));
+    expect(shown).toEqual([62, 38]);
+    expect(shown).toEqual([tender('card_online'), tender('card_present') + tender('cash')]);
+    expect([...board.querySelectorAll('.ch i')].map((i) => i.getAttribute('style'))).toEqual(['--w:62%', '--w:38%']);
+    expect(dash.querySelectorAll('[data-panel="feed"] li').length).toBe(4);
+    expect(dash.querySelector('[data-panel="pace"] svg path')).not.toBeNull();
+    expect(dash.querySelector('button').hasAttribute('hidden')).toBe(true);
+    // The section's link to the ask is a plain link.
+    expect(home.doc.querySelector('#live-board > a[href="#talk"]')).not.toBeNull();
+  });
+
   it('the platform page already carries the whole sample dashboard', () => {
     const platform = rendered.find((r) => r.page.key === 'platform');
     const board = platform.doc.querySelector('#live-dashboard [data-dashboard][data-sample]');
