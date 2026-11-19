@@ -2,6 +2,7 @@
 import { setAskVariant } from '../form/ask-form.js';
 import { ASK_VARIANTS } from '../form/variants.js';
 import { showPhase } from '../show.js';
+import { readUtm } from '../form/utm.js';
 
 /** 'walgreens' only when the first utm_content, trimmed and lower-cased, is 'walgreens-card'. */
 export function iafeVariant(search = location.search) {
@@ -39,4 +40,21 @@ export function applyIafeVariant(doc, variant) {
 export function applyBoothHeading(doc, now = new Date()) {
   const text = showPhase(now) === 'after' ? 'What we showed in Louisville' : 'See it live at Booth #410';
   for (const heading of doc.querySelectorAll('[data-booth-heading]')) heading.textContent = text;
+}
+
+/** The card tags the subject may carry: letters, digits and hyphens, 24 characters at most. */
+const CARD_TAG = /^[A-Za-z0-9-]{1,24}$/;
+
+/**
+ * "Email Anthony" is served as an email with the subject "Website inquiry". When the visitor arrived with a card tag
+ * (the campaign tag utm_content the page captured), the subject names it: "Website inquiry (walgreens-card)". Only that
+ * one tag is used, and only when it is plain letters, digits and hyphens; anything else leaves the served link alone.
+ */
+export function applyCardSubject(doc, utm = readUtm()) {
+  const tag = utm && typeof utm.utm_content === 'string' ? utm.utm_content : '';
+  if (!CARD_TAG.test(tag)) return;
+  for (const a of doc.querySelectorAll('[data-ask-fallback] a.ask-button[href^="mailto:"]')) {
+    const address = a.getAttribute('href').split('?')[0];
+    a.setAttribute('href', `${address}?subject=${encodeURIComponent(`Website inquiry (${tag})`)}`);
+  }
 }

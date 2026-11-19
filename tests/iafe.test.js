@@ -6,7 +6,8 @@ import { renderPage } from '../build/render.js';
 import { ROOT } from './helpers/pages.js';
 import { initAskForms } from '../src/form/ask-form.js';
 import { initShowNotes } from '../src/show.js';
-import { iafeVariant, applyIafeVariant, applyBoothHeading } from '../src/iafe/variant.js';
+import { iafeVariant, applyIafeVariant, applyBoothHeading, applyCardSubject } from '../src/iafe/variant.js';
+import { LEAD_EMAIL } from '../src/site-config.js';
 
 const page = PAGES.find((p) => p.key === 'iafe');
 const norm = (el) => el.textContent.replace(/\s+/g, ' ').trim();
@@ -196,5 +197,61 @@ describe('the card variant is all or nothing', () => {
     await new Promise((r) => setTimeout(r, 0));
     expect(send).toHaveBeenCalledTimes(1);
     expect(send.mock.calls[0][0].request).toBe('In-store mockup'); // the lead's label for the mockup ask
+  });
+});
+
+describe('"Email Anthony" says which card was scanned', () => {
+  const mail = () => document.querySelector('[data-ask-fallback] a.ask-button');
+  const SERVED = `mailto:${LEAD_EMAIL}?subject=Website%20inquiry`;
+
+  it('as served the link opens an email with the subject "Website inquiry"', () => {
+    expect(mail().getAttribute('href')).toBe(SERVED);
+  });
+
+  it('with a card tag the subject becomes "Website inquiry (<tag>)", encoded, to the same address', () => {
+    applyCardSubject(document, { utm_content: 'walgreens-card' });
+    expect(mail().getAttribute('href')).toBe(`mailto:${LEAD_EMAIL}?subject=Website%20inquiry%20(walgreens-card)`);
+    const subject = new URL(mail().getAttribute('href')).searchParams.get('subject');
+    expect(subject).toBe('Website inquiry (walgreens-card)');
+    applyCardSubject(document, { utm_content: 'x'.repeat(24) });
+    expect(new URL(mail().getAttribute('href')).searchParams.get('subject')).toBe(`Website inquiry (${'x'.repeat(24)})`);
+  });
+
+  it('reads the card tag the page already captured when none is passed in', () => {
+    sessionStorage.setItem('emc-utm', JSON.stringify({ utm_source: 'iafe', utm_medium: 'handout', utm_campaign: 'iafe2026', utm_content: 'platform-card' }));
+    try {
+      applyCardSubject(document);
+      expect(mail().getAttribute('href')).toBe(`mailto:${LEAD_EMAIL}?subject=Website%20inquiry%20(platform-card)`);
+    } finally {
+      sessionStorage.clear();
+    }
+  });
+
+  it('leaves the served subject alone for no tag, a tag that is not letters, digits and hyphens, or one over 24 characters', () => {
+    for (const utm_content of [undefined, '', 'a b', 'a_b', 'a.b', '<script>', 'a&body=x', 'x'.repeat(25), '../x', 'a%20b']) {
+      applyCardSubject(document, { utm_content });
+      expect(mail().getAttribute('href'), String(utm_content)).toBe(SERVED);
+    }
+    applyCardSubject(document, {});
+    expect(mail().getAttribute('href')).toBe(SERVED);
+  });
+
+  it('never carries anything else from the address bar into the link', () => {
+    applyCardSubject(document, { utm_source: 'iafe', utm_medium: 'handout', utm_campaign: 'iafe2026', utm_content: 'walgreens-card' });
+    const href = mail().getAttribute('href');
+    expect(href).toBe(`mailto:${LEAD_EMAIL}?subject=Website%20inquiry%20(walgreens-card)`);
+    for (const word of ['iafe', 'handout', 'utm_']) expect(href).not.toContain(word);
+  });
+
+  it('changes only the ask band\'s email button, not the closing strip\'s link', () => {
+    const strip = document.querySelector('[data-iafe-closing] a[href^="mailto:"]');
+    const before = strip.getAttribute('href');
+    applyCardSubject(document, { utm_content: 'walgreens-card' });
+    expect(strip.getAttribute('href')).toBe(before);
+  });
+
+  it('does nothing, without throwing, when the page has no email button', () => {
+    document.querySelector('[data-ask-fallback]').remove();
+    expect(() => applyCardSubject(document, { utm_content: 'walgreens-card' })).not.toThrow();
   });
 });

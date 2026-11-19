@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { renderAll, ROOT } from './helpers/pages.js';
+import { LEAD_EMAIL } from '../src/site-config.js';
 
 // renderAll strips every script, so these documents are what a visitor with JavaScript off gets.
 const rendered = renderAll();
@@ -59,7 +60,8 @@ describe('with JavaScript off', () => {
       expect(fallback, page.file).not.toBeNull();
       expect(fallback.hasAttribute('hidden'), page.file).toBe(false);
       expect(fallback.closest('[hidden]'), page.file).toBeNull();
-      expect(fallback.querySelector('a[href="mailto:anthony@emctickets.com"]'), page.file).not.toBeNull();
+      // "Email Anthony" opens an email that already says what it is about, with no script.
+      expect(fallback.querySelector('a.ask-button').getAttribute('href'), page.file).toBe(`mailto:${LEAD_EMAIL}?subject=Website%20inquiry`);
       expect(fallback.textContent, page.file).toContain('800-290-2090');
       expect(fallback.querySelector('a[href="tel:+18002902090"]'), page.file).not.toBeNull();
       expect(doc.querySelector('[data-ask] form[data-ask-form]').hasAttribute('hidden'), page.file).toBe(true);
@@ -257,7 +259,7 @@ describe('the IAFE page with JavaScript off', () => {
     expect(doc.querySelector('h1').textContent).toBe('One system from first ticket to final report.');
     expect(doc.querySelector('[data-booth-line]').textContent).toContain('See us at Booth #410');
     expect(doc.querySelector('[data-ask]').getAttribute('data-ask-variant')).toBe('talk');
-    expect(doc.querySelector('[data-ask] [data-ask-fallback] a[href="mailto:anthony@emctickets.com"]')).not.toBeNull();
+    expect(doc.querySelector('[data-ask] [data-ask-fallback] a[href^="mailto:anthony@emctickets.com"]')).not.toBeNull();
     expect(doc.querySelector('[data-iafe-closing] a[href="#talk"]')).not.toBeNull();
   });
 });

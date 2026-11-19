@@ -149,7 +149,7 @@ describe('ask band', () => {
       const t = text(band);
       expect(t, page.file).toContain('Anthony Quintana');
       expect(t, page.file).toContain('Toll free, 24/7');
-      expect(band.querySelector('a[href="mailto:anthony@emctickets.com"]'), page.file).not.toBeNull();
+      expect(band.querySelector('a[href^="mailto:anthony@emctickets.com"]'), page.file).not.toBeNull();
       expect(band.querySelector('a[href="tel:+18002902090"]'), page.file).not.toBeNull();
     }
   });
