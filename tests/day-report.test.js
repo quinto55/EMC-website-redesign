@@ -260,6 +260,6 @@ describe('the sample daily report', () => {
 
   it('needs no script: it has no buttons, forms or scripts', () => {
     expect(root.querySelectorAll('button, form, input, script')).toHaveLength(0);
-    expect(root.innerHTML).not.toContain('—');
+    expect(root.innerHTML).not.toContain('\u2014'); // no em dash
   });
 });

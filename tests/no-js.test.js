@@ -245,7 +245,7 @@ describe('the platform page\'s gate scan and sample report with JavaScript off',
     for (const b of buttons) expect(b.hasAttribute('hidden'), text(b)).toBe(true);
     expect(text(demo.querySelector('[role="status"]'))).toBe('');
     expect(t).not.toMatch(/Admitted|Duplicate/);
-    expect(demo.querySelector('[data-gs-note]').hasAttribute('hidden')).toBe(true);
+    expect(demo.querySelector('[data-gs-board]').hasAttribute('hidden')).toBe(true);
     expect(demo.querySelector('[data-gs-rest]').hasAttribute('hidden')).toBe(true);
   });
 });

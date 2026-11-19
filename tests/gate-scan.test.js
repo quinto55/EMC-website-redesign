@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { initialScanState, scanReduce, scanResult, SAMPLE_TICKET, dayLabel, responseLine, renderGateScanHTML } from '../src/demo/gate-scan.js';
+import { initialScanState, scanReduce, scanResult, SAMPLE_TICKET, dayLabel, responseLine, barcodeTail, renderGateScanHTML } from '../src/demo/gate-scan.js';
 import { FAIR, TICKET_TYPES } from '../src/demo/sample-fair.js';
 
 const MAIN = { type: 'scan', at: '2:14 PM', gate: 'Main Gate' };
@@ -86,6 +86,12 @@ describe('the sample ticket', () => {
     expect(responseLine(SAMPLE_TICKET)).toBe('ADULT ADMISSION · FRI JUL 16 · #DCF-001234');
   });
 
+  it('shows its code on the live board as the board shows any barcode: the last six characters after an ellipsis', () => {
+    expect(SAMPLE_TICKET.barcode).toBe('EMC-SAMPLE-TICKET'); // what the QR code says
+    expect(barcodeTail(SAMPLE_TICKET.barcode)).toBe('\u2026TICKET');
+    expect(barcodeTail('4F2A9C')).toBe('4F2A9C'); // six or fewer: the whole code
+  });
+
   it('starts as the ticket, a hidden button and an empty result: complete without script', () => {
     document.body.innerHTML = renderGateScanHTML();
     const root = document.querySelector('[data-demo="gate-scanning"]');
@@ -101,6 +107,8 @@ describe('the sample ticket', () => {
     expect(root.querySelectorAll('[role="status"]')).toHaveLength(1);
     expect(root.querySelector('[role="status"]').textContent.trim()).toBe('');
     expect(root.querySelector('[data-gs-rest]').hasAttribute('hidden')).toBe(true); // the resting line waits for the script too
+    expect(root.querySelector('[data-gs-board]').hasAttribute('hidden')).toBe(true); // and so does the Fraud watch panel
+    expect(root.querySelector('.gs-phone').contains(root.querySelector('[role="status"]'))).toBe(false);
     document.body.innerHTML = '';
   });
 });

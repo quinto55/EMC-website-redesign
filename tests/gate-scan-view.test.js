@@ -6,6 +6,12 @@ import { renderGateScanHTML } from '../src/demo/gate-scan.js';
 import { mountGateScan } from '../src/demo/gate-scan-view.js';
 
 const text = (el) => el.textContent.replace(/\s+/g, ' ').trim();
+/** What the eye reads: the text without the parts drawn only for screen readers. */
+function seen(el) {
+  const copy = el.cloneNode(true);
+  copy.querySelectorAll('.visually-hidden').forEach((n) => n.remove());
+  return text(copy);
+}
 
 function served() {
   document.body.innerHTML = `<main><p>Before</p>${renderGateScanHTML()}<p>After</p></main>`;
@@ -17,16 +23,27 @@ function mounted() {
   const scan = el.querySelector('[data-gs-scan]');
   const reset = el.querySelector('[data-gs-reset]');
   const status = el.querySelector('[role="status"]');
-  return { el, view, scan, reset, status };
+  const board = el.querySelector('[data-gs-board]');
+  const phone = el.querySelector('.gs-phone');
+  return { el, view, scan, reset, status, board, phone };
 }
-/** The result as the visitor sees it: its kind, its icon, the words. */
+/** The result in the phone as the visitor sees it: its kind, its icon, the words. */
 function result(el) {
-  const box = el.querySelector('[role="status"]');
+  const box = el.querySelector('[data-gs-result]');
   return {
     kind: box.getAttribute('data-result'),
     icon: box.querySelector('svg[aria-hidden="true"]') !== null,
     title: text(box.querySelector('.gs-result__title') ?? box),
     text: text(box),
+  };
+}
+/** The Fraud watch panel's words, as the board writes them. */
+function boardRead(board) {
+  return {
+    title: text(board.querySelector('.db-panel__title')),
+    tag: text(board.querySelector('.gs-board__tag')),
+    counts: [...board.querySelectorAll('.db-fraud__counts li')].map(text),
+    rows: [...board.querySelectorAll('.db-try')].map((li) => [seen(li.querySelector('.db-try__line')), seen(li.querySelector('.db-try__first'))]),
   };
 }
 
@@ -36,7 +53,7 @@ afterEach(() => {
 
 describe('the gate scan demo', () => {
   it('mounting shows a phone frame with the sample ticket and a "Scan ticket" button', () => {
-    const { el, scan, reset } = mounted();
+    const { el, scan, reset, status, board } = mounted();
     const phone = el.querySelector('.gs-phone');
     expect(phone).not.toBeNull();
     const img = phone.querySelector('img');
@@ -47,12 +64,14 @@ describe('the gate scan demo', () => {
     expect(text(scan)).toBe('Scan ticket');
     expect(reset.hidden).toBe(true); // Start over appears only after the first scan
     expect(result(el).kind).toBeNull();
-    expect(text(el.querySelector('[role="status"]'))).toBe('');
+    expect(text(status)).toBe('');
+    expect(board.hidden).toBe(true);
   });
 
   it('before a scan the result\'s place shows a quiet resting line, outside the status element, gone once a result shows', () => {
     const { el, scan, reset, status } = mounted();
     const rest = el.querySelector('[data-gs-rest]');
+    const box = el.querySelector('[data-gs-result]');
     expect(rest).not.toBeNull();
     expect(rest.hidden).toBe(false);
     expect(text(rest)).toBe('Ready to scan');
@@ -61,8 +80,8 @@ describe('the gate scan demo', () => {
     expect(rest.contains(status)).toBe(false);
     expect(text(status)).toBe('');
     // It sits in the phone, in the result's place.
-    expect(rest.closest('.gs-screen')).toBe(status.closest('.gs-screen'));
-    expect(rest.parentElement).toBe(status.parentElement);
+    expect(rest.closest('.gs-screen')).toBe(box.closest('.gs-screen'));
+    expect(rest.parentElement).toBe(box.parentElement);
     scan.click();
     expect(rest.hidden).toBe(true);
     scan.click();
@@ -73,55 +92,110 @@ describe('the gate scan demo', () => {
   });
 
   it('the first press admits the ticket: green, a check, "Admitted" and the answer the gate gets', () => {
-    const { el, scan, reset } = mounted();
+    const { el, scan, reset, status, board } = mounted();
     scan.click();
     const r = result(el);
     expect(r.kind).toBe('admitted');
     expect(r.icon).toBe(true);
     expect(r.title).toBe('Admitted');
-    expect(r.text).toContain('ADULT ADMISSION · FRI JUL 16 · #DCF-001234');
-    expect(r.text).toContain('Main Gate · 2:14 PM');
-    // What the status element reads out, word for word, in order.
-    expect(el.querySelector('[role="status"]').textContent).toBe('Admitted ADULT ADMISSION · FRI JUL 16 · #DCF-001234 Main Gate · 2:14 PM');
+    expect(r.text).toBe('Admitted ADULT ADMISSION · FRI JUL 16 · #DCF-001234 Main Gate · 2:14 PM');
+    expect(status.textContent).toBe('Admitted. ADULT ADMISSION · FRI JUL 16 · #DCF-001234. Main Gate, 2:14 PM.');
     expect(text(scan)).toBe('Scan the same ticket again');
     expect(reset.hidden).toBe(false);
-    expect(el.querySelector('[data-gs-note]').hidden).toBe(true);
+    expect(board.hidden).toBe(true);
   });
 
-  it('the second press refuses it: red, a cross, "Duplicate", and when and where it was first used', () => {
-    const { el, scan } = mounted();
+  it('the second press: the phone shows only what the gate gets, Duplicate and where and when this scan was', () => {
+    const { el, scan, phone } = mounted();
     scan.click();
     scan.click();
     const r = result(el);
     expect(r.kind).toBe('refused');
     expect(r.icon).toBe(true);
     expect(r.title).toBe('Duplicate');
-    expect(r.text).toContain('first used 2:14 PM at Main Gate');
-    // This scan is at another gate, a few minutes later: a shared or copied ticket.
-    expect(r.text).toContain('North Gate · 2:21 PM');
-    expect(el.querySelector('[role="status"]').textContent).toBe('Duplicate first used 2:14 PM at Main Gate North Gate · 2:21 PM');
+    // This scan is at another gate, a few minutes later: a shared or copied ticket. Nothing else on the phone.
+    expect(r.text).toBe('Duplicate North Gate · 2:21 PM');
+    expect(text(phone)).not.toContain('first used');
     expect(text(scan)).toBe('Scan the same ticket again');
-    const note = el.querySelector('[data-gs-note]');
-    expect(note.hidden).toBe(false);
-    expect(text(note)).toContain('Fraud watch');
-    expect(text(note)).toContain('Presented again');
   });
 
-  it('every later press is refused again, a minute later each time, so each one reads (and is announced) as new', () => {
-    const { el, scan } = mounted();
+  it('the second press shows, beside the phone, the live board\'s Fraud watch row: where and when the ticket was first used', () => {
+    const { el, scan, board, phone } = mounted();
     scan.click();
     scan.click();
+    expect(board.hidden).toBe(false);
+    expect(phone.contains(board)).toBe(false);
+    expect(board.closest('[data-sample]')).toBe(el);
+    expect(board.closest('.gs-controls')).not.toBeNull(); // under the buttons, where the old sentence was
+    expect(boardRead(board)).toEqual({
+      title: 'Fraud watch',
+      tag: 'Live board',
+      counts: ['1 Presented again'],
+      // The board's two lines; the ticket's code shown as the board shows a barcode, its last six characters.
+      rows: [['…TICKET tried again at North Gate', 'first used 2:14 PM at Main Gate']],
+    });
+    // Read as one sentence by a screen reader, as on the real board.
+    expect(text(board.querySelector('.db-try__what'))).toBe('…TICKET tried again at North Gate · first used 2:14 PM at Main Gate');
+    // It is not a second live region.
+    expect(board.querySelectorAll('[role="status"], [role="alert"], [aria-live]')).toHaveLength(0);
+    expect(board.matches('[role="status"], [role="alert"], [aria-live]')).toBe(false);
+    expect(el.textContent).not.toContain('This also shows on the live board');
+  });
+
+  it('what a screen reader hears on each press, once each', () => {
+    const { scan, reset, status } = mounted();
+    const heard = [];
+    scan.click(); heard.push(status.textContent);
+    scan.click(); heard.push(status.textContent);
+    scan.click(); heard.push(status.textContent);
+    reset.click(); heard.push(status.textContent);
+    scan.click(); heard.push(status.textContent);
+    scan.click(); heard.push(status.textContent);
+    expect(heard).toEqual([
+      'Admitted. ADULT ADMISSION · FRI JUL 16 · #DCF-001234. Main Gate, 2:14 PM.',
+      "Duplicate. North Gate, 2:21 PM. The live board's Fraud watch shows it was first used 2:14 PM at Main Gate.",
+      'Duplicate. North Gate, 2:22 PM.',
+      '',
+      'Admitted. ADULT ADMISSION · FRI JUL 16 · #DCF-001234. Main Gate, 2:14 PM.',
+      "Duplicate. North Gate, 2:21 PM. The live board's Fraud watch shows it was first used 2:14 PM at Main Gate.",
+    ]);
+  });
+
+  it('the status element is the only live region, outside the phone, and not drawn', () => {
+    const { el, status, phone } = mounted();
+    expect(phone.contains(status)).toBe(false);
+    expect(status.classList.contains('visually-hidden')).toBe(true);
+    expect(el.querySelector('[data-gs-result]').matches('[role], [aria-live]')).toBe(false);
+  });
+
+  it('every later press is refused again, a minute later each time, and the board row keeps saying the same thing', () => {
+    const { el, scan, board, phone } = mounted();
     scan.click();
-    expect(result(el).kind).toBe('refused');
-    expect(result(el).text).toContain('North Gate · 2:22 PM');
-    expect(result(el).text).toContain('first used 2:14 PM at Main Gate');
+    scan.click();
+    const row = boardRead(board).rows;
+    scan.click();
+    expect(result(el).text).toBe('Duplicate North Gate · 2:22 PM');
+    expect(boardRead(board).rows).toEqual(row);
+    expect(boardRead(board).counts).toEqual(['2 Presented again']); // the board counts each time it was presented again
     for (let i = 0; i < 50; i++) scan.click();
-    expect(result(el).text).toContain('North Gate · 3:12 PM');
-    expect(result(el).text).toContain('first used 2:14 PM at Main Gate');
+    expect(result(el).text).toBe('Duplicate North Gate · 3:12 PM');
+    expect(boardRead(board).rows).toEqual(row);
+    expect(boardRead(board).counts).toEqual(['52 Presented again']);
+    expect(text(phone)).not.toContain('first used');
+  });
+
+  it('no "first used" inside the phone in any state', () => {
+    const { scan, reset, phone } = mounted();
+    const states = [text(phone)];
+    scan.click(); states.push(text(phone));
+    scan.click(); states.push(text(phone));
+    scan.click(); states.push(text(phone));
+    reset.click(); states.push(text(phone));
+    for (const s of states) expect(s).not.toContain('first used');
   });
 
   it('"Start over" goes back to the start, and the ticket gets in once more', () => {
-    const { el, scan, reset, status } = mounted();
+    const { el, scan, reset, status, board } = mounted();
     scan.click();
     scan.click();
     reset.focus();
@@ -129,8 +203,8 @@ describe('the gate scan demo', () => {
     expect(text(scan)).toBe('Scan ticket');
     expect(reset.hidden).toBe(true);
     expect(text(status)).toBe('');
-    expect(status.hasAttribute('data-result')).toBe(false);
-    expect(el.querySelector('[data-gs-note]').hidden).toBe(true);
+    expect(el.querySelector('[data-gs-result]').hasAttribute('data-result')).toBe(false);
+    expect(board.hidden).toBe(true);
     // The pressed button has gone, so focus moves to the scan button rather than being lost.
     expect(document.activeElement).toBe(scan);
     scan.click();
@@ -193,12 +267,15 @@ describe('the gate scan demo', () => {
   });
 
   it('after destroy() the buttons are gone and the demo is as it was served', () => {
-    const { el, view, scan } = mounted();
+    const { el, view, scan, board } = mounted();
+    scan.click();
     scan.click();
     view.destroy();
     for (const b of el.querySelectorAll('button')) expect(b.hidden).toBe(true);
     expect(text(el.querySelector('[role="status"]'))).toBe('');
+    expect(text(el.querySelector('[data-gs-result]'))).toBe('');
     expect(el.querySelector('[data-gs-rest]').hidden).toBe(true);
+    expect(board.hidden).toBe(true);
     scan.click();
     expect(text(el.querySelector('[role="status"]'))).toBe('');
     view.destroy(); // twice is harmless

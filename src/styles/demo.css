@@ -81,7 +81,7 @@
 .gs .gs-rest svg { flex: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 /* The gate's answer: a word and an icon, then the answer itself, then where and when. Color only repeats them. */
-.gs .gs-result { display: grid; align-content: start; gap: 5px; border-radius: 16px; }
+.gs .gs-result { display: grid; align-content: center; gap: 5px; border-radius: 16px; }
 .js .gs .gs-result { min-height: 116px; padding: 12px 14px; }
 .gs .gs-result[data-result="admitted"] { background: var(--live-tint); color: var(--live-ink); box-shadow: inset 0 0 0 1.5px var(--live); }
 .gs .gs-result[data-result="refused"] { background: var(--tint-red); color: var(--red-shadow); box-shadow: inset 0 0 0 1.5px var(--red); }
@@ -98,12 +98,36 @@
 .gs .gs-controls { display: grid; flex: 1 1 220px; justify-items: start; gap: 16px; }
 .gs .gs-scan { white-space: normal; text-align: left; background: var(--ink); box-shadow: 0 5px 0 #05070b; }
 .gs .gs-scan:active { box-shadow: 0 2px 0 #05070b; }
-.gs .gs-controls .gs-note { max-width: 300px; margin: 0; font-size: 15px; line-height: 1.45; color: var(--mut); }
 /* Beside the phone (room for 292 + 36 + 220 pixels), the buttons' column keeps one height whatever it shows, so the
-   scan button never moves under the pointer when "Start over" and the note appear below it. */
+   scan button never moves under the pointer when "Start over" and the Fraud watch panel appear below it. */
 @container (min-width: 548px) {
-  .gs .gs-controls { min-height: 220px; align-content: start; }
+  .gs .gs-controls { min-height: 330px; align-content: start; }
 }
+
+/* What the fair's office sees on a refusal: the live board's Fraud watch panel, drawn by the dashboard's own rules
+   (dashboard.css, under .db) at the board's phone sizes. Its lines wrap rather than being cut short. */
+.gs .gs-board {
+  --db-pad: 13px;
+  --db-body: 14px;
+  --db-small: 12.5px;
+  width: 100%;
+  max-width: 340px;
+}
+.gs .gs-board .db-panel { font: 400 var(--db-body)/1.35 var(--font-text); font-variant-numeric: tabular-nums; }
+.gs .gs-board p { margin: 0; font-size: inherit; color: inherit; }
+.gs .gs-board .db-panel__head { align-items: center; }
+.gs .gs-board .db-panel__title { margin: 0; }
+.gs .gs-board__tag {
+  padding: 1px 8px;
+  border: 1px solid var(--db-line-2);
+  border-radius: 999px;
+  color: var(--db-muted);
+  font: 500 11px/1.5 var(--font-mono);
+  white-space: nowrap;
+}
+.gs .gs-board .db-fraud__counts { justify-content: start; }
+.gs .gs-board .db-try__line,
+.gs .gs-board .db-try__first { white-space: normal; overflow: visible; }
 
 /* ---------- the sample daily report ---------- */
 .dr {
