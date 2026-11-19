@@ -21,11 +21,9 @@ export const VIDEOS = [
     caption: 'The real product, recorded with a sample fair. About a minute.' },
   // These three were recorded with a client fair's material. Only the name-blinded versions (files ending -web)
   // may be used. Set cleared to false to take one off the site at once.
-  // fair-map and phone-line are held (cleared: false) until the owner has watched the name-blinded versions.
-  // To switch one on: set cleared to true, run `npm run videos`, commit the two new files and videos.json.
-  { id: 'fair-map', title: 'Interactive fair map', file: 'emc-fair-map-web.mp4', poster: 'emc-fair-map-web-poster.jpg', cleared: false,
+  { id: 'fair-map', title: 'Interactive fair map', file: 'emc-fair-map-web.mp4', poster: 'emc-fair-map-web-poster.jpg', cleared: true,
     caption: "A real fair's map, with the fair's name left out. About a minute." },
-  { id: 'phone-line', title: 'Ticket-buyer call line', file: 'emc-phone-line-web.mp4', poster: 'emc-phone-line-web-poster.jpg', cleared: false,
+  { id: 'phone-line', title: 'Ticket-buyer call line', file: 'emc-phone-line-web.mp4', poster: 'emc-phone-line-web-poster.jpg', cleared: true,
     caption: "A sample call, with the fair's name left out. About a minute." },
   { id: 'pip', title: 'Pip', file: 'emc-pip-gate-helper-web.mp4', poster: 'emc-pip-gate-helper-web-poster.jpg', cleared: true,
     caption: 'Pip answering guests at a front gate kiosk. Under a minute.' },
