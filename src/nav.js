@@ -27,5 +27,6 @@ export function initNav(doc = document) {
     if (ev.key !== 'Escape' || !isOpen()) return;
     setOpen(false);
     toggle.focus();
-  });  doc.documentElement.classList.add('nav-ready');
+  });
+  doc.documentElement.classList.add('nav-ready');
 }
