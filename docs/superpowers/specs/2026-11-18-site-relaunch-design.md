@@ -20,9 +20,10 @@ the IAFE convention in Louisville to sell it:
 - An email invite to about 200 fair contacts is going out Nov 18 to 25, so
   fair managers will be looking at the site before the show.
 
-The new site replaces WordPress on emctickets.com. Anthony repoints the
-domain. Target switch: **Wednesday Nov 25, 2026**, so it is settled before
-Thanksgiving and before the show.
+The new site takes over the main pages of emctickets.com from WordPress.
+Target go-live: **Wednesday Nov 25, 2026**, so it is settled before
+Thanksgiving and before the show. How it goes live changed after review:
+the domain is not repointed (section 5.13).
 
 **Who it is for.** First: a fair or festival manager, or a fair board member,
 deciding whether EMC is worth a conversation. Many arrive on a phone from a QR
@@ -48,8 +49,9 @@ so we can close the sale."
    on computers a curtain that pulls back on the first scroll.
 4. **Working utilities.** "Find my tickets" and "Client login" go to the real
    ticketing app. The contact form really delivers.
-5. **Replace WordPress with no dead ends.** `/iafe/` is live for the card QR
-   codes, and every address on the current site lands somewhere sensible.
+5. **Take over from WordPress with no dead ends.** `/iafe/` is live for the
+   card QR codes, every old marketing address lands somewhere sensible, and
+   the event pages that live under the domain keep working.
 6. **Good on a phone first.** Phone visitors get the page at once, fast, with
    no curtain.
 
@@ -78,7 +80,8 @@ so we can close the sale."
 - A visitor fills in the form and the lead is silently lost.
 - Anthony's cell number, or any phone number other than the toll-free number,
   appears on the site.
-- Email for emctickets.com is disturbed by the domain switch.
+- Any of the 18 live event pages under the domain (section 3.6) stops
+  working, or email for emctickets.com is disturbed.
 
 ## 3. Constraints
 
@@ -86,8 +89,8 @@ so we can close the sale."
 
 - Staging ready for Anthony to review by **Mon Nov 23**.
 - Fixes and a real end-to-end form test on **Tue Nov 24**.
-- Domain switch **Wed Nov 25**, early in the day.
-- Section 10 gives the build order so the site can still switch on time if
+- Go-live **Wed Nov 25**, early in the day.
+- Section 10 gives the build order so the site can still go live on time if
   the later tiers are not finished.
 
 ### 3.2 Wording and facts
@@ -174,15 +177,36 @@ more of advance sales"). **None of those carry over.**
 - The app has no contact or lead endpoint and refuses form posts from other
   sites.
 
-### 3.6 The domain today
+### 3.6 The domain and its host today (checked 2026-11-18)
 
+- **Eighteen event sites live in folders under the domain**, each its own
+  WordPress install on the same host, all loading today: `/flstatefair/`,
+  `/scstatefair/`, `/coastalcarolinafair/`, `/coastalcarolina-fairground/`,
+  `/ccfair-tripleb/`, `/santaseforest/`, `/northfloridafair/`,
+  `/reithofferfestivals/`, `/countrythunderfl/`, `/countrythunderwi/`,
+  `/chicagofootballclassic/`, `/biggarlandfair/`, `/kansascityrenfest/`,
+  `/michiganrenfest/`, `/minnesotarenfest/`, `/newyorkrenfair/`,
+  `/stlouisrenfest/`, `/renaissancefestivals/`. They are not in the main
+  site's sitemap. `/flstatefair/` is current: it is the Walgreens advance-sale
+  page for the 2027 Florida State Fair, on sale in stores through 2/15/27.
+  **These must keep working.** Repointing the domain would take all of them
+  down at once.
+- The main WordPress site also has working pages outside the marketing
+  pages: `/event-intake-form/` (a long client intake form), `/event-list/` (a
+  directory of event and partner sites, including the 18 above),
+  `/circle-k-video/` and `/greater-jacksonville-fair/` (a Walgreens deal page
+  for a fair that ended Nov 15).
+- The host is a shared Apache server at `162.144.98.42`. Claude has no access
+  to it today.
+- The WordPress site loads Google Tag Manager container `GTM-WXP79P4D`.
 - DNS is managed at GoDaddy (nameservers `ns51/ns52.domaincontrol.com`).
-- `emctickets.com` A record: `162.144.98.42` (the WordPress host). `www` is a
-  CNAME to `emctickets.com`.
+- `emctickets.com` A record: `162.144.98.42`. `www` is a CNAME to
+  `emctickets.com`.
 - Email is Microsoft 365 (MX `emctickets-com.mail.protection.outlook.com`).
-- `app.emctickets.com` points at `159.65.38.62` (the ticketing app).
-- Only the `@` A record and the `www` CNAME change. MX, TXT and every other
-  record stay as they are.
+- `app.emctickets.com` points at `159.65.38.62` (the ticketing app). So does
+  a catch-all `*` record: any other subdomain, such as a fair's storefront at
+  `<fair>.emctickets.com`, resolves to the app.
+- Under the chosen go-live (section 5.13) no DNS record changes at all.
 
 ### 3.7 Images and footage
 
@@ -220,7 +244,8 @@ each section. Fastest, and it is the real product. Rejected because there is
 nothing to click, which was the point, and today's screens show test data.
 
 Anthony talks about outcomes and left the how to Claude. Claude chose
-approach 1 and told him so on 2026-11-18.
+approach 1 and told him so on 2026-11-18. Where the static files are served
+from was revised the same day after review; see section 5.13.
 
 ## 5. What gets built
 
@@ -254,9 +279,8 @@ address, email, toll-free number, Privacy, Terms, cookie settings.
 your fair.", "Anthony Quintana · anthony@emctickets.com", "Toll free, 24/7
 800-290-2090", and the form (section 5.9). It has the id `talk`.
 
-**Old addresses.** Each old WordPress address gets a small page at the same
-path that sends the visitor on at once (meta refresh plus a canonical link, a
-visible link as a fallback, and `noindex`):
+**Old addresses.** The old marketing pages are sent on with permanent (301)
+redirects set on the web host (section 5.13):
 
 | Old address | Goes to |
 |---|---|
@@ -267,12 +291,13 @@ visible link as a fallback, and `noindex`):
 | `/contact-us/` | `/contact/` |
 | `/privacy-and-terms/` | `/privacy/` |
 | `/walgreens/` | `/retail-partners/` |
-| `/events/` | `/` |
-| `/greater-jacksonville-fair/` | `/` (the fair ended Nov 15; see open question Q1) |
-| `/event-intake-form/`, `/event-list/`, `/circle-k-video/` | open question Q1 |
+| `/events/` (an empty page) | `/` |
 
-`/about/` keeps its address. `/hello-world/` and `/category/uncategorized/`
-are WordPress leftovers and get the 404 page.
+`/about/` keeps its address and gets the new page. **Everything else on the
+host is left exactly as it is and keeps working through WordPress:** the 18
+event sites, `/event-intake-form/`, `/event-list/`, `/circle-k-video/` and
+`/greater-jacksonville-fair/`. They keep the old look. The new site does not
+link to them.
 
 ### 5.2 The look
 
@@ -324,10 +349,19 @@ Sections, in order (copy as in the mockup):
 
 **The live sample board.** A card titled "Demo County Fair, Friday" with a
 LIVE pill and a "Sample data" pill. Three figures (tickets sold today, scanned
-in, sales today), three channel bars (Online, Retail stores, Box office) and a
-three-line feed of sales that ticks every couple of seconds. It always carries
-the "Sample data" label. It stops ticking when off screen or when the tab is
-hidden.
+in, sales today), channel bars and a three-line feed of sales that ticks
+every couple of seconds. It always carries the "Sample data" label. It stops
+ticking when off screen or when the tab is hidden.
+
+**Change from the mockup.** The mockup's board shows a "Retail stores" bar and
+feed lines tagged Walgreens, Circle K and Menards. The real dashboard only
+knows two channels, Online and Box office (`CHANNEL_LABEL` in the app's sales
+report route, and `app/components/live/feed.tsx`), and store sales reach EMC
+in the chains' reports days later. Showing store sales ticking in live would
+show something the product does not do. So the sample board, the Live
+dashboard demo and the sample report use **Online and Box office only**. The
+"Retail stores" row in the Sell card stays, because it links to the retail
+partners page and makes no live claim.
 
 ### 5.4 The curtain (home page, computers only)
 
@@ -387,6 +421,12 @@ Rules for every demo:
   prices, not EMC fees.
 - It is modeled on the real product's screens (sources listed per demo) and
   must not show a feature the real product does not have.
+- Inside the phone and tablet frames, a demo follows the real product's
+  steps, labels and layout, drawn in this site's look (section 5.2). It is
+  not a pixel copy of the product's own styling.
+- No fee lines. The real checkout prints a per-ticket service fee, which this
+  site must not show. A demo total is the sum of the sample ticket prices,
+  and nothing says or implies there are no fees.
 - It has a clear start, can be restarted, works by keyboard, and works on a
   phone.
 - It ends with the ask: "Let's talk about your fair".
@@ -440,8 +480,12 @@ office address.
   was scanned.
 - **Delivery:** an email to `anthony@emctickets.com`, subject "Website
   inquiry: {fair or event}", with reply-to set to the visitor. Sent through an
-  outside form service (open question Q2). All delivery code sits behind one
-  small module so the service can be swapped later without touching the pages.
+  outside form service (open question Q2; Claude recommends Web3Forms). All
+  delivery code sits behind one small module so the service can be swapped
+  later without touching the pages. The service's key is needed by Mon Nov 23
+  for the Tue Nov 24 test. If there is no working delivery at go-live, the
+  form is not shown: the ask band shows the email address, an "Email Anthony"
+  button and the toll-free number instead.
 - **After sending:** the form is replaced by a short thank-you that names the
   visitor and repeats the toll-free number.
 - **If sending fails:** what the visitor typed stays, and a clear message
@@ -480,9 +524,13 @@ The landing page for the three folder-card QR codes:
 - Each page has its own title and description, a canonical link, and sharing
   tags. The sharing image and the favicon set are redrawn in the new look with
   the new logo (`scripts/build-icons.mjs` already generates icons).
-- `sitemap.xml` lists the nine public pages (not `/iafe/`, not the redirect
-  pages). `robots.txt` allows everything on the live domain.
+- `sitemap.xml` lists the eight public pages (not `/iafe/`). `robots.txt`
+  keeps the WordPress rules that are there today.
 - Staging must not be indexed.
+- **Tracking.** The site launches with no trackers, as the July design
+  decided. The cookie banner is shown only when at least one tracker is
+  switched on, so it does not appear at launch. Whether the old Google Tag
+  Manager container carries over is open question Q3.
 
 ### 5.12 Quality bar
 
@@ -500,31 +548,68 @@ The landing page for the three folder-card QR codes:
   number other than 800-290-2090, and the exact approved sentences from
   section 3.2 where they are used.
 
-### 5.13 Hosting and the switch
+### 5.13 Hosting and go-live
 
-- **Production:** GitHub Pages on this repo (`quinto55/EMC-website-redesign`)
-  with the custom domain `emctickets.com`, built and published by a GitHub
-  Actions workflow on push to `main`.
-- **Not the `quinto55.github.io` site.** If the domain were attached to that
-  site, every other project page under it would also appear under
-  emctickets.com. The domain attaches to this repo only.
-- **Staging:** the existing `scripts/deploy-pages.sh` path to
-  `https://quinto55.github.io/`, which serves from the root like production.
-  It replaces the July preview there.
-- **The switch (Anthony, at GoDaddy):**
-  1. A day before: lower the time-to-live on the `@` A record and the `www`
-     record.
-  2. Replace the `@` A record `162.144.98.42` with GitHub Pages' four
-     addresses: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`,
-     `185.199.111.153`.
-  3. Change the `www` CNAME to `quinto55.github.io`.
-  4. Add the GitHub domain-verification TXT record when GitHub shows it.
-  5. Leave MX, the existing TXT records, `app` and everything else alone.
-- **After the switch (Claude):** confirm the certificate has been issued, turn
-  on "Enforce HTTPS", and check every page, each old address, the three QR
-  links, both app links and one real form submission on the live domain.
-- **Undo:** put the two records back. WordPress is not changed or cancelled,
-  so it comes back as it was. Keep the WordPress hosting until after IAFE.
+**Chosen: the new pages go onto the current web host, alongside WordPress.**
+The built site is a folder of static files. Those files are placed in the
+existing host's web root. A short block of rules at the top of the root
+`.htaccess` file does three things: it makes the new home page the one served
+at `/`, it sends the old marketing addresses to their new ones (section 5.1),
+and it sets caching for the new files. WordPress stays installed underneath,
+and every address the new site does not claim keeps working exactly as today.
+
+Why this way:
+
+- The 18 event sites and the old working pages keep working with no effort.
+- No DNS record changes, so email, the ticketing app and the fair storefront
+  subdomains cannot be affected, and there is no wait for a new security
+  certificate.
+- Undo is quick: remove the block and the new home page file, and the old
+  site is back.
+- The host keeps ordinary visitor logs, which should be enough to count card
+  scans on `/iafe/` without adding any tracker. To be confirmed once there is
+  access.
+
+What it needs: **access to the hosting account's files** (open question Q1).
+
+Requirements for the builder:
+
+- Read the host's real root `.htaccess` and folder listing before writing the
+  rules. Expect WordPress's own block and possibly a page-cache block; the new
+  block goes above both and must not edit them.
+- The new site's folders and files must not collide with anything already in
+  the web root. Give the build's asset folder a name that cannot collide.
+- Do not move, rename or edit any WordPress file or any event-site folder.
+- Take a copy of the original `.htaccess` first. Ship a written undo.
+- Deploys after the first one must be a single repeatable step, not a manual
+  file-by-file upload.
+- Unknown addresses may keep getting WordPress's own not-found page. Routing
+  them to the new 404 page is welcome only if it needs no change to
+  WordPress.
+
+**Staging:** the existing `scripts/deploy-pages.sh` path to
+`https://quinto55.github.io/`, which serves from the root like production. It
+replaces the July preview there.
+
+**After go-live (Claude):** check every new page, each redirect, the three QR
+links, both app links, all 18 event sites, the four old pages left in place,
+and one real form submission on the live domain.
+
+**Considered and not chosen:**
+
+- *Repoint the domain to GitHub Pages* (the first draft of this plan). It
+  takes down the 18 event sites, and GitHub Pages cannot pass those addresses
+  back to the old host.
+- *Put a forwarding service in front of both* (move the domain's DNS to
+  Cloudflare, send the new pages one way and everything else to the old
+  host). It works without access to the host's files, but it means moving
+  every DNS record, including email and the ticketing app's, in the week
+  before the show. This is the fallback if file access to the host cannot be
+  had.
+
+**Cleanup, with Anthony's OK:** GitHub Pages on this repo is switched on and
+serves the raw, unbuilt source at `quinto55.github.io/EMC-website-redesign/`,
+which is broken. It should be switched off.
 
 ### 5.14 What leaves the repo
 
@@ -539,8 +624,10 @@ published on the preview address, so they need no redirects.
 
 - Purpose and funnel (section 1), and that utilities are wanted if they fit
   before IAFE.
-- The new site replaces WordPress on emctickets.com and he will repoint the
-  domain.
+- The new site replaces the WordPress site on emctickets.com. He offered to
+  repoint the domain; review then showed that would take down the event
+  sites, so the go-live method in section 5.13 is Claude's revised proposal
+  and is not yet agreed.
 - Look: the "Live board" direction, made "much lighter / brighter and more
   friendly" with the information streamlined, then "the sunny board".
 - Hero background: "B Full Photo".
@@ -551,7 +638,8 @@ published on the preview address, so they need no redirects.
 
 ## 7. Claude's calls (check these)
 
-1. Build approach 1; hosting on GitHub Pages; an outside form service.
+1. Build approach 1; the new pages go onto the current web host alongside
+   WordPress (section 5.13); an outside form service.
 2. Fonts: Bricolage Grotesque, Figtree, DM Mono. Anthony approved the look by
    eye, not the fonts by name.
 3. The line on the curtain, "Behind every great fair.", is Claude's wording.
@@ -571,21 +659,32 @@ published on the preview address, so they need no redirects.
 10. `/iafe/` changes its lead and form for the Walgreens card, has a
     date-aware line, and is not indexed.
 11. No one but Anthony is named on the site.
-12. `/greater-jacksonville-fair/` and `/events/` go to the home page.
+12. The empty `/events/` page goes to the home page. The old working pages,
+    including the expired `/greater-jacksonville-fair/`, are left as they are.
 13. The sample fair's name, ticket types and prices.
 14. Marketing and About copy is newly written from existing EMC text, with no
     new facts.
+15. Store sales are taken off the sample board, the Live dashboard demo and
+    the sample report, because the real dashboard does not show them
+    (section 5.3). This changes what Anthony saw in the mockup.
+16. Demo screens follow the product's steps in the site's look, with no fee
+    lines (section 5.5).
+17. No trackers and no cookie banner at launch (section 5.11).
 
 ## 8. Open questions for Anthony
 
-- **Q1. Old working pages.** `/event-intake-form/`, `/event-list/` and
-  `/circle-k-video/` exist on the current site. Are any still in use? Each one
-  that is must be rebuilt here or it stops working at the switch. (Asked
-  2026-11-18, not yet answered.)
+- **Q1. Access to the web host.** Going live needs access to the files of the
+  hosting account that serves emctickets.com (the host at `162.144.98.42`,
+  not GoDaddy). Who has that login, and can Claude be given file access
+  (SFTP or SSH), or will someone upload the files? Needed by Mon Nov 23.
 - **Q2. Form service.** The form needs an outside service to turn a
-  submission into an email. It needs an account or access key tied to an EMC
-  email address, and leads pass through it. Anthony must approve the service
-  and create the account.
+  submission into an email. Claude recommends Web3Forms (free up to 250
+  messages a month; no account, the key is emailed to the address that will
+  receive the leads). Anthony must approve it and request the key, because it
+  ties an EMC email address to an outside service. Needed by Mon Nov 23.
+- **Q3. Google Tag Manager.** The current site loads a Google Tag Manager
+  container. Does anyone use what it collects (ads, visitor reports)? If yes
+  it carries over behind the cookie banner; if no it is dropped.
 
 ## 9. Left to the builder
 
@@ -598,19 +697,20 @@ published on the preview address, so they need no redirects.
   error messages, within section 3.2. New copy is listed in the hand-off so
   Anthony can read it on staging.
 - How staging is kept out of search engines.
-- The GitHub Actions workflow details.
+- The exact host rules and the deploy step, within section 5.13.
 
 ## 10. Build order
 
-If time runs short, the site switches with tier 1 complete and later tiers
+If time runs short, the site goes live with tier 1 complete and later tiers
 following as updates.
 
-1. **Tier 1, needed to replace WordPress:** the look and shared parts; Home
+1. **Tier 1, needed to go live:** the look and shared parts; Home
    with the live sample board; the contact form working end to end;
    `/contact/`; `/iafe/`; `/retail-partners/`; `/platform/` with the Live
    dashboard and Online sales demos and short text blocks for the rest;
-   `/about/`; `/marketing/`; Privacy, Terms, 404; old-address redirects;
-   production hosting and staging.
+   `/about/`; `/marketing/`; Privacy, Terms, 404; staging; the go-live
+   package for the web host (rules, undo, deploy step). Everything except the
+   last item can be built before Q1 is answered.
 2. **Tier 2:** the curtain; the Box office, Gate scanning and Daily reports
    demos.
 3. **Tier 3:** the "For your guests" blocks beyond one line each; the
@@ -621,9 +721,11 @@ following as updates.
 - Unit tests for each demo's step logic, the form (validation, success,
   failure, test mode off the live domain), the curtain's show-or-skip rule,
   the date-aware IAFE line and the card-specific IAFE page.
-- The site-integrity tests cover the page list, sitemap, redirect pages, page
-  titles and the wording checks in section 5.12.
-- Before the switch, every page is looked at in a real browser at phone and
+- The site-integrity tests cover the page list, sitemap, page titles and the
+  wording checks in section 5.12.
+- Before go-live, every page is looked at in a real browser at phone and
   computer sizes, and the curtain is watched on a real computer.
 - One real form submission is sent on staging with the test switch, and one
-  on the live domain after the switch.
+  on the live domain after go-live.
+- After go-live, the checks listed in section 5.13 are run and the results
+  reported, including all 18 event sites.
