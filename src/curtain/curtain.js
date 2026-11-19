@@ -5,7 +5,8 @@
 //
 // It never stands between a visitor and the page:
 // - It shows only over the cover the head script already put up (html.curtain-pending, by the same rule), so the hero
-//   never flashes first, and it takes that cover over at once with the same still.
+//   never flashes first, and it takes that cover over at once with the same still. If the visitor has already scrolled
+//   past that cover, it does not show at all.
 // - A late arrival (the CSS cover gives up at 8 s), no canvas, or any error: the page, as served. Slow frames: a plain
 //   slide of the still instead of the cloth.
 // - Once open, everything it added is gone: its element, the canvases, the video, every listener, timer and frame.
@@ -90,8 +91,11 @@ export function mountCurtain(doc = document, opts = {}) {
   const clearMarks = () => html.classList.remove('curtain-pending', 'curtain-closed');
   const now = opts.now ?? (() => win.performance.now());
   const inputs = opts.inputs ?? curtainInputs(win, CURTAIN_SEEN_KEY);
-  // Only over the head's cover: without it the hero has been painted, and a cloth now would be a flash.
-  if (!html.classList.contains('curtain-pending') || !shouldShowCurtain(inputs) || now() > LATE_MS) {
+  // Only over the head's cover: without it the hero has been painted, and a cloth now would be a flash. Never over a page
+  // the visitor has already scrolled (the cover can be scrolled past while this is on its way, and a reload can put the
+  // page back where it was): they stay where they are, with no mark in the session, since they have not seen it.
+  const scrolled = win.scrollY > 0 || win.scrollX > 0;
+  if (!html.classList.contains('curtain-pending') || !shouldShowCurtain(inputs) || now() > LATE_MS || scrolled) {
     clearMarks();
     return null;
   }

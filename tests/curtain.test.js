@@ -198,6 +198,7 @@ afterEach(() => {
   vi.useRealTimers();
   html().className = '';
   document.body.innerHTML = '';
+  window.scrollTo(0, 0);
 });
 
 describe('when the curtain shows', () => {
@@ -266,6 +267,28 @@ describe('when the curtain shows', () => {
     // No footage in the HTML: no video element and no preload; the module asks for it only when the curtain shows.
     expect(home.html).not.toMatch(/<video\b/);
     expect(home.html).not.toMatch(/fair-loop|fair-poster/);
+  });
+
+  it('never mounts over a page the visitor has already scrolled: they stay where they are', async () => {
+    // The head's cover can be scrolled past while the module is on its way (a slow line, or a reload that puts the
+    // page back where it was). A cloth now, and a pull back to the top on the next scroll, would lose their place.
+    for (const [x, y] of [[0, 400], [30, 0]]) {
+      window.scrollTo(x, y);
+      const storage = makeStorage();
+      await mount({ storage });
+      expect(handle, `${x},${y}`).toBeNull();
+      expect(root()).toBeNull();
+      expect(html().className).toBe('js'); // the marks are cleared: no cover, no closed state
+      expect(storage.writes, 'they have not seen the curtain').toEqual([]);
+      expect(images, 'nothing of it is fetched').toHaveLength(0);
+      frameFor(7000, 100);
+      expect(videos).toHaveLength(0);
+      expect([window.scrollX, window.scrollY], 'no scroll reset').toEqual([x, y]);
+      // Scrolling on is the page's own business.
+      expect(wheel(120).defaultPrevented).toBe(false);
+      expect(key('ArrowDown').defaultPrevented).toBe(false);
+      window.scrollTo(0, 0);
+    }
   });
 
   it('a module that arrives late, or a page without a drawing surface, leaves the page as it is', async () => {
@@ -491,11 +514,64 @@ describe('smoothness', () => {
   });
 
   it('draws with a real context stub without throwing, closed and opening', async () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
     await mount({ paint: undefined });
     frameFor(200);
+    // Still up after real frames of the still, and of the footage once it plays.
+    expect(root()).not.toBeNull();
+    expect(root().classList.contains('is-drawn')).toBe(true);
+    videos[0].becomeReady();
+    frameFor(200);
+    expect(root()).not.toBeNull();
     wheel(120);
-    frameFor(1800);
+    expect(isOpening()).toBe(true);
+    frameFor(800);
+    expect(root(), 'still sweeping halfway through').not.toBeNull();
+    frameFor(1000);
     expect(root()).toBeNull();
+    // The flat still the slide uses.
+    handle.destroy();
+    html().className = 'js';
+    await mount({ paint: undefined });
+    frameFor(1200, 40);
+    expect(root().classList.contains('is-slide')).toBe(true);
+    expect(errors).not.toHaveBeenCalled();
+  });
+
+  it('any error in the drawing or the footage tears it down and shows the page', async () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const thePage = (when) => {
+      expect(root(), when).toBeNull();
+      expect(html().className, when).toBe('js');
+      expect(frames.size, when).toBe(0);
+      expect(vi.getTimerCount(), when).toBe(0);
+      expect(wheel(120).defaultPrevented, when).toBe(false);
+    };
+    const boom = () => {
+      throw new Error('boom');
+    };
+    // On the first frame.
+    await mount({ paint: boom });
+    thePage('first frame');
+    expect(errors).toHaveBeenCalledTimes(1);
+    // Halfway through the opening.
+    await mount({
+      paint: (cloth, f) => {
+        if (f.progress > 0.3) boom();
+      },
+    });
+    frameFor(200);
+    expect(root()).not.toBeNull();
+    wheel(120);
+    expect(isOpening()).toBe(true);
+    frameFor(800);
+    thePage('mid-opening');
+    expect(errors).toHaveBeenCalledTimes(2);
+    // Making the video.
+    await mount({ createVideo: boom });
+    frame();
+    thePage('the video');
+    expect(errors).toHaveBeenCalledTimes(3);
   });
 });
 
