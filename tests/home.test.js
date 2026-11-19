@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { existsSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { renderAll, visibleText, ROOT } from './helpers/pages.js';
-import { pageByKey } from '../build/pages.js';
+import { pageByKey, PAGES } from '../build/pages.js';
 
 const { doc, html } = renderAll().find((r) => r.page.key === 'home');
 const main = doc.querySelector('main');
@@ -130,6 +130,22 @@ describe('home page', () => {
     expect(scripts.length).toBeGreaterThan(0);
     for (const s of scripts) expect(s).toContain('type="module"');
     expect(doc.querySelector('picture img').getAttribute('fetchpriority')).toBe('high');
+  });
+
+  it('brings the curtain on computers only by its stylesheet, its head script and its own footage folder', () => {
+    expect(pageByKey('home').styles).toContain('/src/styles/curtain.css');
+    for (const p of PAGES.filter((x) => x.key !== 'home')) expect(p.styles, p.file).not.toContain('/src/styles/curtain.css');
+    // The head decides before the first paint; nothing about the footage is in the HTML.
+    const head = html.slice(0, html.indexOf('</head>'));
+    expect(head).toContain("classList.add('curtain-pending')");
+    expect(html).not.toMatch(/<video\b|fair-loop|fair-poster/);
+    // The footage is not a product video: it has its own folder, both formats, a few megabytes at most.
+    for (const f of ['fair-poster.jpg', 'fair-loop.webm', 'fair-loop.mp4']) {
+      const file = resolve(ROOT, 'public/emc-site/curtain', f);
+      expect(existsSync(file), f).toBe(true);
+      expect(statSync(file).size, f).toBeLessThanOrEqual(3 * 1024 * 1024);
+    }
+    expect(existsSync(resolve(ROOT, 'public/emc-site/video/fair-loop.webm'))).toBe(false);
   });
 
   it('Sell, Scan, Count cards link to the right places', () => {

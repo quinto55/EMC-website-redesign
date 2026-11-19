@@ -1,0 +1,128 @@
+/* The home page's curtain (spec 5.4), computers only. Nothing here does anything until script sets a class:
+
+   html.curtain-pending  The head script (build/render.js) sets it before the first paint when the curtain will show.
+                         It covers the first screen with a plain still, so the hero never flashes before the cloth.
+                         If the module never arrives, the still takes itself away after 8 seconds (an animation, no
+                         script), and meanwhile a visitor can scroll past it: it is not fixed, and nothing here locks
+                         scrolling (the module does that, only while it is alive).
+   .curtain              The module's own element (src/curtain/curtain.js), fixed over the whole window, the header
+                         included. It shows the same still at once, the cloth canvas fades in over it, and the cue
+                         button sits over the cue drawn on the cloth.
+   html.curtain-closed   The module sets it while the cloth is closed: the photo waits a little zoomed in, the copy and
+                         the board wait lower down and unseen. It goes as the cloth starts to move, and they settle into
+                         place, as in the approved mockup. Without the curtain none of this happens: the hero is simply
+                         there. */
+
+/* ---------- the still: the poster under the cloth's two shades, the logo at the top left ----------
+   The cloth draws exactly this (src/curtain/curtain.js), so the module takes over without a jump. The picture is
+   centred and covers 110% of the width, so the cloth's swaying hem never shows its edge; 177.78vh is the poster's width
+   at the window's height (it is 1120 x 630), and changes with a still of another shape. */
+html.curtain-pending body::before,
+.curtain::before {
+  content: "";
+  background:
+    linear-gradient(rgba(7, 9, 15, .55), rgba(7, 9, 15, 0) 150px),
+    linear-gradient(rgba(7, 9, 15, 0) 30%, rgba(7, 9, 15, .86)),
+    url('/emc-site/curtain/fair-poster.jpg') center / max(110%, 177.78vh) auto no-repeat,
+    #0b0d14;
+}
+html.curtain-pending body::after,
+.curtain::after {
+  content: "";
+  top: 26px;
+  left: 5.5%;
+  width: 96px;
+  aspect-ratio: 309 / 250;
+  background: url('/emc-site/img/emc-logo-on-dark.png') 0 0 / 100% 100% no-repeat;
+}
+
+/* The head's cover: the first screen only, over the header too, gone by itself after 8 seconds. */
+html.curtain-pending body::before,
+html.curtain-pending body::after {
+  position: absolute;
+  z-index: 50;
+  animation: curtain-still-gives-up .3s ease 8s forwards;
+}
+html.curtain-pending body::before { top: 0; left: 0; width: 100%; height: 100vh; }
+@keyframes curtain-still-gives-up { to { opacity: 0; visibility: hidden; } }
+
+/* ---------- the module's curtain ---------- */
+.curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 50; /* over the header (30); under the skip link (100) and the cookie banner (60) */
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.curtain::before,
+.curtain::after { position: absolute; z-index: 0; }
+.curtain::before { inset: 0; }
+.curtain-cloth {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.curtain.is-drawn .curtain-cloth { opacity: 1; }
+/* Once the cloth has faded in over it, the still underneath stops being drawn. */
+.curtain.is-drawn::before,
+.curtain.is-drawn::after { visibility: hidden; transition: visibility 0s linear .3s; }
+/* Once the cloth moves, the still under it goes: the cloth is all that is left over the page. */
+.curtain.is-opening .curtain-cloth { opacity: 1; transition: none; }
+.curtain.is-opening::before,
+.curtain.is-opening::after { content: none; }
+
+/* The cue: a real button over the cue drawn on the cloth, its own text the same size and invisible, so its focus ring
+   fits the drawn words. The module keeps it level with the cloth's sway. */
+.curtain-cue {
+  --focus: #fff;
+  position: absolute;
+  z-index: 2;
+  left: 5.5%;
+  bottom: 27px;
+  height: 44px;
+  margin: 0;
+  padding: 0 22px 0 0; /* the drawn arrow */
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: transparent;
+  font: 500 14px/44px var(--font-mono);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  forced-color-adjust: none;
+  will-change: transform;
+}
+.curtain.is-opening .curtain-cue,
+.curtain.is-sliding .curtain-cue { visibility: hidden; }
+
+/* The plain slide: when the cloth cannot be drawn smoothly, the still moves off to the right. */
+.curtain.is-slide .curtain-cloth { opacity: 1; }
+.curtain.is-sliding {
+  transform: translateX(calc(100% + 90px));
+  box-shadow: -30px 0 60px rgba(60, 35, 0, .28);
+  transition: transform .9s cubic-bezier(.65, 0, .35, 1);
+}
+
+/* ---------- what is behind it settles into place as the cloth passes (the mockup's timings) ----------
+   The transitions are always declared, but nothing changes these properties unless the curtain's closed state is
+   taken away, so without the curtain the hero is simply in place: no rise and no delay. */
+@media (min-width: 1001px) {
+  .hero-photo img { transition: transform 2.6s cubic-bezier(.2, .7, .2, 1); }
+  .hero-copy > *,
+  .hero-board { transition: opacity .7s ease, transform .95s cubic-bezier(.2, .7, .2, 1); }
+  .hero-copy > :nth-child(1) { transition-delay: .42s; }
+  .hero-copy > :nth-child(2) { transition-delay: .5s; }
+  .hero-copy > :nth-child(3) { transition-delay: .58s; }
+  .hero-copy > :nth-child(4) { transition-delay: .66s; }
+  .hero-board { transition-delay: .8s; }
+  html.curtain-closed .hero-photo img { transform: scale(1.09); transition: none; }
+  html.curtain-closed .hero-copy > *,
+  html.curtain-closed .hero-board { opacity: 0; transform: translateY(28px); transition: none; }
+}

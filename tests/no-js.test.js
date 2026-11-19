@@ -28,6 +28,30 @@ function phoneRules(file) {
 const declsFor = (rules, selector) =>
   rules.filter((r) => r.selectors.includes(selector)).map((r) => r.decls).join('; ');
 
+/** Every rule of a stylesheet, inside @media blocks too, as { selectors, decls }, and its @keyframes bodies by name. */
+function cssRules(file) {
+  const css = readFileSync(resolve(ROOT, file), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
+  const rules = [];
+  const keyframes = {};
+  const walk = (text) => {
+    for (let i = 0; i < text.length; ) {
+      const open = text.indexOf('{', i);
+      if (open < 0) break;
+      const head = text.slice(i, open).trim();
+      let depth = 1;
+      let j = open + 1;
+      for (; j < text.length && depth; j++) depth += text[j] === '{' ? 1 : text[j] === '}' ? -1 : 0;
+      const body = text.slice(open + 1, j - 1);
+      if (/^@(media|supports)/.test(head)) walk(body);
+      else if (head.startsWith('@keyframes')) keyframes[head.split(' ')[1]] = body;
+      else rules.push({ selectors: head.split(',').map((s) => s.trim()), decls: body.trim() });
+      i = j;
+    }
+  };
+  walk(css);
+  return { rules, keyframes };
+}
+
 describe('with JavaScript off', () => {
   it('every page shows the email and phone fallback and keeps the form hidden', () => {
     for (const { page, doc } of rendered) {
@@ -135,6 +159,44 @@ describe('with JavaScript off', () => {
       for (const sel of users) expect(sel, name).toMatch(/^\.proof\.is-armed /);
     }
     expect(css).not.toMatch(/\.js[^\w-][^{}]*(proof|yrs|logos)/);
+  });
+
+  it('the home page shows the hero with no cover over it when the script has not run', () => {
+    const home = rendered.find((r) => r.page.key === 'home');
+    // Only the head script puts the class the cover needs on <html>; with JavaScript off it never runs.
+    expect(home.html).not.toMatch(/<html[^>]*\bclass=/);
+    expect(home.doc.documentElement.className).toBe('');
+    expect(home.doc.querySelector('[class*="curtain"]')).toBeNull();
+    expect(home.doc.querySelector('main .hero h1')).not.toBeNull();
+
+    // CSS is not applied in happy-dom, so this checks the curtain's rules.
+    const { rules, keyframes } = cssRules('src/styles/curtain.css');
+    expect(rules.length).toBeGreaterThan(0);
+    // Everything in it that hides, covers or moves something belongs to a class only script sets: the head's mark
+    // (curtain-pending), the module's closed state (curtain-closed) or the module's own elements (.curtain...).
+    const SCRIPT_SET = /^(html\.curtain-pending |html\.curtain-closed |\.curtain[\s.:-]|\.curtain$)/;
+    const covering = rules.filter((r) => /opacity: ?0(?![.\d%])|visibility: ?hidden|display: ?none|position: ?(fixed|absolute)|url\(|transform: ?[a-z]/.test(r.decls));
+    expect(covering.length).toBeGreaterThan(0);
+    for (const r of covering) for (const sel of r.selectors) expect(sel, r.decls).toMatch(SCRIPT_SET);
+    // Nothing keys off the early `js` class.
+    for (const r of rules) for (const sel of r.selectors) expect(sel).not.toMatch(/\.js\b/);
+
+    // The head's cover: the still, over the first screen only (absolute, not fixed, so a visitor whose script
+    // failed can still scroll past it), and it takes itself away after 8 seconds by a CSS animation.
+    const cover = rules.filter((r) => r.selectors.includes('html.curtain-pending body::before')).map((r) => r.decls).join('; ');
+    expect(cover, 'the head cover rules').not.toBe('');
+    expect(cover).toMatch(/position: ?absolute/);
+    expect(cover).not.toMatch(/position: ?fixed/);
+    expect(cover).toMatch(/fair-poster\.jpg/);
+    const anim = cover.match(/animation: ?([\w-]+) [^;]*?\b8s\b[^;]*forwards/);
+    expect(anim, cover).not.toBeNull();
+    const last = keyframes[anim[1]].match(/(?:to|100%) ?\{([^}]*)\}/)[1];
+    expect(last).toMatch(/visibility: ?hidden/);
+    expect(last).toMatch(/opacity: ?0(?![.\d])/);
+    // Scrolling is never locked in CSS (the module does that, only while it is alive).
+    for (const r of rules) {
+      if (r.selectors.some((s) => /^(html|body)\b/.test(s))) expect(r.decls, r.selectors.join()).not.toMatch(/overflow|touch-action|overscroll/);
+    }
   });
 
   it('the platform page already carries the whole sample dashboard', () => {

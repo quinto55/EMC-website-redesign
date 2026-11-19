@@ -9,6 +9,7 @@ import { createBoardState, snapshot } from '../src/demo/board-engine.js';
 import { renderDashboardHTML } from '../src/demo/dashboard-markup.js';
 import { createDashState, dashSnapshot } from '../src/demo/dashboard-engine.js';
 import { VIDEOS, renderVideoHTML, publishedMeta } from './videos.js';
+import { CURTAIN_SEEN_KEY, shouldShowCurtain, curtainInputs } from '../src/curtain/should-show.js';
 
 const PARTIALS_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'partials');
 const OG_IMAGE = `${SITE_URL}/emc-site/og-image.png`;
@@ -59,6 +60,17 @@ export function buildVars(page, { staging = false } = {}) {
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+/**
+ * The home page's curtain decision, made in the head before the first paint (spec 5.4): when the module's own rule
+ * holds, `curtain-pending` goes on <html> and curtain.css covers the hero with the still until the module takes over
+ * (or, if it never does, for 8 seconds). The rule is the module's: the two functions' source is copied in here.
+ */
+function curtainHeadScript() {
+  const src = `(function(){var show=${shouldShowCurtain};var read=${curtainInputs};` +
+    `try{if(show(read(window,${JSON.stringify(CURTAIN_SEEN_KEY)})))document.documentElement.classList.add('curtain-pending')}catch(e){}})()`;
+  return `<script>${src}</script>`;
+}
+
 function headBlock(page, { staging }) {
   const url = SITE_URL + page.path;
   const lines = [
@@ -84,6 +96,7 @@ function headBlock(page, { staging }) {
     '<link rel="apple-touch-icon" href="/emc-site/icons/apple-touch-icon.png">',
     '<link rel="manifest" href="/emc-site/site.webmanifest">',
     "<script>document.documentElement.classList.add('js')</script>",
+    ...(page.key === 'home' ? [curtainHeadScript()] : []),
     ...PRELOAD_FONTS.map((href) => `<link rel="preload" href="${href}" as="font" type="font/woff2" crossorigin>`),
     ...page.styles.map((href) => `<link rel="stylesheet" href="${href}">`),
     `<script type="module" src="${page.entry}"></script>`,
