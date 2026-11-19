@@ -2,6 +2,7 @@
 import { createBoardState, nextSale, snapshot } from './board-engine.js';
 import { renderBoardInner, boardFigures, feedRowHTML } from './board-markup.js';
 import { runWhileVisible } from './lifecycle.js';
+import { createPause, bindPauseButton } from './pause.js';
 
 const setText = (node, text) => {
   if (node && node.textContent !== text) node.textContent = text;
@@ -16,8 +17,12 @@ const setText = (node, text) => {
  *
  * `shares`, when given, are the two channel percents to show (Online, then Box office) in place of the board's own
  * rounding; the bars follow them. The home page passes the dashboard's, so the two boards' percents never differ.
+ *
+ * `pause` (src/demo/pause.js) is the pause state the board's Pause button toggles; the view shows the button and
+ * keeps its word in step. destroy() hides the button again and removes its listener.
  */
-export function createBoardView(el, { feedSize = 3 } = {}) {
+export function createBoardView(el, { feedSize = 3, pause = createPause() } = {}) {
+  const unbindPause = bindPauseButton(el.querySelector('[data-pause]'), pause);
   function render(state, { shares } = {}) {
     const snap = snapshot(state, { feedSize });
     for (const [k, text] of Object.entries(boardFigures(snap))) setText(el.querySelector(`[data-k="${k}"]`), text);
@@ -38,19 +43,21 @@ export function createBoardView(el, { feedSize = 3 } = {}) {
       else feed.insertAdjacentHTML('beforeend', feedRowHTML(sale));
     });
   }
-  return { render };
+  return { render, destroy: unbindPause };
 }
 
 /**
  * Takes over the board element the page was served with. The served markup already shows
- * the opening figures, so nothing changes until the first sale. Ticks only while visible.
+ * the opening figures, so nothing changes until the first sale. Ticks only while visible and not paused.
  */
 export function mountBoard(el, { feedSize = 3, intervalMs = 1700, rng = Math.random } = {}) {
   let state = createBoardState();
   if (!el.querySelector('[data-k]')) el.innerHTML = renderBoardInner(snapshot(state, { feedSize }));
-  const view = createBoardView(el, { feedSize });
+  const pause = createPause();
+  const view = createBoardView(el, { feedSize, pause });
 
   function tick() {
+    if (pause.paused) return;
     state = nextSale(state, rng).state;
     view.render(state);
   }
@@ -59,7 +66,14 @@ export function mountBoard(el, { feedSize = 3, intervalMs = 1700, rng = Math.ran
   const cleanup = runWhileVisible(el, {
     start: () => { timer = setInterval(tick, intervalMs); },
     stop: () => { clearInterval(timer); timer = null; },
+    pause,
   });
 
-  return { tick, destroy: cleanup };
+  return {
+    tick,
+    destroy() {
+      cleanup();
+      view.destroy();
+    },
+  };
 }

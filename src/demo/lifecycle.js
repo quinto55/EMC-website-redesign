@@ -3,14 +3,15 @@
 /**
  * Calls start() when the element is on screen and the tab is visible, stop() when either stops being true.
  * Without IntersectionObserver the element counts as on screen and only the tab's visibility matters.
- * Returns a cleanup function that stops and detaches everything.
+ * With a `pause` (src/demo/pause.js), it also runs only while not paused: pausing calls stop(), and no scroll or
+ * tab change starts it again until the pause ends. Returns a cleanup function that stops and detaches everything.
  */
-export function runWhileVisible(el, { start, stop }) {
+export function runWhileVisible(el, { start, stop, pause = null }) {
   let onScreen = true;
   let running = false;
 
   const update = () => {
-    const should = onScreen && !document.hidden;
+    const should = onScreen && !document.hidden && !(pause && pause.paused);
     if (should === running) return;
     running = should;
     if (should) start();
@@ -27,10 +28,12 @@ export function runWhileVisible(el, { start, stop }) {
     observer.observe(el);
   }
   document.addEventListener('visibilitychange', update);
+  const unsubscribe = pause ? pause.subscribe(update) : null;
   update();
 
   return () => {
     document.removeEventListener('visibilitychange', update);
+    if (unsubscribe) unsubscribe();
     if (observer) observer.disconnect();
     if (running) {
       running = false;

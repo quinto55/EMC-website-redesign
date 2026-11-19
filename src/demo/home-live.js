@@ -3,6 +3,7 @@ import { createDashState, advance, dashSnapshot } from './dashboard-engine.js';
 import { createBoardView } from './board-view.js';
 import { createDashboardView } from './dashboard-view.js';
 import { runWhileVisible } from './lifecycle.js';
+import { createPause } from './pause.js';
 
 /**
  * The compact board's two channel percents, taken from the dashboard's Money panel rather than rounded again: Online
@@ -27,13 +28,16 @@ function attempt(step) {
  * and shows it on both, the dashboard from its snapshot and the compact board from the board state the dashboard
  * wraps, with its two percents from the dashboard's Money panel, so their figures always agree (the dashboard's
  * count up to them). It ticks while the tab is showing and at least one of the two is on screen, and never catches up
- * on ticks it missed. An off-screen dashboard takes its new figures at once, so no animation frame runs for a board
+ * on ticks it missed. Each board has a Pause button; the two share one day, so one press on either pauses both (the
+ * timer stops, no sale lands and no count-up runs) and both read "Resume"; a paused day stays paused whatever the tab
+ * or the scroll position does. An off-screen dashboard takes its new figures at once, so no animation frame runs for a board
  * nobody sees. Either element may be missing; the other still works. After destroy() nothing runs.
  */
 export function mountHomeLive({ boardEl = null, dashEl = null, intervalMs = 1700, rng = Math.random } = {}) {
   let state = createDashState();
-  const board = boardEl ? createBoardView(boardEl) : null;
-  let dash = dashEl ? createDashboardView(dashEl) : null;
+  const pause = createPause();
+  const board = boardEl ? createBoardView(boardEl, { pause }) : null;
+  let dash = dashEl ? createDashboardView(dashEl, { pause }) : null;
   try {
     dash?.render(dashSnapshot(state)); // what the board already shows: this only fits its chart to its box
   } catch (err) {
@@ -45,7 +49,7 @@ export function mountHomeLive({ boardEl = null, dashEl = null, intervalMs = 1700
   let destroyed = false;
 
   function tick() {
-    if (destroyed) return;
+    if (destroyed || pause.paused) return;
     state = advance(state, rng, { seconds: intervalMs / 1000 });
     const snap = dashSnapshot(state);
     // Each board is drawn on its own: one failing cannot skip the other.
@@ -79,6 +83,7 @@ export function mountHomeLive({ boardEl = null, dashEl = null, intervalMs = 1700
       onChange(false);
       update();
     },
+    pause,
   });
   const cleanups = [];
   if (boardEl) cleanups.push(watch(boardEl));
@@ -95,6 +100,7 @@ export function mountHomeLive({ boardEl = null, dashEl = null, intervalMs = 1700
     for (const cleanup of cleanups) cleanup();
     clearInterval(timer);
     timer = null;
+    board?.destroy();
     dash?.destroy();
   }
 

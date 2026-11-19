@@ -6,6 +6,7 @@ import { FAIR, TICKET_KIND_LABEL, addOnsLine } from './sample-fair.js';
 import { count } from './board-engine.js';
 import { cents } from './dashboard-engine.js';
 import { DAY_START_MIN, DAY_END_MIN, shareBy } from './pace.js';
+import { pauseButtonHTML } from './pause.js';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const dollars = (n) => '$' + count(n);
@@ -308,6 +309,7 @@ export function renderDashboardInner(snap, { size = CHART_SIZE } = {}) {
     '<p class="db-live"><span class="db-live__dot" aria-hidden="true"></span>LIVE</p>' +
     `<p class="db-clock"><time data-a="clock" datetime="${clock.datetime}">${field(f, 'clock-hm')}${field(f, 'clock-sec', 'span', 'db-clock__sec')}${field(f, 'clock-period', 'span', 'db-clock__period')}</time></p>` +
     '<span class="db-pill">Sample data</span>' +
+    pauseButtonHTML('db-pause', 'the sample dashboard') +
     '<button type="button" class="db-btn" data-fullscreen hidden>Full screen</button>' +
     '</div>' +
     '<p class="db-ribbon">SAMPLE · simulated crowd</p>' +

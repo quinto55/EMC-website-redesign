@@ -6,6 +6,7 @@ import {
 } from './dashboard-markup.js';
 import { count } from './board-engine.js';
 import { runWhileVisible } from './lifecycle.js';
+import { createPause, bindPauseButton } from './pause.js';
 
 const COUNT_UP_MS = 800;
 const COUNT_UP_FRAMES = 48;
@@ -57,9 +58,11 @@ function syncRows(list, items, html) {
  * text and attributes in place, never the board or a panel. The four tiles count up to each new figure over about
  * 800 ms (reduced motion jumps), asking for animation frames only while they are counting; settle() finishes a count
  * at once. Until its first render() the view knows only the figures the markup shows, so render what the board was
- * served with first: that draws the pace chart at its box's own size. After destroy() nothing runs.
+ * served with first: that draws the pace chart at its box's own size. `pause` (src/demo/pause.js) is the pause state
+ * the board's Pause button toggles; the view shows the button and keeps its word in step. After destroy() nothing
+ * runs, the Pause and Full screen buttons are hidden again and their listeners are gone.
  */
-export function createDashboardView(el) {
+export function createDashboardView(el, { pause = createPause() } = {}) {
   const screen = el.querySelector('.db-screen');
   const fields = new Map([...el.querySelectorAll('[data-f]')].map((n) => [n.getAttribute('data-f'), n]));
   const tiles = TILES.map(([key, , value]) => {
@@ -77,6 +80,7 @@ export function createDashboardView(el) {
   const sparks = new Map([...el.querySelectorAll('[data-gate]')].map((li) => [li.getAttribute('data-gate'), {
     li, flag: li.querySelector('.db-flag'), parts: new Map([...li.querySelectorAll('svg [data-c]')].map((n) => [n.getAttribute('data-c'), n])),
   }]));
+  const unbindPause = bindPauseButton(el.querySelector('[data-pause]'), pause);
   let chartSize = { ...CHART_SIZE };
   let snap = null;
   let destroyed = false;
@@ -230,6 +234,7 @@ export function createDashboardView(el) {
     if (destroyed) return;
     finishCount();
     destroyed = true;
+    unbindPause();
     resizes?.disconnect();
     if (fsButton && fsSupported) {
       fsButton.removeEventListener('click', toggleFullscreen);
@@ -257,7 +262,8 @@ export function mountDashboard(el, { intervalMs = 1700, rng = Math.random } = {}
   if (!el.querySelector('.db-screen')) {
     el.innerHTML = `<div class="db-screen">${renderDashboardInner(dashSnapshot(state))}</div><div class="db-stand" aria-hidden="true"></div>`;
   }
-  const view = createDashboardView(el);
+  const pause = createPause();
+  const view = createDashboardView(el, { pause });
   try {
     view.render(dashSnapshot(state)); // what the board already shows: this only fits the chart to its box
   } catch (err) {
@@ -267,7 +273,7 @@ export function mountDashboard(el, { intervalMs = 1700, rng = Math.random } = {}
   let destroyed = false;
 
   function tick() {
-    if (destroyed) return;
+    if (destroyed || pause.paused) return;
     state = advance(state, rng, { seconds: intervalMs / 1000 });
     view.render(dashSnapshot(state));
   }
@@ -280,6 +286,7 @@ export function mountDashboard(el, { intervalMs = 1700, rng = Math.random } = {}
       timer = null;
       view.settle();
     },
+    pause,
   });
 
   function destroy() {

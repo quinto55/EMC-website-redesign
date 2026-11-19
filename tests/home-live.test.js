@@ -427,4 +427,125 @@ describe('the home page boards on one sample day', () => {
       }
     });
   });
+
+  describe('the pause buttons (WCAG 2.2.2)', () => {
+    const buttons = (boardEl, dashEl) => [boardEl.querySelector('button[data-pause]'), dashEl.querySelector('button[data-pause]')];
+    const word = (btn) => btn.querySelector('[data-pause-label]').textContent;
+    const figures = (boardEl, dashEl) => ({ board: boardEl.innerHTML.replace(/\shidden=""/g, ''), dash: dashEl.innerHTML.replace(/\shidden=""/g, '') });
+
+    it('each board has one real button, hidden as served; mounting shows both and destroy() hides them again', () => {
+      const { boardEl, dashEl } = loadHome();
+      const [a, b] = buttons(boardEl, dashEl);
+      for (const btn of [a, b]) {
+        expect(btn).not.toBeNull();
+        expect(btn.getAttribute('type')).toBe('button');
+        expect(btn.hasAttribute('hidden')).toBe(true);
+        expect(word(btn)).toBe('Pause');
+        expect(btn.querySelector('.visually-hidden').textContent.trim().length).toBeGreaterThan(0);
+      }
+      expect(boardEl.querySelectorAll('button')).toHaveLength(1);
+      expect(a.textContent).not.toBe(b.textContent); // each says which board it pauses
+      const live = mountHomeLive({ boardEl, dashEl });
+      expect(a.hasAttribute('hidden')).toBe(false);
+      expect(b.hasAttribute('hidden')).toBe(false);
+      live.destroy();
+      expect(a.hasAttribute('hidden')).toBe(true);
+      expect(b.hasAttribute('hidden')).toBe(true);
+    });
+
+    it('one press on either button pauses both boards: nothing ticks, no figure changes, both buttons read Resume', () => {
+      for (const which of [0, 1]) {
+        const { boardEl, dashEl } = loadHome();
+        const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1700, rng: mulberry32(9) });
+        vi.advanceTimersByTime(1700 * 3);
+        const btns = buttons(boardEl, dashEl);
+        btns[which].click();
+        expect(btns.map(word)).toEqual(['Resume', 'Resume']);
+        expect(vi.getTimerCount()).toBe(0);
+        expect(frames.size).toBe(0);
+        const frozen = figures(boardEl, dashEl);
+        vi.advanceTimersByTime(3 * 60 * 60 * 1000); // three hours
+        live.tick();
+        flushFrames();
+        expect(figures(boardEl, dashEl)).toEqual(frozen);
+        live.destroy();
+      }
+    });
+
+    it('a press mid count-up settles the dashboard on the figures it was heading to, and nothing runs after', () => {
+      const { boardEl, dashEl } = loadHome();
+      const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(3) });
+      vi.advanceTimersByTime(1000);
+      expect(frames.size).toBe(1); // counting up
+      buttons(boardEl, dashEl)[0].click();
+      expect(frames.size).toBe(0);
+      expect(dashEl.querySelector('[data-counting]')).toBeNull();
+      expect(dashboard(dashEl).tickets).toBe(compact(boardEl).sold);
+      live.destroy();
+    });
+
+    it('stays paused when the tab is hidden and shown, when the boards scroll away and back, and under reduced motion', () => {
+      reduced = true;
+      globalThis.IntersectionObserver = FakeIO;
+      const { boardEl, dashEl } = loadHome();
+      const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
+      fire(boardEl, true);
+      fire(dashEl, true);
+      buttons(boardEl, dashEl)[1].click();
+      const frozen = figures(boardEl, dashEl);
+      setHidden(true);
+      setHidden(false);
+      fire(boardEl, false);
+      fire(dashEl, false);
+      fire(boardEl, true);
+      fire(dashEl, true);
+      vi.advanceTimersByTime(60000);
+      expect(vi.getTimerCount()).toBe(0);
+      expect(figures(boardEl, dashEl)).toEqual(frozen);
+      expect(buttons(boardEl, dashEl).map(word)).toEqual(['Resume', 'Resume']);
+      live.destroy();
+    });
+
+    it('Resume continues from the same figures: the next sale lands on both boards and they agree', () => {
+      reduced = true;
+      const { boardEl, dashEl } = loadHome();
+      const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
+      vi.advanceTimersByTime(2000);
+      const btns = buttons(boardEl, dashEl);
+      btns[0].click();
+      const frozen = { c: compact(boardEl), d: dashboard(dashEl) };
+      vi.advanceTimersByTime(30000);
+      btns[1].click();
+      expect(btns.map(word)).toEqual(['Pause', 'Pause']);
+      vi.advanceTimersByTime(999);
+      expect(dashboard(dashEl).orders).toBe(frozen.d.orders);
+      vi.advanceTimersByTime(1);
+      expect(dashboard(dashEl).orders).toBe(frozen.d.orders + 1);
+      expect(compact(boardEl).sales).not.toBe(frozen.c.sales);
+      expect(compact(boardEl).sold).toBe(dashboard(dashEl).tickets);
+      expect(compact(boardEl).sales).toBe(dashboard(dashEl).gross);
+      live.destroy();
+    });
+
+    it('destroy() removes both listeners', () => {
+      const { boardEl, dashEl } = loadHome();
+      const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000 });
+      const btns = buttons(boardEl, dashEl);
+      live.destroy();
+      btns.forEach((btn) => btn.click());
+      expect(btns.map(word)).toEqual(['Pause', 'Pause']);
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it('a missing dashboard still leaves a compact board whose button pauses it', () => {
+      reduced = true;
+      const { boardEl } = loadHome();
+      const live = mountHomeLive({ boardEl, dashEl: null, intervalMs: 1000, rng: mulberry32(3) });
+      boardEl.querySelector('button[data-pause]').click();
+      const frozen = boardEl.innerHTML;
+      vi.advanceTimersByTime(10000);
+      expect(boardEl.innerHTML).toBe(frozen);
+      live.destroy();
+    });
+  });
 });

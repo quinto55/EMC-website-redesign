@@ -175,6 +175,116 @@ describe('the live board', () => {
   });
 });
 
+const pauseButton = (el) => el.querySelector('button[data-pause]');
+const label = (btn) => btn.querySelector('[data-pause-label]').textContent;
+
+describe('the board\'s pause button (WCAG 2.2.2)', () => {
+  it('is one real button, hidden as served, whose visible text is "Pause" and whose name says what it pauses', () => {
+    const el = boardEl();
+    const buttons = el.querySelectorAll('button');
+    expect(buttons).toHaveLength(1);
+    const btn = pauseButton(el);
+    expect(btn).toBe(buttons[0]);
+    expect(btn.getAttribute('type')).toBe('button');
+    expect(btn.hasAttribute('hidden')).toBe(true);
+    expect(label(btn)).toBe('Pause');
+    expect(btn.querySelector('.visually-hidden').textContent).toMatch(/board/i);
+    expect(btn.textContent.replace(/\s+/g, ' ').trim()).toMatch(/^Pause \w.*board$/);
+  });
+
+  it('is shown when the board mounts and hidden again by destroy()', () => {
+    const el = boardEl();
+    const board = mountBoard(el);
+    expect(pauseButton(el).hasAttribute('hidden')).toBe(false);
+    board.destroy();
+    expect(pauseButton(el).hasAttribute('hidden')).toBe(true);
+  });
+
+  it('stops the ticking itself and keeps the figures; Resume makes the next sale land', () => {
+    const el = boardEl();
+    const board = mountBoard(el, { intervalMs: 1000, rng: mulberry32(6) });
+    vi.advanceTimersByTime(3000);
+    const btn = pauseButton(el);
+    btn.click();
+    expect(label(btn)).toBe('Resume');
+    expect(btn.querySelector('.visually-hidden').textContent).toMatch(/board/i);
+    expect(vi.getTimerCount()).toBe(0);
+    const frozen = el.innerHTML.replace(/\shidden=""/g, '');
+    vi.advanceTimersByTime(60 * 60 * 1000);
+    board.tick(); // even a direct tick lands no sale while paused
+    expect(el.innerHTML.replace(/\shidden=""/g, '')).toBe(frozen);
+
+    btn.click();
+    expect(label(btn)).toBe('Pause');
+    const money = kpi(el, 'money');
+    vi.advanceTimersByTime(999);
+    expect(kpi(el, 'money')).toBe(money);
+    vi.advanceTimersByTime(1);
+    expect(kpi(el, 'money')).not.toBe(money);
+    board.destroy();
+  });
+
+  it('stays paused when the tab is hidden and shown, and when the board scrolls off screen and back', () => {
+    const real = globalThis.IntersectionObserver;
+    const observers = [];
+    globalThis.IntersectionObserver = class {
+      constructor(cb) { this.cb = cb; observers.push(this); }
+      observe() {}
+      disconnect() {}
+      fire(isIntersecting) { this.cb([{ isIntersecting }]); }
+    };
+    try {
+      const el = boardEl();
+      const board = mountBoard(el, { intervalMs: 1000, rng: mulberry32(8) });
+      observers[0].fire(true);
+      pauseButton(el).click();
+      const frozen = kpi(el, 'money');
+      setHidden(true);
+      setHidden(false);
+      observers[0].fire(false);
+      observers[0].fire(true);
+      vi.advanceTimersByTime(30000);
+      expect(vi.getTimerCount()).toBe(0);
+      expect(kpi(el, 'money')).toBe(frozen);
+      expect(label(pauseButton(el))).toBe('Resume');
+      pauseButton(el).click();
+      vi.advanceTimersByTime(1000);
+      expect(kpi(el, 'money')).not.toBe(frozen);
+      board.destroy();
+    } finally {
+      globalThis.IntersectionObserver = real;
+    }
+  });
+
+  it('stays paused under reduced motion', () => {
+    const realMatch = globalThis.matchMedia;
+    globalThis.matchMedia = (q) => ({ matches: q.includes('prefers-reduced-motion'), media: q, addEventListener() {}, removeEventListener() {} });
+    try {
+      const el = boardEl();
+      const board = mountBoard(el, { intervalMs: 1000, rng: mulberry32(6) });
+      pauseButton(el).click();
+      const frozen = kpi(el, 'money');
+      setHidden(true);
+      setHidden(false);
+      vi.advanceTimersByTime(60000);
+      expect(kpi(el, 'money')).toBe(frozen);
+      board.destroy();
+    } finally {
+      globalThis.matchMedia = realMatch;
+    }
+  });
+
+  it('destroy() removes the button\'s listener', () => {
+    const el = boardEl();
+    const board = mountBoard(el, { intervalMs: 1000 });
+    const btn = pauseButton(el);
+    board.destroy();
+    btn.click();
+    expect(label(btn)).toBe('Pause');
+    expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
 describe('runWhileVisible', () => {
   it('treats the element as visible when there is no IntersectionObserver', () => {
     const real = globalThis.IntersectionObserver;

@@ -140,12 +140,14 @@ describe('the dashboard markup', () => {
     expect(h).not.toMatch(/\bfees?\b/i);
   });
 
-  it('has no controls but a Full screen button that waits for the browser to say it can', () => {
+  it('has no controls but a Pause button and a Full screen button that wait for the script and the browser', () => {
     const el = boardEl();
-    const buttons = el.querySelectorAll('button, a, input, select, textarea, [tabindex]');
-    expect(buttons).toHaveLength(1);
-    expect(buttons[0].textContent.trim()).toBe('Full screen');
-    expect(buttons[0].hasAttribute('hidden')).toBe(true);
+    const buttons = [...el.querySelectorAll('button, a, input, select, textarea, [tabindex]')];
+    expect(buttons).toHaveLength(2);
+    expect(buttons.map((b) => b.tagName)).toEqual(['BUTTON', 'BUTTON']);
+    expect(buttons[0].matches('[data-pause]')).toBe(true);
+    expect(buttons[1].textContent.trim()).toBe('Full screen');
+    for (const b of buttons) expect(b.hasAttribute('hidden')).toBe(true);
   });
 });
 
@@ -358,7 +360,7 @@ describe('the live dashboard', () => {
     screen.requestFullscreen = vi.fn(() => Promise.resolve());
     try {
       const board = mountDashboard(el);
-      const button = el.querySelector('button');
+      const button = el.querySelector('[data-fullscreen]');
       expect(button.hasAttribute('hidden')).toBe(false);
       button.click();
       expect(screen.requestFullscreen).toHaveBeenCalledTimes(1);
@@ -390,5 +392,82 @@ describe('the live dashboard', () => {
       removed.mockRestore();
       delete document.fullscreenEnabled;
     }
+  });
+
+  describe('the pause button (WCAG 2.2.2)', () => {
+    const pauseBtn = (el) => el.querySelector('button[data-pause]');
+    const word = (btn) => btn.querySelector('[data-pause-label]').textContent;
+    const shown = (el) => el.innerHTML.replace(/\shidden=""/g, '');
+
+    it('is one real button in the top bar, hidden as served, "Pause" with a visually hidden suffix naming the board', () => {
+      const el = boardEl();
+      const btn = pauseBtn(el);
+      expect(btn).not.toBeNull();
+      expect(btn.closest('.db-bar')).not.toBeNull();
+      expect(btn.getAttribute('type')).toBe('button');
+      expect(btn.hasAttribute('hidden')).toBe(true);
+      expect(word(btn)).toBe('Pause');
+      expect(btn.querySelector('.visually-hidden').textContent).toMatch(/dashboard/i);
+      expect(el.querySelectorAll('[data-pause]')).toHaveLength(1);
+    });
+
+    it('is shown when the dashboard mounts and hidden again by destroy()', () => {
+      const el = boardEl();
+      const board = mountDashboard(el);
+      expect(pauseBtn(el).hasAttribute('hidden')).toBe(false);
+      board.destroy();
+      expect(pauseBtn(el).hasAttribute('hidden')).toBe(true);
+    });
+
+    it('stops the ticking, the clock and the count-up, keeps every figure, and Resume makes the next sale land', () => {
+      reduced = true; // the tiles jump, so the orders figure shows the new sale at once
+      const el = boardEl();
+      const board = mountDashboard(el, { intervalMs: 1000, rng: mulberry32(6) });
+      vi.advanceTimersByTime(3000);
+      const btn = pauseBtn(el);
+      btn.click();
+      expect(word(btn)).toBe('Resume');
+      expect(vi.getTimerCount()).toBe(0);
+      expect(frames.size).toBe(0);
+      expect(el.querySelector('[data-counting]')).toBeNull();
+      const frozen = shown(el);
+      vi.advanceTimersByTime(3 * 60 * 60 * 1000);
+      board.tick();
+      flushFrames();
+      expect(shown(el)).toBe(frozen);
+
+      btn.click();
+      expect(word(btn)).toBe('Pause');
+      const orders = tile(el, 'orders');
+      vi.advanceTimersByTime(999);
+      expect(tile(el, 'orders')).toBe(orders);
+      vi.advanceTimersByTime(1);
+      expect(Number(tile(el, 'orders').replace(/\D/g, ''))).toBe(Number(orders.replace(/\D/g, '')) + 1);
+      board.destroy();
+    });
+
+    it('stays paused when the tab is hidden and shown, and under reduced motion', () => {
+      reduced = true;
+      const el = boardEl();
+      const board = mountDashboard(el, { intervalMs: 1000, rng: mulberry32(6) });
+      pauseBtn(el).click();
+      const frozen = shown(el);
+      setHidden(true);
+      setHidden(false);
+      vi.advanceTimersByTime(60000);
+      expect(vi.getTimerCount()).toBe(0);
+      expect(shown(el)).toBe(frozen);
+      board.destroy();
+    });
+
+    it('destroy() removes its listener', () => {
+      const el = boardEl();
+      const board = mountDashboard(el, { intervalMs: 1000 });
+      const btn = pauseBtn(el);
+      board.destroy();
+      btn.click();
+      expect(word(btn)).toBe('Pause');
+      expect(vi.getTimerCount()).toBe(0);
+    });
   });
 });

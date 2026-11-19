@@ -2,6 +2,7 @@
 // and the board view uses the same pieces to change the board in place.
 import { FAIR } from './sample-fair.js';
 import { count, money } from './board-engine.js';
+import { pauseButtonHTML } from './pause.js';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -23,7 +24,7 @@ export function renderBoardInner(snap) {
   const feed = snap.feed.map(feedRowHTML).join('');
   const k = boardFigures(snap);
   return `
-<div class="bd-top"><span class="pill-live">Live</span><span class="bd-name">${esc(FAIR.name)}, ${esc(FAIR.day)}</span><span class="pill-sample">Sample data</span></div>
+<div class="bd-top"><span class="pill-live">Live</span><span class="bd-name">${esc(FAIR.name)}, ${esc(FAIR.day)}</span><span class="pill-sample">Sample data</span>${pauseButtonHTML('bd-pause', 'the sample sales board')}</div>
 <div class="kpis">
   <div class="kpi"><b data-k="sold">${k.sold}</b><span>Tickets sold today</span></div>
   <div class="kpi"><b data-k="scanned">${k.scanned}</b><span>Scanned in</span></div>

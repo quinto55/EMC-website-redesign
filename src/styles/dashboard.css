@@ -165,7 +165,8 @@
   font: 500 var(--db-small)/1.3 var(--font-mono);
   white-space: nowrap;
 }
-.db .db-btn {
+.db .db-btn,
+.db .db-pause {
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -179,8 +180,10 @@
   white-space: nowrap;
   cursor: pointer;
 }
-.db .db-btn:hover { background: rgba(255, 255, 255, .06); }
-.db .db-btn[hidden] { display: none; }
+.db .db-btn:hover,
+.db .db-pause:hover { background: rgba(255, 255, 255, .06); }
+.db .db-btn[hidden],
+.db .db-pause[hidden] { display: none; }
 
 /* The sample ribbon: impossible to miss, never mistaken for real numbers. */
 .db .db-ribbon {
@@ -575,6 +578,11 @@
   .db .db-event { flex: 1 1 calc(100% - 60px); font-size: 17px; }
   /* Full screen is for a wall screen or a laptop; on a phone the board is already the whole screen's width. */
   .db .db-btn { display: none; }
+  /* Pause stays on phones (WCAG 2.2.2): a 44px tap target at the right end of the bar's first row, out of the flow, so
+     the bar is as tall with it as without it and nothing moves when the script shows it. The fair's name leaves it room. */
+  .db .db-bar { position: relative; }
+  .db .db-pause { position: absolute; top: calc(var(--db-pad) * .7 - 6px); right: var(--db-pad); min-height: 44px; padding: 0 .9em; }
+  .db .db-event { padding-right: 78px; }
 
   .db .db-grid {
     grid-template-columns: minmax(0, 1fr);
