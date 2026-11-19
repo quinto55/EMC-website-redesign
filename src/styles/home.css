@@ -125,8 +125,10 @@
 
 /* ---------- proof strip, overlapping the bottom of the photo ----------
    "40+" leads, large and red on the site's yellow marker; the fairs line is the quiet second voice. As served this is
-   the final state. src/proof-count.js adds .is-armed (the starting state) only in the task that starts the play, and
-   .is-counted when the figures land on 40, which runs the "+", the marker and the fades below. */
+   the final state. src/proof-count.js adds .is-armed (the starting state, and the fairs line and logos fading in while
+   the number counts) only in the task that starts the play, and .is-counted when the figures land on 40, which runs
+   the "+", the marker and the words below. Phones (600px and under) stack it; tablets and narrower computers put the
+   fairs line over the logos beside the years block. */
 .proof {
   position: relative;
   z-index: 4;
@@ -185,14 +187,17 @@
   .logos { grid-area: logos; align-self: start; }
 }
 
-/* The starting state, set by the script only as it plays. */
+/* The play, set by the script only as it runs. As the number starts counting, the fairs line fades in after 150 ms
+   and the logos after 300 ms (each 500 ms, starting from hidden), so the card is never just a number. */
+.proof.is-armed .proof-line { animation: proof-fade-in .5s cubic-bezier(.2, .7, .3, 1) .15s both; }
+.proof.is-armed .logos { animation: proof-fade-in .5s cubic-bezier(.2, .7, .3, 1) .3s both; }
+@keyframes proof-fade-in { from { opacity: 0; } }
+/* Held back until the number lands. */
 .proof.is-armed .yrs-plus { opacity: 0; transform: scale(.6); }
 .proof.is-armed .yrs-num::before { transform: scaleX(0); }
 .proof.is-armed .yrs-words { opacity: 0; transform: translateY(8px); }
-.proof.is-armed .proof-line,
-.proof.is-armed .logos { opacity: 0; }
-/* The figures have landed on 40: the "+" pops in, the marker draws left to right, then the words rise and the fairs
-   line and the logos fade in, 150 ms apart. All done 1 s later (TAIL_MS in proof-count.js). */
+/* The figures have landed on 40: the "+" pops in, the marker draws left to right, and "years in the industry" rises
+   in as the punchline. All done 0.7 s later (TAIL_MS in proof-count.js). */
 .proof.is-counted .yrs-plus {
   opacity: 1;
   transform: none;
@@ -204,8 +209,6 @@
   transform: none;
   transition: opacity .4s ease .3s, transform .4s cubic-bezier(.2, .7, .3, 1) .3s;
 }
-.proof.is-counted .proof-line { opacity: 1; transition: opacity .4s ease .45s; }
-.proof.is-counted .logos { opacity: 1; transition: opacity .4s ease .6s; }
 
 /* ---------- Live dashboard: the full sample board, under the proof strip ----------
    The board stands on the cream page at the wrap's full width, in its monitor frame on computers and as a dark card
@@ -311,6 +314,19 @@
 
   .mods,
   .guest-cards { grid-template-columns: minmax(0, 1fr); }
+}
+/* Tablets: the proof strip keeps its 72px years block on the left, with the fairs line over the logos beside it, so its
+   right half is not left empty. Phones (600px and under) stay stacked. */
+@media (min-width: 601px) and (max-width: 1000px) {
+  .proof {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "yrs line" "yrs logos";
+    gap: 14px 32px;
+    padding: 24px 28px;
+  }
+  .yrs { grid-area: yrs; }
+  .proof-line { grid-area: line; align-self: end; }
+  .logos { grid-area: logos; align-self: start; }
 }
 
 /* A browser without subgrid cannot line the photo up with the end of the hero: the photo

@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { renderAll } from './helpers/pages.js';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { renderAll, ROOT } from './helpers/pages.js';
 import { countFrames, initProofCount } from '../src/proof-count.js';
 
 // The proof strip exactly as the home page serves it (renderAll leaves the scripts out).
@@ -143,6 +145,37 @@ describe('the proof strip as served', () => {
   });
 });
 
+describe('the reveal order (home.css)', () => {
+  const css = readFileSync(resolve(ROOT, 'src/styles/home.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
+  const decls = (selector) => [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+    .filter(([, sel]) => sel.split(',').map((s) => s.trim()).includes(selector))
+    .map(([, , d]) => d)
+    .join('; ');
+  /** [duration, delay] in seconds of the one animation a rule runs. */
+  const timing = (selector) => {
+    const anim = decls(selector).match(/animation: ?([^;]+)/)?.[1] ?? '';
+    return [...anim.matchAll(/([\d.]+)s\b/g)].map((m) => Number(m[1]));
+  };
+
+  it('the fairs line and the logos fade in while the number counts, so the card is never just the number', () => {
+    const [lineFor, lineAfter] = timing('.proof.is-armed .proof-line');
+    const [logosFor, logosAfter] = timing('.proof.is-armed .logos');
+    expect(lineAfter).toBeGreaterThan(0);
+    expect(lineAfter).toBeLessThanOrEqual(0.2);
+    expect(logosAfter).toBeGreaterThan(lineAfter);
+    expect(logosAfter).toBeLessThanOrEqual(0.35);
+    // both fully in well before the count (1.2 s) lands
+    expect(lineAfter + lineFor).toBeLessThanOrEqual(0.9);
+    expect(logosAfter + logosFor).toBeLessThanOrEqual(0.9);
+  });
+
+  it('"years in the industry" comes last, after the number lands, as the punchline', () => {
+    expect(decls('.proof.is-armed .yrs-words')).toMatch(/opacity: 0/);
+    expect(decls('.proof.is-armed .yrs-words')).not.toMatch(/animation/);
+    expect(decls('.proof.is-counted .yrs-words')).toMatch(/transition:/);
+  });
+});
+
 describe('initProofCount', () => {
   it('with reduced motion it shows the final state at once and never arms', () => {
     reduced = true;
@@ -202,9 +235,11 @@ describe('initProofCount', () => {
     expect(armed()).toBe(true);
     expect(frames.size).toBe(0);
     expect(strip().classList.contains('is-done')).toBe(false);
-    // then the "+", the marker and the fades run (CSS), and the strip settles in its final state
-    for (let i = 0; i < 70; i++) frame();
-    expect(strip().classList.contains('is-done')).toBe(true);
+    // then the "+", the marker and the words run (CSS), and the strip settles in its final state, all within 2.5 s
+    let m = 0;
+    while (!strip().classList.contains('is-done') && m++ < 500) frame();
+    expect(m * (1000 / 60)).toBeGreaterThanOrEqual(650); // the words' rise ends 0.7 s after the number lands
+    expect((n + m) * (1000 / 60)).toBeLessThanOrEqual(2100);
     expectFinal();
   });
 

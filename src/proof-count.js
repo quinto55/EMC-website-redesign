@@ -1,11 +1,12 @@
-// The home page's proof strip: "40+" counts up, the "+" pops in, a marker draws under it, then the rest fades in.
-// The strip as served is the final state. This adds .is-armed (the starting state) only in the task that starts the
-// play, then .is-counted when the figures land on 40 (CSS runs the "+", the marker and the fades from there). Every
+// The home page's proof strip: "40+" counts up while the fairs line and the logos fade in, then the "+" pops in, a
+// marker draws under it and "years in the industry" rises in as the punchline. The strip as served is the final
+// state. This adds .is-armed (the starting state, which also starts those two fades) only in the task that starts the
+// play, then .is-counted when the figures land on 40 (CSS runs the "+", the marker and the words from there). Every
 // way out (the end, a hidden tab, the safety timer, destroy) removes both, back to the final state. Browser only.
 
 const COUNT_MS = 1200;      // 0 to 40
 const STEPS = 72;           // one number a frame at 60 frames a second
-const TAIL_MS = 1000;       // the "+", the marker and the fades after the count (home.css, .is-counted)
+const TAIL_MS = 700;        // the "+", the marker and the words after the count (home.css, .is-counted)
 const SAFETY_MS = 2500;     // after arming: the final state, whatever happened
 const LOAD_WAIT_MS = 300;   // a strip already on screen at load starts after this
 const IN_VIEW = 0.6;        // share of the strip on screen that starts the play

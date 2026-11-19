@@ -121,6 +121,18 @@ describe('with JavaScript off', () => {
     expect(hiding.length).toBeGreaterThan(0);
     for (const sel of hiding) expect(sel).toMatch(/^\.proof\.is-armed |::before$/);
     expect(hiding.filter((s) => !s.startsWith('.proof.is-armed '))).toEqual(['.yrs-digits::before']); // the invisible "40" that holds the figures' width
+    // A keyframe that starts hidden (the fades that run while the number counts) is used only by the starting state.
+    const hidingFrames = [...css.matchAll(/@keyframes ([\w-]+) ?\{((?: ?[^{}]+\{[^{}]*\})+) ?\}/g)]
+      .filter(([, , body]) => /opacity: ?0(?![.\d%])|scale(?:X|Y)?\(0\)|visibility: ?hidden/.test(body))
+      .map(([, name]) => name);
+    expect(hidingFrames.length).toBeGreaterThan(0);
+    for (const name of hidingFrames) {
+      const users = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+        .filter(([, , decls]) => new RegExp(`animation(?:-name)?: ?[^;]*\\b${name}\\b`).test(decls))
+        .flatMap(([, sel]) => sel.split(',').map((s) => s.trim()));
+      expect(users.length, name).toBeGreaterThan(0);
+      for (const sel of users) expect(sel, name).toMatch(/^\.proof\.is-armed /);
+    }
     expect(css).not.toMatch(/\.js[^\w-][^{}]*(proof|yrs|logos)/);
   });
 
