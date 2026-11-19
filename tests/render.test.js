@@ -65,7 +65,6 @@ describe('renderPage', () => {
   it('exposes page values through buildVars', () => {
     const vars = buildVars(page());
     expect(vars.TONE).toBe('cream');
-    expect(vars.PAGE_PATH).toBe('/platform/');
     expect(vars.ASK_VARIANT).toBe('talk');
     expect(vars.TOLL_FREE_TEL).toBe('+18002902090');
     expect(vars.YEAR).toBe(String(new Date().getFullYear()));

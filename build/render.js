@@ -44,12 +44,11 @@ const defaultRead = (name) => {
   }
 };
 
-export function buildVars(page, { staging = false } = {}) {
+export function buildVars(page) {
   const vars = {};
   for (const [k, v] of Object.entries(config)) if (typeof v === 'string') vars[k] = v;
   vars.YEAR = String(new Date().getFullYear());
   vars.TONE = page.tone;
-  vars.PAGE_PATH = page.path;
   vars.ASK_VARIANT = page.ask;
   const ask = ASK_VARIANTS[page.ask];
   if (!ask) throw new Error(`Unknown ask variant "${page.ask}" on ${page.file}`);
@@ -126,7 +125,7 @@ export function renderPage(source, page, { staging = false, read = defaultRead }
     html = html.split(`data-nav="${page.nav}"`).join(`data-nav="${page.nav}" aria-current="page"`);
   }
 
-  const vars = buildVars(page, { staging });
+  const vars = buildVars(page);
   return html.replace(/\{\{([A-Z0-9_]+)\}\}/g, (_, token) => {
     if (!(token in vars)) throw new Error(`Unknown site token: ${token}`);
     return vars[token];

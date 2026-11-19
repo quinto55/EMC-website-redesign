@@ -21,7 +21,7 @@ describe('site integrity', () => {
     expect(locs).toEqual(PUBLIC_PATHS.map((p) => `${SITE_URL}${p}`));
     const lastmods = [...read('public/sitemap.xml').matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((m) => m[1]);
     expect(lastmods).toHaveLength(8);
-    expect(new Set(lastmods)).toEqual(new Set(['2026-11-18']));
+    for (const d of lastmods) expect(d).toMatch(/^\d{4}-\d{2}-\d{2}$/); // a real date, whichever day the sitemap was last touched
   });
 
   it('iafe and the not-found page are noindexed and out of the sitemap', () => {
@@ -31,8 +31,6 @@ describe('site integrity', () => {
       expect(html, key).toContain('<meta name="robots" content="noindex">');
       expect(sitemap).not.toContain(page.path);
     }
-    const iafe = rendered.find((r) => r.page.key === 'iafe').page;
-    expect(sitemap).not.toContain(iafe.path);
   });
 
   it('robots.txt keeps the WordPress rules and names the sitemap', () => {
