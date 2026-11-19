@@ -161,11 +161,11 @@ describe('home page', () => {
         ['Retail stores', '/retail-partners/', 'See how'],
       ]],
       ['02', 'Scan', 'Any gate. Duplicates blocked.', [
-        ['Gate scanning', '/platform/#gate-scanning', 'See how'],
+        ['Gate scanning', '/platform/#gate-scanning', 'Try it'],
       ]],
       ['03', 'Count', 'Every ticket, as it happens.', [
         ['Live dashboard', '/platform/#live-dashboard', 'Try it'],
-        ['Daily reports', '/platform/#daily-reports', 'See how'],
+        ['Daily reports', '/platform/#daily-reports', 'See one'],
       ]],
     ];
     for (const [num, name, line, rows] of CARDS) {

@@ -147,8 +147,8 @@ describe('platform page', () => {
 
   it('the live dashboard block holds the sample board, between its words and the recording', () => {
     expect(text(main)).not.toContain('Demo coming to this page.');
-    expect(main.querySelector('[data-demo]')).toBeNull();
     const el = block('live-dashboard');
+    expect(el.querySelector('[data-demo]')).toBeNull();
     const boards = el.querySelectorAll('[data-dashboard]');
     expect(boards).toHaveLength(1);
     const board = boards[0];
@@ -167,8 +167,42 @@ describe('platform page', () => {
     expect(board.querySelectorAll('h3').length).toBeGreaterThanOrEqual(7);
   });
 
-  it('the page loads the dashboard styles', () => {
+  it('the page loads the dashboard styles and the demo styles', () => {
     expect(pageByKey('platform').styles).toContain('/src/styles/dashboard.css');
+    expect(pageByKey('platform').styles).toContain('/src/styles/demo.css');
+  });
+
+  it('the gate scanning block holds the scan demo, after its sentences and before its link to the ask', () => {
+    const el = block('gate-scanning');
+    const demos = el.querySelectorAll('[data-demo="gate-scanning"]');
+    expect(demos).toHaveLength(1);
+    const demo = demos[0];
+    expect(demo.matches('[data-sample]')).toBe(true);
+    expect([...main.querySelectorAll('[data-demo]')]).toEqual([demo]); // the page's only click-through demo
+    const follows = (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+    const say = byText(el, 'p', 'A ticket gets in once. Scan it again and the gate sees it has already been used.');
+    const talk = byText(el, 'a[href="#talk"]', "Let's talk about your fair");
+    expect(follows(say, demo)).toBe(true);
+    expect(follows(demo, talk)).toBe(true);
+    expect(demo.querySelectorAll('h1, h2')).toHaveLength(0);
+  });
+
+  it('the daily reports block holds the sample report, after its sentence and before its link to the ask', () => {
+    const el = block('daily-reports');
+    const reports = el.querySelectorAll('[data-day-report]');
+    expect(reports).toHaveLength(1);
+    const report = reports[0];
+    expect(report.matches('[data-sample]')).toBe(true);
+    expect(main.querySelectorAll('[data-day-report]')).toHaveLength(1);
+    const follows = (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+    const say = byText(el, 'p', "Sales by ticket type and by channel, scans by gate, and the day's totals.");
+    const talk = byText(el, 'a[href="#talk"]', "Let's talk about your fair");
+    expect(follows(say, report)).toBe(true);
+    expect(follows(report, talk)).toBe(true);
+    // The report sits under the block's h2: its title is an h3 and its sections h4s.
+    expect(report.querySelectorAll('h1, h2')).toHaveLength(0);
+    expect(report.querySelectorAll('h3')).toHaveLength(1);
+    expect([...report.querySelectorAll('h4')].map(text)).toEqual(['By ticket type', 'By channel', 'At the gates']);
   });
 
   it('the box office tour opens the real register in a new tab, and says so to a screen reader', () => {
@@ -205,8 +239,8 @@ describe('platform page', () => {
     }
   });
 
-  it("the three product blocks end with a link to the ask, reading \"Let's talk about your fair\"", () => {
-    for (const id of ['online-sales', 'box-office', 'live-dashboard']) {
+  it("the five product blocks end with a link to the ask, reading \"Let's talk about your fair\"", () => {
+    for (const id of ['online-sales', 'box-office', 'gate-scanning', 'live-dashboard', 'daily-reports']) {
       const links = [...block(id).querySelectorAll('a')];
       const last = links[links.length - 1];
       expect(last.getAttribute('href'), id).toBe('#talk');

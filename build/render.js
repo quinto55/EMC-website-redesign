@@ -8,6 +8,8 @@ import { renderBoardHTML } from '../src/demo/board-markup.js';
 import { createBoardState, snapshot } from '../src/demo/board-engine.js';
 import { renderDashboardHTML } from '../src/demo/dashboard-markup.js';
 import { createDashState, dashSnapshot } from '../src/demo/dashboard-engine.js';
+import { renderGateScanHTML } from '../src/demo/gate-scan.js';
+import { renderDayReportHTML } from '../src/demo/day-report.js';
 import { VIDEOS, renderVideoHTML, publishedMeta } from './videos.js';
 import { CURTAIN_SEEN_KEY, shouldShowCurtain, curtainInputs } from '../src/curtain/should-show.js';
 
@@ -25,6 +27,8 @@ const HEADER_LOGOS = {
 export const GENERATORS = {
   board: () => renderBoardHTML(snapshot(createBoardState())),
   dashboard: () => renderDashboardHTML(dashSnapshot(createDashState())),
+  'gate-scan': () => renderGateScanHTML(),
+  'day-report': () => renderDayReportHTML(),
 };
 // One player per product video (<!--site:video-box-office--> and so on). A video that is not
 // cleared renders nothing; a cleared one whose files were never copied stops the build.

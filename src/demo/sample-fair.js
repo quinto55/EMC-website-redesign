@@ -48,6 +48,23 @@ export const LIVE_BASELINE = {
 };
 
 /**
+ * One closed day for the sample daily report: Thursday, about one and a half times the boards' opening figures. 4,321
+ * tickets plus 419 parking and 1,178 rides, $91,854; 3,927 admitted (Admission tickets only, so never more than the
+ * 4,321 sold).
+ */
+export const DAY_REPORT = {
+  day: 'Thursday',
+  sold: {
+    adult: { online: 1768, box: 1096 },
+    child: { online: 734, box: 452 },
+    wristband: { online: 731, box: 447 },
+    family: { online: 168, box: 103 },
+    parking: { online: 262, box: 157 },
+  },
+  scannedByGate: { main: 2118, north: 1097, midway: 712 },
+};
+
+/**
  * Whole percents of `values` that always sum to exactly 100 (largest-remainder rounding).
  * An all-zero input gives all zeros.
  */

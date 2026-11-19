@@ -59,7 +59,7 @@
 .block p { margin-top: 12px; font-size: 18px; color: var(--mut); }
 .block .say { font-size: 20px; font-weight: 600; line-height: 1.4; color: var(--ink); }
 
-/* A block with a video: words and links on the left, the video on the right. */
+/* A block with a video or a demo: words and links on the left, the video or demo on the right. */
 .watch {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 8fr);
@@ -103,7 +103,6 @@
 /* A short block laid out across the card. */
 .strip { display: grid; align-items: center; gap: 12px 44px; }
 .retail { grid-template-columns: minmax(0, 1.25fr) auto minmax(0, 1fr); }
-.reports { grid-template-columns: minmax(0, 5fr) minmax(0, 8fr); }
 .strip p { margin-top: 0; }
 .strip-lead p { margin-top: 10px; }
 .block .stat {
@@ -119,8 +118,11 @@
 .stat b { font: 700 64px/1 var(--font-head); letter-spacing: -.03em; color: var(--red); }
 .strip-more .talk-link { margin-top: 4px; }
 
-/* Scan: two smaller cards side by side. */
-.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+/* Daily reports: the heading and its sentence across the card, then the sample report under them. */
+.reports-head { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 8fr); align-items: center; gap: 12px 44px; }
+.block .reports-head .say { margin-top: 0; }
+
+/* RFID wristbands: its heading and the "Later in 2027" tag on one line. */
 .block-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
 .tag {
   padding: 4px 11px;
@@ -221,11 +223,9 @@
 
   .strip,
   .retail,
-  .reports { grid-template-columns: minmax(0, 1fr); }
+  .reports-head { grid-template-columns: minmax(0, 1fr); }
   .block .stat { padding: 16px 0; border: 0; border-top: 1px dashed var(--line); border-bottom: 1px dashed var(--line); }
   .stat b { font-size: 52px; }
-
-  .pair { grid-template-columns: minmax(0, 1fr); }
 
   .live > .db { margin: 20px 0; }
   .live-recorded .media-lead { font-size: 22px; }

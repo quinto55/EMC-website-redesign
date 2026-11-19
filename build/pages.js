@@ -8,7 +8,7 @@ export const PAGES = [
   { key: 'platform', file: 'platform/index.html', path: '/platform/', nav: 'platform', ask: 'talk', tone: 'cream', indexable: true,
     title: 'The platform | EMC Tickets',
     description: 'See the EMC ticketing platform work: online sales, the box office and a live dashboard you can try. No sign-up.',
-    styles: [SITE_CSS, '/src/styles/platform.css', '/src/styles/dashboard.css'], entry: '/src/entry/platform.js' },
+    styles: [SITE_CSS, '/src/styles/platform.css', '/src/styles/dashboard.css', '/src/styles/demo.css'], entry: '/src/entry/platform.js' },
   { key: 'retail', file: 'retail-partners/index.html', path: '/retail-partners/', nav: 'retail', ask: 'mockup', tone: 'cream', indexable: true,
     title: 'Retail partners | EMC Tickets',
     description: 'Sell your fair tickets at Walgreens. EMC is the exclusive event ticket partner of Walgreens.',

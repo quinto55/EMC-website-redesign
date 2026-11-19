@@ -211,6 +211,42 @@ describe('with JavaScript off', () => {
   });
 });
 
+describe('the platform page\'s gate scan and sample report with JavaScript off', () => {
+  const platform = rendered.find((r) => r.page.key === 'platform');
+  const text = (el) => el.textContent.replace(/\s+/g, ' ').trim();
+
+  it('shows the whole sample report, as served', () => {
+    const report = platform.doc.querySelector('#daily-reports [data-day-report][data-sample]');
+    expect(report).not.toBeNull();
+    expect(report.closest('[hidden]')).toBeNull();
+    expect(report.querySelector('[hidden]')).toBeNull();
+    const t = text(report);
+    for (const s of ['Demo County Fair, Thursday', 'Sample data', 'By ticket type', 'By channel', 'At the gates',
+      'Adult admission', 'Child admission', 'Ride wristband', 'Family 4-pack', 'Parking pass', 'Online', 'Box office',
+      'Main Gate', 'North Gate', 'Midway Gate', '4,321', 'plus 419 parking and 1,178 rides', '$91,854', '3,927']) expect(t, s).toContain(s);
+    expect(report.querySelectorAll('table')).toHaveLength(3);
+    expect(report.querySelectorAll('tbody tr')).toHaveLength(5 + 2 + 3);
+  });
+
+  it('the gate scanning block shows its sentences and the sample ticket, and no button that would do nothing', () => {
+    const block = platform.doc.getElementById('gate-scanning');
+    const t = text(block);
+    for (const s of ['Any gate, duplicates blocked. Barcode or QR.', 'A ticket gets in once. Scan it again and the gate sees it has already been used.',
+      'Demo County Fair', 'Adult admission', 'Sample ticket. Not valid for entry.', 'Sample data']) expect(t, s).toContain(s);
+    const demo = block.querySelector('[data-demo="gate-scanning"]');
+    const img = demo.querySelector('img[src="/emc-site/img/sample-ticket-qr.svg"]');
+    expect(img).not.toBeNull();
+    expect(img.closest('[hidden]')).toBeNull();
+    // The buttons wait for the script; the result area is empty; no result is shown as if a scan had happened.
+    const buttons = [...demo.querySelectorAll('button')];
+    expect(buttons.length).toBeGreaterThan(0);
+    for (const b of buttons) expect(b.hasAttribute('hidden'), text(b)).toBe(true);
+    expect(text(demo.querySelector('[role="status"]'))).toBe('');
+    expect(t).not.toMatch(/Admitted|Duplicate/);
+    expect(demo.querySelector('[data-gs-note]').hasAttribute('hidden')).toBe(true);
+  });
+});
+
 describe('the IAFE page with JavaScript off', () => {
   it('shows the standard lead and the email fallback', () => {
     const { doc } = rendered.find((r) => r.page.key === 'iafe');
