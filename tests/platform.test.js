@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { renderAll } from './helpers/pages.js';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { renderAll, ROOT } from './helpers/pages.js';
 import { pageByKey } from '../build/pages.js';
 import { VIDEOS, videoById } from '../build/videos.js';
 
@@ -247,5 +249,13 @@ describe('platform page', () => {
       expect(text(last), id).toBe("Let's talk about your fair");
     }
     expect(doc.getElementById('talk')).not.toBeNull();
+  });
+
+  it("the dashboard's bar keeps its computer-width height from dashboard.css, so no page shifts when the script takes over", () => {
+    const strip = (f) => readFileSync(resolve(ROOT, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
+    const dashboard = strip('src/styles/dashboard.css');
+    // On the bar itself, in the dashboard's own variables, not on every .db wrapper (the scan demo's panel has no bar).
+    expect(dashboard).toMatch(/@media \(min-width: 1001px\) \{ \.js \.db \.db-bar \{ min-height: calc\(40px \+ var\(--db-pad\) \* 1\.4 \+ 1px\); \} \}/);
+    expect(strip('src/styles/home.css')).not.toMatch(/db-bar/);
   });
 });

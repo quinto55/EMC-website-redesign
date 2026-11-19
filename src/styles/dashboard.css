@@ -99,6 +99,12 @@
   border-bottom: 1px solid var(--db-line);
   background: rgba(14, 18, 32, .72);
 }
+/* On computers the script shows the bar's Full screen button (40px tall, the bar's tallest item). With JavaScript on,
+   the bar has that height from the first paint, so nothing below it moves when the script takes over. The rule is
+   for the bar itself: a board without a top bar (the scan demo's Fraud watch panel) has nothing to reserve. */
+@media (min-width: 1001px) {
+  .js .db .db-bar { min-height: calc(40px + var(--db-pad) * 1.4 + 1px); }
+}
 .db .db-logo { flex: none; display: block; width: auto; height: clamp(30px, 3.1cqi, 40px); }
 .db .db-event {
   flex: 1 1 auto;
