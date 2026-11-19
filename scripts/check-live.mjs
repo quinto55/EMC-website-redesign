@@ -92,7 +92,7 @@ export function redirectMatch(got, want) {
   if (!got) return { ok: false, note: '' };
   if (got === want) return { ok: true, note: '' };
   if (want.startsWith('https://') && got === `http://${want.slice('https://'.length)}`) {
-    return { ok: true, note: `answers over http first (${got}), the right address; the host then moves it to https` };
+    return { ok: true, note: `answers over http first (${got}): the right page, but check in a browser that it ends on https` };
   }
   return { ok: false, note: '' };
 }
