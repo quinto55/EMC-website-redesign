@@ -1,0 +1,22 @@
+{
+  "online-ordering": {
+    "width": 1920,
+    "height": 1080,
+    "seconds": 53.4
+  },
+  "box-office": {
+    "width": 1920,
+    "height": 1080,
+    "seconds": 52.9
+  },
+  "live-board": {
+    "width": 1920,
+    "height": 1080,
+    "seconds": 57.9
+  },
+  "pip": {
+    "width": 1920,
+    "height": 1080,
+    "seconds": 42.8
+  }
+}

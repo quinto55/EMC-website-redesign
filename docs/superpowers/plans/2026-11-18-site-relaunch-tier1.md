@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-11-18-site-relaunch-design.md`. Look reference: `docs/superpowers/specs/assets/2026-11-18-site-relaunch/mockup.html` (the `.d2` and `.bg-b` rules are the approved look; ignore `.bg-a`, `.bg-c`, `.bg-d`, `.pick` and `.phones`).
 
-**Scope:** Tier 1 of spec section 10. The curtain, the Box office, Gate scanning and Daily reports demos, the longer "For your guests" blocks and polish are tier 2 and 3, in a follow-up plan.
+**Scope:** Tier 1 of spec section 10, as changed by Anthony on 2026-11-18 (see "Changes after the plan was written"). The curtain, anything further for Gate scanning and Daily reports, the longer "For your guests" blocks and polish are tier 2 and 3, in a follow-up plan.
 
 **Branch:** `feature/relaunch-tier1` in the main checkout (no worktree). Merge with `--no-ff`.
 
@@ -45,11 +45,22 @@
 1. Shared parts are HTML partials in `src/partials/`, included at build time by `<!--site:name-->` placeholders. Config values reach HTML as `{{TOKEN}}`.
 2. The collision-proof asset folder is `emc-site/` (`build.assetsDir: 'emc-site/assets'`, public files in `public/emc-site/`).
 3. `/iafe/` has one form, directly under its hero (`id="talk"`), and a closing strip that links back to it.
-4. Until the tier 2 demos exist, the home page rows for Gate scanning and Daily reports read "See how", not "Try it" or "See one".
+4. Home page row labels: Online sales and Box office POS read "Watch it" (they play a real-product video), Live dashboard reads "Try it" (it is the one in-page demo), and Retail stores, Gate scanning and Daily reports read "See how". The line under the heading reads "Pick any tool and see it work. No sign-up." (the mockup said "try it yourself", written before the videos existed).
 5. A plain sharing image in the new look ships in tier 1, so no page points at the old gold artwork.
 6. `robots.txt` keeps today's WordPress rules and names the new `sitemap.xml`.
 7. Staging is a `--mode staging` build: every page `noindex`, `robots.txt` disallows everything.
 8. The form's default HTML state is the fallback (an "Email Anthony" button and the toll-free number). JavaScript swaps in the form only when it can deliver or simulate.
+
+## Changes after the plan was written
+
+**2026-11-18, from Anthony, while Task 4 was in review.** (1) "Please leverage the videos being made in the Demo Video Creation Terminal so we do not make the videos twice." (2) Asked how the site should use them, he chose: videos replace the click-through copies, "but I want the dashboard to be more complex and closer to the terminal that we made". (3) On the three videos that show a client fair's name (fair map, phone line, Pip): "Leave them but just blind the name. Make sure there is not a MNPI (something like the map is ok)".
+
+What that changes here:
+
+- The Platform page plays the real-product walkthrough videos for Online sales, Box office and the Live board. The click-through Online sales demo (the old Task 7) is dropped, and tier 2 no longer builds a Box office click-through. The spec's sections 4 and 5.5 are superseded on those points.
+- The Live dashboard demo stays an in-page demo and is rebuilt to follow the real live board's panels and dark screen look (the new Task 7). The home page keeps the compact board from the approved mockup.
+- The fair map, phone line and Pip videos go on the site only as name-blinded versions with no non-public details. The Demo Video terminal delivered those versions the same evening (files ending `-web`), and an independent frame-by-frame check found no trace of the fair's name and nothing non-public (`video-check-report.md` in the plan's workspace); the sound was transcribed and checked by the Demo Video terminal. They go on the site and to staging for Anthony's review. Real but public details remain in them (the grounds, act and vendor names, the fair's 2026 dates, hours and public prices). This repo is public, so the unblinded files never enter it.
+- This repo copies finished video files (`npm run videos`); it never records or edits them.
 
 ## Review Focus
 
@@ -597,8 +608,8 @@ it('proof strip is exact', () => {
   // img alts: Walgreens, Circle K, Menards
 });
 it('Sell, Scan, Count cards link to the right places', () => {
-  // 'Sell. Scan. Count.', 'Pick any tool and try it yourself. No sign-up.'
-  // 01 Sell 'Online, at the window and in stores.': Online sales -> /platform/#online-sales 'Try it'; Box office POS -> /platform/#box-office 'Try it'; Retail stores -> /retail-partners/ 'See how'
+  // 'Sell. Scan. Count.', 'Pick any tool and see it work. No sign-up.'
+  // 01 Sell 'Online, at the window and in stores.': Online sales -> /platform/#online-sales 'Watch it'; Box office POS -> /platform/#box-office 'Watch it'; Retail stores -> /retail-partners/ 'See how'
   // 02 Scan 'Any gate. Duplicates blocked.': Gate scanning -> /platform/#gate-scanning 'See how'; 'RFID wristbands' with 'Later in 2027' and no link
   // 03 Count 'Every ticket, as it happens.': Live dashboard -> /platform/#live-dashboard 'Try it'; Daily reports -> /platform/#daily-reports 'See how'
 });
@@ -611,7 +622,7 @@ it('carries Organization JSON-LD with the toll-free number and address, and no e
 
 - [ ] **Step 3: Run** `npx vitest run tests/home.test.js`. Expected: FAIL.
 
-- [ ] **Step 4: Write `index.html` and `home.css`** from the mockup's `.bg-b` layout: the hero block holds the photo (`<picture>` positioned behind, with the mockup's two gradients over it), the header include inside the hero's `.wrap`, the copy on the left and the board with its "Running right now" chip on the right; on computers the hero fills the window height (minimum 640px) and the proof strip overlaps its bottom edge by 44px; on phones (1000px and under) the photo covers only the top of the hero behind the copy, as in the mockup. Then the proof strip, the Sell, Scan, Count section, the guest cards and the ask band. The "Tickets on sale at" label before the logos is visually hidden text. The `site-integrity` hash-link test will fail until Task 6 creates the ids; mark that one test `it.todo` with a comment naming Task 6 and nothing else.
+- [ ] **Step 4: Write `index.html` and `home.css`** from the mockup's `.bg-b` layout: the hero block holds the photo (`<picture>` positioned behind, with the mockup's two gradients over it), the header include inside the hero's `.wrap`, the copy on the left and the board with its "Running right now" chip on the right; on computers the hero fills the window height (minimum 640px) and the proof strip overlaps its bottom edge by 44px; on phones (1000px and under) the photo covers only the top of the hero behind the copy, as in the mockup. Then the proof strip, the Sell, Scan, Count section, the guest cards and the ask band. The small arrow after each row's action word ("Watch it", "Try it", "See how") is drawn with CSS or an inline SVG, not with an arrow character: the self-hosted fonts have no arrow glyph. The "Tickets on sale at" label before the logos is visually hidden text. The `site-integrity` hash-link test will fail until Task 6 creates the ids; mark that one test `it.todo` with a comment naming Task 6 and nothing else.
 
 - [ ] **Step 5: Run** `npm test`. Expected: PASS (one todo).
 
@@ -621,39 +632,87 @@ it('carries Organization JSON-LD with the toll-free number and address, and no e
 
 ---
 
-### Task 6: The platform page and the Live dashboard demo
+### Task 6: The platform page and the product videos
+
+*Revised 2026-11-18 after Anthony's decision: the real-product walkthrough videos made in the Demo Video terminal replace the planned click-through copies of online ordering and the box office. This repo never records or edits product videos; it copies finished files.*
 
 **Files:**
-- Create: `src/styles/platform.css`, `src/styles/demo.css`, `src/show.js`, `src/demo/pace.js`, `src/demo/dashboard-view.js`, `src/entry/platform.js`, `tests/show.test.js`, `tests/pace.test.js`, `tests/dashboard-view.test.js`, `tests/platform.test.js`
+- Create: `build/videos.js`, `scripts/sync-videos.mjs`, `public/emc-site/video/` (written by the script: six MP4s, six posters, `videos.json`), `src/video.js`, `src/show.js`, `src/styles/platform.css`, `src/entry/platform.js`, `tests/videos.test.js`, `tests/show.test.js`, `tests/platform.test.js`
 - Rewrite: `platform/index.html`
-- Modify: `build/pages.js` (platform `styles` adds board, demo and platform CSS; `entry` `/src/entry/platform.js`), `tests/site-integrity.test.js` (restore the hash-link test)
+- Modify: `build/render.js` (one generator per video), `build/pages.js` (platform `styles` adds `/src/styles/platform.css`; `entry` `/src/entry/platform.js`), `package.json` (script `videos`), `tests/site-integrity.test.js` (restore the hash-link test)
 
 **Interfaces:**
-- Consumes: board engine, `runWhileVisible`, `count`, `money`.
+- Consumes: `GENERATORS`, the chrome classes, `trackEvent`.
 - Produces:
   ```js
+  // build/videos.js
+  export const VIDEO_SOURCE_DIR = '/mnt/c/Users/Anthony Quintana/Desktop/EMC Pitch Materials/Product Demo Videos';   // override with env EMC_VIDEO_SRC
+  export const VIDEO_PUBLIC_DIR = 'public/emc-site/video';
+  export const VIDEOS = [
+    { id: 'online-ordering', title: 'Online ordering', file: 'emc-online-ordering.mp4', poster: 'emc-online-ordering-poster.jpg', cleared: true,
+      caption: 'The real product, recorded with a sample fair. About a minute.' },
+    { id: 'box-office', title: 'Box office', file: 'emc-box-office.mp4', poster: 'emc-box-office-poster.jpg', cleared: true,
+      caption: 'The real product, recorded with a sample fair. About a minute.' },
+    { id: 'live-board', title: 'Live board', file: 'emc-live-board.mp4', poster: 'emc-live-board-poster.jpg', cleared: true,
+      caption: 'The real product, recorded with a sample fair. About a minute.' },
+    // These three were recorded with a client fair's material. Only the name-blinded versions (files ending -web)
+    // may be used. Set cleared to false to take one off the site at once.
+    { id: 'fair-map', title: 'Interactive fair map', file: 'emc-fair-map-web.mp4', poster: 'emc-fair-map-web-poster.jpg', cleared: true,
+      caption: "A real fair's map, with the fair's name left out. About a minute." },
+    { id: 'phone-line', title: 'Ticket-buyer call line', file: 'emc-phone-line-web.mp4', poster: 'emc-phone-line-web-poster.jpg', cleared: true,
+      caption: "A sample call, with the fair's name left out. About a minute." },
+    { id: 'pip', title: 'Pip', file: 'emc-pip-gate-helper-web.mp4', poster: 'emc-pip-gate-helper-web-poster.jpg', cleared: true,
+      caption: 'Pip answering guests at a front gate kiosk. Under a minute.' },
+  ];
+  // Never in this repo (they show the client fair's name): emc-fair-map.mp4, emc-phone-line.mp4, emc-pip-gate-helper.mp4,
+  // emc-all-products-booth-loop.mp4, their posters, all-seven-at-a-glance.jpg, and anything from the "web (720p)" subfolder.
+  export const NEVER_COPY = ['emc-fair-map.mp4', 'emc-phone-line.mp4', 'emc-pip-gate-helper.mp4', 'emc-all-products-booth-loop.mp4'];
+  export const videoById = (id) => VIDEOS.find((v) => v.id === id) ?? null;
+  export function copyPlan(videos = VIDEOS): { id, from, to, posterFrom, posterTo }[]   // cleared videos only
+  export function renderVideoHTML(video, meta): string    // '' when the video is not cleared; meta = { width, height } from videos.json
+
+  // src/video.js
+  export function initVideos(doc = document, track = trackEvent): void   // starting one video pauses the others; fires 'video_play' { id } once per video
+
   // src/show.js
   export const SHOW = { booth: '#410', city: 'Louisville', firstDay: '2026-11-30', lastDay: '2026-12-01', timeZone: 'America/New_York' };
   export function showPhase(now = new Date()): 'before' | 'during' | 'after'     // by the calendar date in SHOW.timeZone
   export function boothLine(now = new Date()): string
   export function initShowNotes(doc = document, now = new Date()): void
   // initShowNotes: un-hides every [data-booth-note] in phases 'before' and 'during'; sets [data-booth-line] text to boothLine(now)
-
-  // src/demo/pace.js
-  export const DAY_START_MIN = 9 * 60, DAY_END_MIN = 23 * 60;
-  export function shareBy(minute): number                       // share of the day's sales made by this minute: 0 at open, 1 at close, never decreasing
-  export function paceSeries(ticketsNow, nowMinute): { minute: number, tickets: number }[]   // one point per half hour from open to now, ending at ticketsNow
-  export function projectedTotal(ticketsNow, nowMinute): number // ticketsNow / shareBy(nowMinute), rounded to the nearest 50
-
-  // src/demo/dashboard-view.js
-  export function mountDashboard(el, { intervalMs = 1700, rng = Math.random, startMinute = 18 * 60 + 42 } = {}): { tick(): void, destroy(): void }
   ```
   `boothLine` strings, exactly: before `See us at Booth #410 in Louisville, Nov 30 to Dec 1`; during `We're at Booth #410 today`; after `Good to meet you in Louisville.`
-- Page ids: `online-sales`, `box-office`, `retail`, `gate-scanning`, `rfid`, `live-dashboard`, `daily-reports`, `guests`, `guest-map`, `guest-pip`, `guest-call-line`. Task 7 fills the element `[data-demo="online-sales"]` inside `#online-sales`.
+  Placeholders: `<!--site:video-online-ordering-->` and so on, one per id (`GENERATORS['video-' + id]`).
+- Page ids: `online-sales`, `box-office`, `retail`, `gate-scanning`, `rfid`, `live-dashboard`, `daily-reports`, `guests`, `guest-map`, `guest-pip`, `guest-call-line`. Task 7 fills the element `[data-demo="live-dashboard"]` inside `#live-dashboard`.
 
-- [ ] **Step 1: Read the real product's board** for what it shows and how it words it: `~/projects/EMC-Ticketing-Platform/app/components/live/` (`counter.tsx`, `money.tsx`, `pace.tsx`, `gates.tsx`, `feed.tsx`). The demo may show only things found there, drawn in this site's look. Do not copy its styling, and do not show the weather, fraud, alerts, registers or brief panels.
+- [ ] **Step 1: Write the failing tests.**
 
-- [ ] **Step 2: Write the failing tests.**
+`tests/videos.test.js`:
+```js
+it('lists the six videos, and the three recorded with a client fair use only the name-blinded files', () => {
+  expect(VIDEOS.map((v) => v.id)).toEqual(['online-ordering', 'box-office', 'live-board', 'fair-map', 'phone-line', 'pip']);
+  for (const id of ['fair-map', 'phone-line', 'pip']) expect(videoById(id).file).toMatch(/-web\.mp4$/);
+  for (const v of VIDEOS) expect(NEVER_COPY).not.toContain(v.file);
+});
+it('only cleared videos are ever copied', () => {
+  expect(copyPlan().map((p) => p.id)).toEqual(VIDEOS.filter((v) => v.cleared).map((v) => v.id));
+  expect(copyPlan([{ id: 'x', file: 'x.mp4', poster: 'x.jpg', cleared: false }])).toEqual([]);
+});
+it('refuses to plan a copy of a file on the never-copy list', () => {
+  expect(() => copyPlan([{ id: 'x', file: 'emc-fair-map.mp4', poster: 'x.jpg', cleared: true }])).toThrow(/emc-fair-map\.mp4/);
+});
+it('a cleared video renders a native player that needs no JavaScript', () => {
+  // renderVideoHTML(videoById('box-office'), { width: 1920, height: 1080 }) parsed:
+  // figure[data-video="box-office"] > video[controls][playsinline][preload="none"][poster="/emc-site/video/emc-box-office-poster.jpg"][width][height]
+  // with <source src="/emc-site/video/emc-box-office.mp4" type="video/mp4"> and a fallback <a href> to the same file inside the video element;
+  // figcaption text is the video's caption from the manifest; the video has an aria-label naming the title
+});
+it('a video that is not cleared renders nothing', () => { expect(renderVideoHTML({ ...videoById('pip'), cleared: false }, {})).toBe(''); });
+it('every cleared video and poster is in the repo, and nothing else is', () => {
+  // public/emc-site/video holds exactly the six MP4s, their six posters and videos.json; no file on NEVER_COPY, nothing else
+});
+it('starting one video pauses the others and reports the play once', () => { /* initVideos with stubbed play/pause and a track spy */ });
+```
 
 `tests/show.test.js`:
 ```js
@@ -669,103 +728,133 @@ it('gives the three lines exactly', () => {});
 it('initShowNotes shows booth notes before and during the show and leaves them hidden after', () => {});
 ```
 
-`tests/pace.test.js`: `shareBy` is 0 at open, 1 at close, never decreases across the day, and clamps outside it; `paceSeries(3947, 18 * 60 + 42)` never decreases and its last point is 3947; `projectedTotal` is a multiple of 50 and at least `ticketsNow`.
+`tests/platform.test.js` (rendered page): every id listed above exists; the copy in Step 3 is present exactly; `#online-sales`, `#box-office`, `#live-dashboard`, `#guest-map`, `#guest-call-line` and `#guest-pip` each hold their video (`[data-video]` with the right id); the box office link is `https://app.emctickets.com/pos/tour` with `target="_blank"` and `rel` containing `noopener`; `#rfid` has no link and says "Later in 2027"; each of the four booth notes is `hidden` in the HTML and reads "See it at Booth #410"; `#online-sales`, `#box-office` and `#live-dashboard` each end with a link to `#talk` reading "Let's talk about your fair".
 
-`tests/dashboard-view.test.js`: after mounting, the text holds "Demo County Fair, Friday", "Sample data", "Tickets sold today", "Scanned in", "Sales today", a pace heading starting "On pace for", the three gate names, and a feed of six; the root matches `[data-sample]`; `tick()` changes the figures; it stops when hidden and when off screen (same cases as the board); never shows a store channel.
+- [ ] **Step 2: Run** the three new test files. Expected: FAIL.
 
-`tests/platform.test.js` (rendered page): every id listed above exists; the copy in Step 4 is present exactly; the box office link is `https://app.emctickets.com/pos/tour` with `target="_blank"` and `rel` containing `noopener`; `#rfid` has no link and says "Later in 2027"; each of the four booth notes is `hidden` in the HTML and reads "See it at Booth #410"; `#online-sales` and `#live-dashboard` each end with a link to `#talk` reading "Let's talk about your fair".
-
-- [ ] **Step 3: Run** the four new test files. Expected: FAIL.
+- [ ] **Step 3: Write `scripts/sync-videos.mjs` and run it** (`npm run videos`). For each entry of `copyPlan()`: fail with a clear message if the source file is missing; copy the MP4 with `ffmpeg -y -i <from> -c copy -movflags +faststart <to>` (no re-encode; plain copy with a printed warning if ffmpeg is not on the PATH); write the poster as a 960-wide JPEG (quality 78) with sharp; read width, height and duration with `ffprobe` into `public/emc-site/video/videos.json` (`{ [id]: { width, height, seconds } }`). Delete any file in the folder that is not in the plan. Print one line per video with its size. Expected: six MP4s of 2 to 9 MB each. The script reads only the exact filenames in the manifest from the source folder's top level; it never reads the "web (720p)" subfolder.
 
 - [ ] **Step 4: Write `platform/index.html`** with this copy, in this order. Each block is a `<section>` with the id shown; group labels use the numbered squares (01 Sell, 02 Scan, 03 Count).
 
-  - Intro: kicker "The platform"; `<h1>Sell. Scan. Count.</h1>`; "One system from first ticket to final report. Pick any tool and try it yourself. No sign-up."; a row of jump links to the blocks.
+  - Intro: kicker "The platform"; `<h1>Sell. Scan. Count.</h1>`; "One system from first ticket to final report. Pick any tool and see it work. No sign-up."; a row of jump links to the blocks.
   - **01 Sell**
-    - `online-sales`: `<h2>Online sales</h2>`; "Online sales and flash sales, on any phone. Buyers pick their tickets, pay and get a QR ticket."; an empty `<div data-demo="online-sales"></div>` (Task 7) preceded for now by the line "Demo coming to this page."; then the `#talk` link. Task 7 removes the "Demo coming" line.
-    - `box-office`: `<h2>Box office POS</h2>`; "Ring up a sale at the window. The register runs in a web browser on an iPad, so there is nothing to install. Tickets and the receipt print automatically."; link "Take the full box office tour" (new tab) with the note "Opens the real register with sample data."
+    - `online-sales`: `<h2>Online sales</h2>`; "Online sales and flash sales, on any phone. Buyers pick their tickets, pay and get a QR ticket."; `<!--site:video-online-ordering-->`; the `#talk` link.
+    - `box-office`: `<h2>Box office POS</h2>`; "Ring up a sale at the window. The register runs in a web browser on an iPad, so there is nothing to install. Tickets and the receipt print automatically."; `<!--site:video-box-office-->`; link "Take the full box office tour" (new tab) with the note "Opens the real register with sample data, so you can try it yourself."; the `#talk` link.
     - `retail`: `<h2>Retail stores</h2>`; "EMC is the exclusive event ticket partner of Walgreens."; "8,000+ retail locations"; "Same benefits at Circle K and Menards."; link "See how retail works" to `/retail-partners/`.
   - **02 Scan**
     - `gate-scanning`: `<h2>Gate scanning</h2>`; "Any gate, duplicates blocked. Barcode or QR."; "A ticket gets in once. Scan it again and the gate sees it has already been used."
     - `rfid`: `<h2>RFID wristbands</h2>` with the amber tag "Later in 2027"; "RFID wristbands later in 2027."; booth note.
   - **03 Count**
-    - `live-dashboard`: `<h2>Live dashboard</h2>`; "Real-time validation. 24/7 dashboard. Watch tickets sold, scanned in and sales as they happen."; `<div data-demo="live-dashboard"></div>`; the `#talk` link.
+    - `live-dashboard`: `<h2>Live dashboard</h2>`; "Real-time validation. 24/7 dashboard. Watch tickets sold, scanned in and sales as they happen."; `<div data-demo="live-dashboard"></div>` preceded for now by the line "Demo coming to this page." (Task 7 removes that line); then "Or watch the real board, recorded:" and `<!--site:video-live-board-->`; the `#talk` link.
     - `daily-reports`: `<h2>Daily reports</h2>`; "Sales by ticket type and by channel, scans by gate, and the day's totals."
-  - `guests`: `<h2>New for your guests</h2>`; three blocks: `guest-map` "Interactive fair map", "Your grounds on every phone."; `guest-pip` "Pip", "A talking AI clown for the front gate."; `guest-call-line` "Ticket-buyer call line", "Ticket answers by phone."; each with a booth note.
+  - `guests`: `<h2>New for your guests</h2>`; three blocks: `guest-map` "Interactive fair map", "Your grounds on every phone.", `<!--site:video-fair-map-->`; `guest-pip` "Pip", "A talking AI clown for the front gate.", `<!--site:video-pip-->`; `guest-call-line` "Ticket-buyer call line", "Ticket answers by phone.", `<!--site:video-phone-line-->`; each with a booth note.
   - Booth note markup, hidden by default: `<p class="booth-note" data-booth-note hidden>See it at Booth #410</p>`.
 
-- [ ] **Step 5: Implement `show.js`, `pace.js`, `dashboard-view.js` and `platform.js`.** `showPhase` formats `now` as a date in `SHOW.timeZone` with `Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' })` and compares strings. The dashboard is a white card on the cream page: a head row (LIVE pill, "Demo County Fair, Friday", a sample clock that starts at 6:42 PM and runs in real time, the Sample data pill); three KPI tiles; a "Pace through the day" panel with the heading "On pace for N today" and an SVG line of `paceSeries` with a "Now" marker; a "Gates" panel listing each gate's admitted count; a "Latest sales" feed of six lines, each with the items, "place · tender" and the amount. On phones the panels stack. `platform.js` imports `./site.js`, calls `initShowNotes()`, and mounts the dashboard.
+- [ ] **Step 5: Implement `build/videos.js`, the generators, `src/video.js`, `src/show.js` and `src/entry/platform.js`.** `renderVideoHTML` builds the native player described in the test; a cleared video whose files are missing from `public/emc-site/video` makes the build throw with "run npm run videos". `showPhase` formats `now` as a date in `SHOW.timeZone` with `Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' })` and compares strings. `platform.js` imports `./site.js`, then calls `initShowNotes()` and `initVideos()`.
 
-- [ ] **Step 6: Write `demo.css` and `platform.css`.** `demo.css` holds what every demo shares: the demo card, its caption row with the Sample data pill, the phone frame (`.frame-phone`, used by Task 7) and a tablet frame (`.frame-tablet`, for tier 2). `platform.css` holds the page layout and the dashboard.
+- [ ] **Step 6: Write `platform.css`:** the page layout (intro, jump links, group labels, blocks as white cards on cream), the video figure (16:9, rounded 22px corners, the line under it in muted text, full width of its card, never wider than 960px), the amber "Later in 2027" tag, the booth note. On phones a video fills the card's width and the native full-screen control is the way to see it large.
 
-- [ ] **Step 7: Restore the hash-link test** in `tests/site-integrity.test.js` (remove the `it.todo`). **Run** `npm test`. Expected: PASS.
+- [ ] **Step 7: Restore the hash-link test** in `tests/site-integrity.test.js` (remove the `it.todo` Task 5 left). **Run** `npm test`. Expected: PASS.
 
-- [ ] **Step 8: Look at it.** `npm run dev`; `node .superpowers/tools/shots.mjs /platform/`. No sideways scroll at 360; the dashboard reads clearly at 390 and 1280 and ticks in a browser; the booth notes show (today is before the show).
+- [ ] **Step 8: Look at it.** `npm run dev`; `node .superpowers/tools/shots.mjs /platform/`. No sideways scroll at 360; each of the six videos shows its poster and plays in a browser (check one with `node .superpowers/tools/tick-check.mjs` is not needed; instead confirm by loading the page and reading `video.readyState` after calling `play()` in a Playwright script, or report that playback was not verified); the booth notes show (today is before the show).
 
-- [ ] **Step 9: Commit** `feat(relaunch): platform page and the live dashboard demo`.
+- [ ] **Step 9: Commit** `feat(relaunch): platform page with the real-product walkthrough videos`.
 
 ---
 
-### Task 7: The Online sales demo
+### Task 7: The live dashboard, modeled on the real live board
+
+*Added 2026-11-18. Anthony: "I want the dashboard to be more complex and closer to the terminal that we made." The Live dashboard demo on the platform page follows the real live board's panels, labels and dark screen look, on sample data.*
 
 **Files:**
-- Create: `src/demo/online-sales.js`, `src/demo/online-sales-view.js`, `scripts/build-sample-qr.mjs`, `public/emc-site/img/sample-ticket-qr.svg`, `tests/online-sales.test.js`, `tests/online-sales-view.test.js`
-- Modify: `platform/index.html` (remove "Demo coming to this page."), `src/entry/platform.js`, `src/styles/demo.css`, `package.json` (dev dependency `qrcode`, script `sample-qr`), `tests/platform.test.js`
+- Create: `src/demo/dashboard-engine.js`, `src/demo/pace.js`, `src/demo/dashboard-markup.js`, `src/demo/dashboard-view.js`, `src/styles/dashboard.css`, `tests/dashboard-engine.test.js`, `tests/pace.test.js`, `tests/dashboard-view.test.js`
+- Modify: `build/render.js` (the `dashboard` generator), `platform/index.html` (replace the "Demo coming to this page." line and the empty demo element with `<!--site:dashboard-->`), `src/entry/platform.js`, `build/pages.js` (platform `styles` adds `/src/styles/dashboard.css`), `tests/platform.test.js`, `tests/no-js.test.js`
 
 **Interfaces:**
-- Consumes: `TICKET_TYPES`, `FAIR`, `money`; `[data-demo="online-sales"]`; `.frame-phone`.
+- Consumes: `createBoardState`, `nextSale`, `snapshot`, `count`, `money`, `mulberry32` from `src/demo/board-engine.js`; `TICKET_TYPES`, `GATES`, `FAIR`, `wholePercents`, `totals` from `src/demo/sample-fair.js`; `runWhileVisible` from `src/demo/lifecycle.js`.
 - Produces:
   ```js
-  // src/demo/online-sales.js
-  export const STEPS = ['event', 'tickets', 'checkout', 'ticket'];
-  export const MAX_PER_TYPE = 10;
-  export const SAMPLE_BUYER = { name: 'Sam Sample', email: 'sam@example.com', card: 'Visa ending 4242' };
-  export function initialState(): { step: 'event', cart: Record<string, number> }
-  export function reduce(state, action): state
-  // actions: { type: 'start' } | { type: 'add', id } | { type: 'remove', id } | { type: 'checkout' } | { type: 'pay' } | { type: 'back' } | { type: 'restart' }
-  export function cartLines(state): { id, name, qty, price, lineTotal }[]
-  export function cartTotal(state): number
-  export function cartCount(state): number
+  // src/demo/pace.js
+  export const DAY_START_MIN = 9 * 60, DAY_END_MIN = 23 * 60;
+  export function shareBy(minute): number                        // share of the day's sales made by this minute: 0 at open, 1 at close, never decreasing
+  export function paceSeries(ticketsNow, nowMinute): { minute, tickets }[]   // one point per half hour from open to now, the last one exactly ticketsNow at nowMinute
+  export function forecast(ticketsNow, nowMinute): { projected, low, high }  // projected = ticketsNow / shareBy(now) rounded to the nearest 10; low <= projected <= high; all >= ticketsNow
 
-  // src/demo/online-sales-view.js
-  export function mountOnlineSales(el): { destroy(): void }
+  // src/demo/dashboard-engine.js
+  export function createDashState({ minute = 18 * 60 + 42 } = {}): DashState     // wraps createBoardState(); same tickets, sales and scans as the home board
+  export function advance(state, rng = Math.random, { seconds = 1.7 } = {}): DashState   // one sale through nextSale, plus everything derived from it; never mutates
+  export function dashSnapshot(state): DashSnapshot
+
+  // src/demo/dashboard-markup.js
+  export function renderDashboardHTML(snap): string       // the whole board; root has data-sample and data-dashboard
+
+  // src/demo/dashboard-view.js
+  export function mountDashboard(el, { intervalMs = 1700, rng = Math.random } = {}): { tick(): void, destroy(): void }
+  ```
+  `DashSnapshot`:
+  ```js
+  {
+    clock: { minute, label },                 // label like '6:42 PM'
+    totals: { tickets, gross, orders, admitted, avgOrder, refundCount, refunds, sinceLabel, sinceCount, gateRate },
+    feed: [{ id, lines, where, amount, ageLabel }],          // 4 newest; where like 'Online · Card' or 'Gate 1 · Cash'
+    pace: { series, projected, low, high, nowMinute },
+    gates: [{ id, name, admitted, perMinute /* 30 numbers */, rate, slow }],
+    tenders: [{ id, label, amount, share }],                 // 'Online card', 'Box-office card', 'Cash'; shares sum to 100
+    types: [{ id, name, sold, left, note }],                 // note: "Won't sell out today" or 'Sells out about 9:30 PM'
+    registers: [{ id, name, cashier, sales, cardSeconds, drawer, reader, printer, close }],
+    fraud: { presentedAgain, voided, wrongEvent, wrongDay, recent: [{ tail, gate, firstLabel, firstGate, timeLabel }] },
+    brief: { timeLabel, text },
+  }
   ```
 
-- [ ] **Step 1: Read the real storefront** for its steps, labels and layout: `~/projects/EMC-Ticketing-Platform/app/routes/$eventSlug.tsx`, `$eventSlug_.checkout.$checkoutId.tsx`, `app/components/storefront/ticket-card.tsx` and `ticket-stub.tsx`, and the screenshots in `/mnt/c/Users/Anthony Quintana/Desktop/EMC Storefront Cleanup Screens/` (`3-event-page-phone.png`, `4-event-page-phone-tickets-chosen.png`, `7-ticket-page-phone.png`). Follow its steps and wording in this site's look. Leave out its service fee line, its payment fields and its bot check.
+- [ ] **Step 1: Study the real board.** Read, in `~/projects/EMC-Ticketing-Platform` (read only; do not run it, do not change it): `app/components/live/shell.tsx`, `counter.tsx`, `feed.tsx`, `pace.tsx`, `gates.tsx`, `money.tsx`, `registers.tsx`, `fraud.tsx`, `alerts.tsx`, `format.ts`, `app/lib/live/types.ts`, `app/lib/live/analytics.ts`, and `app/styles/live.css` for its layout, colors and type scale. Look at the board as it appears on a screen: `/mnt/c/Users/Anthony Quintana/Desktop/EMC Pitch Materials/Product Demo Videos/emc-live-board-poster.jpg`. The demo keeps the real board's panel names, labels, order and screen look. It leaves out what needs a server or a person: the Ask box, the demo switch, the weather panel, the "Updated" stamp and the LIVE / DELAYED / OFFLINE status logic (the dot always reads LIVE).
 
 - [ ] **Step 2: Write the failing tests.**
 
-`tests/online-sales.test.js`:
+`tests/pace.test.js`: `shareBy` is 0 at open, 1 at close, never decreases across the day and clamps outside it; `paceSeries(3947, 18 * 60 + 42)` never decreases and its last point is `{ minute: 1122, tickets: 3947 }`; `forecast(3947, 1122)` gives multiples of 10 with `3947 <= low <= projected <= high`.
+
+`tests/dashboard-engine.test.js`:
 ```js
-it('starts on the fair page with an empty cart', () => {});
-it('start moves to tickets', () => {});
-it('add and remove change the quantity within 0 and MAX_PER_TYPE', () => {
-  // 11 adds of 'adult' -> 10; remove at 0 stays 0; an unknown id changes nothing
+it('opens on the same books as the home board', () => {
+  const s = dashSnapshot(createDashState());
+  expect(s.totals.tickets).toBe(3947); expect(s.totals.gross).toBe(61284); expect(s.totals.admitted).toBe(2618);
+  expect(s.clock.label).toBe('6:42 PM');
 });
-it('the total is the sum of the sample prices and nothing else', () => {
-  // 2 adult + 1 wristband -> lines [24, 30], total 54
+it('every panel agrees with the books after any number of sales', () => {
+  // 400 advances with mulberry32(11); after each one:
+  // tenders amounts sum to totals.gross and their shares sum to 100; tender labels are exactly ['Online card', 'Box-office card', 'Cash']
+  // totals.orders rose by exactly 1; avgOrder === Math.round(gross / orders * 100) / 100
+  // types: the sold figures sum to totals.tickets; every left >= 0
+  // gates: admitted figures sum to totals.admitted; each perMinute has 30 non-negative numbers; rate is the mean of the last 10, one decimal
+  // registers: sales sum to the Box-office card and Cash tenders together; an online sale changes no register
+  // fraud counts never decrease; recent has at most 5 entries
+  // pace.series ends at totals.tickets; totals.tickets <= pace.low <= pace.projected <= pace.high
 });
-it('checkout needs at least one ticket', () => { /* 'checkout' with an empty cart stays on tickets */ });
-it('pay moves from checkout to the ticket', () => {});
-it('back steps one screen: checkout to tickets, tickets to event; nothing from event or ticket', () => {});
-it('restart returns to the first screen with an empty cart from anywhere', () => {});
-it('an action that does not apply to the current step returns the same state', () => { /* 'pay' on 'tickets', 'add' on 'ticket' */ });
+it('the clock moves forward with each advance and the feed ages', () => {});
+it('never mutates the state it was given', () => { /* deep-freeze the input */ });
+it('is the same run for the same seed', () => {});
+it('shows only Online and the box-office registers as places; never a store', () => {});
 ```
 
-`tests/online-sales-view.test.js`: mounting shows the fair page with "Demo County Fair" and "Sample data"; "Get tickets" shows the five ticket types with their sample prices; the plus button for Adult admission twice shows a total of "$24"; the Checkout button is disabled with an empty cart; checkout shows the sample buyer and "Visa ending 4242" as text with no `input` elements at all; "Pay $24" shows the ticket with the QR image, the text "Sample ticket. Not valid for entry." and no fee line anywhere (the text never matches `/fee/i`); "Start over" returns to the first screen; each step change moves focus to the step's heading; every control is a `button`; the root matches `[data-sample]`.
+`tests/dashboard-view.test.js`: `renderDashboardHTML(dashSnapshot(createDashState()))` holds "Demo County Fair", "LIVE", "Sample data", the four tile labels "Tickets today", "Gross today", "Orders", "Admitted", the panel headings "Latest sales", "Gates", "Money", "Fraud watch", "Ticket types today", "Registers", a pace heading starting "On pace for", the legend "Sold so far", "Expected at this pace", "Forecast range", the fraud labels "Presented again", "Voided", "Wrong event", "Wrong day", and "AI brief"; the root matches `[data-sample][data-dashboard]` and has no `aria-live` anywhere; `tick()` changes the tile figures without replacing the board's root element or its panel elements (hold references to them before and after); it stops when hidden and when off screen and does not catch up (the board's cases); `destroy()` stops everything and a later `tick()` does nothing.
 
-`tests/platform.test.js`, add: the page no longer says "Demo coming to this page."
+`tests/platform.test.js`, change: the page no longer says "Demo coming to this page." and `#live-dashboard` contains `[data-dashboard]`. `tests/no-js.test.js`, add: the platform page as served contains the dashboard with `3,947` and `$61,284`.
 
-- [ ] **Step 3: Run** the two new test files. Expected: FAIL.
+- [ ] **Step 3: Run** the three new test files. Expected: FAIL.
 
-- [ ] **Step 4: Build the QR.** `npm i -D qrcode`; `scripts/build-sample-qr.mjs` writes `public/emc-site/img/sample-ticket-qr.svg` encoding the text `EMC-SAMPLE-TICKET` (not a web address), dark `#1b1f2a` on white. Run it.
+- [ ] **Step 4: Implement the engine.** `createDashState` holds the board state plus: orders (start 1,512), refunds (start 4 refunds, $96; they do not grow), tender amounts that already sum to the baseline gross (Online card = the baseline's online sales; the box-office sales split between card and cash), three registers ("Gate 1", "Gate 2", "Box Office 1") with sample cashiers "Sam", "Riley" and "Jordan" whose sales already sum to the box-office tenders, per-gate minute buckets for the last 30 minutes consistent with each gate's admitted count, fraud counts (start 12 presented again, 3 voided, 0 wrong event, 2 wrong day, with two recent tries), a capacity per ticket type well above what a visit can sell, and the sample clock. `advance` makes one sale with `nextSale` and attributes it: an online sale goes to the Online card tender; a box-office sale goes to one register and to Box-office card or Cash by its tender; scans go into the current minute bucket of the gate that took them; about one advance in forty adds a "presented again" try; the clock moves forward by `seconds`, rolling the minute buckets when the minute changes. The brief sentence is built from the snapshot: "As of 6:42 PM: 3,947 tickets sold, $61,284 gross, 2,618 admitted, with 6,150 projected for the day (5,900 to 6,400)." (figures from the snapshot; write ranges with "to").
 
-- [ ] **Step 5: Implement the reducer and the view.** The view renders a caption row ("Buy a ticket", Sample data pill), then a phone frame whose screen shows the current step: the fair page (name, "Friday", a "Get tickets" button); the ticket list (name, sample price, minus and plus buttons with `aria-label`s such as "Add one Adult admission", the quantity, a running total, "Checkout"); the checkout (order lines, total, the sample buyer and card as text, "Pay $N", "Back"); the ticket (fair name, the first line's ticket type, the QR, the sample notice, "Start over"). A step line under the frame ("Step 2 of 4") is an `aria-live="polite"` region.
+- [ ] **Step 5: Implement the markup and the view.** One board, laid out as the real one: top bar (the on-dark EMC logo, "Demo County Fair", a red LIVE dot, the clock with seconds, the "Sample data" pill); a ribbon "SAMPLE · simulated crowd"; the four tiles with their sub-lines ("+N since 6:30 PM", "Average order $40.53", "4 refunds, $96.00", "N a minute at the gates"); then the panels in the real board's arrangement: Latest sales (ticket stubs with amount and age), the pace chart (SVG: sold-so-far line, dashed expected line, shaded forecast range, a "Now" marker, hour labels), Gates (admitted, a 30-minute sparkline, rate per minute, a "Slow" flag when the real board's rule in `analytics.ts` would flag it), Money (the split bar and the three tenders with amount and share), Fraud watch, Ticket types today, Registers (cashier, sales, card-sale seconds, drawer, reader and printer dots, last close); and the brief strip along the bottom labeled "AI brief" with "sample" beside it. `mountDashboard` renders once, then on each tick updates text and attributes in place (never replaces the board or a panel); the four tile figures count up over about 800 ms (they jump under reduced motion); it runs only through `runWhileVisible`; after `destroy()` nothing runs. No fee lines anywhere.
 
-- [ ] **Step 6: Run** `npm test`. Expected: PASS.
+- [ ] **Step 6: Write `dashboard.css`.** The board is a dark screen (the real board's colors from `live.css`) set in a monitor frame with a stand on computers, as in the poster, on the cream page; the site's fonts (Bricolage Grotesque for figures and headings, Figtree for text, DM Mono for small labels). At 1000px and under there is no monitor stand: the board is a dark rounded card and the panels stack in this order: tiles (two by two), pace, Latest sales, Gates, Money, Ticket types today, Registers, Fraud watch, brief. Text on the dark screen meets 4.5:1 contrast. No sideways scroll at 360px. Animation off under `prefers-reduced-motion`.
 
-- [ ] **Step 7: Look at it.** `npm run dev`; `node .superpowers/tools/shots.mjs /platform/`. In a browser, go through the four steps by keyboard only (Tab, Enter, Space). The frame fits a 360px phone without sideways scroll.
+- [ ] **Step 7: Register the generator** (`GENERATORS.dashboard = () => renderDashboardHTML(dashSnapshot(createDashState()))`), put `<!--site:dashboard-->` in the page in place of the temporary line and the empty element, and mount it from `platform.js` (a failure to mount must not break the rest of the page).
 
-- [ ] **Step 8: Commit** `feat(relaunch): online sales demo`.
+- [ ] **Step 8: Run** `npm test`. Expected: PASS.
+
+- [ ] **Step 9: Look at it.** `npm run dev`; `node .superpowers/tools/shots.mjs /platform/` and again with `--nojs`. Compare the computer screenshot with the poster JPEG: same panels in the same places, same dark screen feel. Check 360 and 390 for the stacked layout. Confirm it ticks: `node .superpowers/tools/tick-check.mjs http://localhost:5173/platform/ '[data-dashboard]'` prints CHANGED and no errors.
+
+- [ ] **Step 10: Commit** `feat(relaunch): live dashboard demo modeled on the real live board`.
 
 ---
 
@@ -962,7 +1051,7 @@ it('new page paths come from the registry', () => { /* NEW_PAGES equals PAGES pa
 ### Task 11: Finish (controller)
 
 - [ ] **Step 1:** `npm test` and `npm run build` on the branch. Expected: all pass, no warnings about missing files.
-- [ ] **Step 2: Browser pass.** `npx vite preview`, then `node .superpowers/tools/shots.mjs --base http://localhost:4173` over all ten pages plus the Walgreens IAFE link. Expected: no page scrolls sideways at 360; look at every screenshot at 390 and 1280. Check by hand in the preview: the menu on a phone width, the form (simulate) on `/contact/`, both demos by keyboard, the cookie settings link, and the home page with JavaScript disabled.
+- [ ] **Step 2: Browser pass.** `npx vite preview`, then `node .superpowers/tools/shots.mjs --base http://localhost:4173` over all ten pages plus the Walgreens IAFE link. Expected: no page scrolls sideways at 360; look at every screenshot at 390 and 1280. Check by hand in the preview: the menu on a phone width, the form (simulate) on `/contact/`, the three videos play, the dashboard ticks, the cookie settings link, and the home and platform pages with JavaScript disabled.
 - [ ] **Step 3: Try the host rules for real** if an Apache can be had without sudo (`apt-get download apache2-bin` and its libraries, unpacked under `~/.local`): serve `dist-host/` beside a fake WordPress (`index.php`, a root `.htaccess` holding the stock WordPress block, two fake event folders each with `index.php`), with the block on top, and run `check-live.mjs --post` against it. If Apache cannot be had in 20 minutes, record that the rules are checked only by the unit test and will be proven on the real host at go-live.
 - [ ] **Step 4: Final whole-branch review** by a fresh reviewer against the spec and this plan. Fix what it finds.
 - [ ] **Step 5:** Merge to `main` with `--no-ff`, run the tests on the merge, delete the branch, push `main` to origin (standing instruction).

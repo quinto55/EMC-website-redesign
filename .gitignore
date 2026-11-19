@@ -4,3 +4,5 @@ dist/
 .vite/
 .superpowers/
 assets-src/
+dist-host/
+dist-host.zip

@@ -1,4 +1,22 @@
+// analytics.js imports getConsent from here as well; the cycle is safe because neither
+// module calls the other while loading, only from functions run later.
+import { anyTrackerConfigured } from './analytics.js';
+
 const KEY = 'emc-cookie-consent';
+const PRIVACY_LINK = '<a href="/privacy/">Privacy Policy</a>';
+
+const CHOICE = `
+  <p class="cookie-banner__text">We use cookies to understand how visitors use the site and to measure our advertising. See our ${PRIVACY_LINK}.</p>
+  <div class="cookie-banner__actions">
+    <button type="button" class="btn ghost" data-consent="declined">Decline</button>
+    <button type="button" class="btn" data-consent="accepted">Accept</button>
+  </div>`;
+
+const NOTHING_TRACKED = `
+  <p class="cookie-banner__text">This site is not using any tracking cookies right now. See our ${PRIVACY_LINK}.</p>
+  <div class="cookie-banner__actions">
+    <button type="button" class="btn" data-cookie-close>Close</button>
+  </div>`;
 
 export function getConsent() {
   try {
@@ -13,31 +31,42 @@ export function setConsent(value) {
   try {
     localStorage.setItem(KEY, value);
   } catch {
-    /* storage unavailable (private mode) — treat as session-only choice */
+    /* storage unavailable (private mode): the choice lasts for this page only */
   }
   if (value === 'accepted') {
     document.dispatchEvent(new CustomEvent('emc:consent-accepted'));
   }
 }
 
-export function initConsentBanner(doc = document) {
-  if (getConsent() !== null) return null;
-  const banner = doc.createElement('div');
-  banner.className = 'cookie-banner';
-  banner.setAttribute('role', 'region');
-  banner.setAttribute('aria-label', 'Cookie consent');
-  banner.innerHTML = `
-    <p class="cookie-banner__text">We use cookies to understand how visitors use the site and to measure our advertising. See our <a href="/privacy.html">Privacy Policy</a>.</p>
-    <div class="cookie-banner__actions">
-      <button type="button" class="cookie-banner__btn" data-consent="declined">Decline</button>
-      <button type="button" class="cookie-banner__btn cookie-banner__btn--accept" data-consent="accepted">Accept</button>
-    </div>`;
-  banner.addEventListener('click', (ev) => {
-    const btn = ev.target.closest('[data-consent]');
+/** One panel at a time, pinned to the bottom of the screen. */
+function showPanel(doc, { label, html, takeFocus }) {
+  doc.querySelectorAll('.cookie-banner').forEach((n) => n.remove());
+  const opener = takeFocus ? doc.activeElement : null;
+  const panel = doc.createElement('div');
+  panel.className = 'cookie-banner';
+  panel.setAttribute('role', 'region');
+  panel.setAttribute('aria-label', label);
+  panel.innerHTML = html;
+  panel.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-consent], [data-cookie-close]');
     if (!btn) return;
-    setConsent(btn.dataset.consent);
-    banner.remove();
+    if (btn.dataset.consent) setConsent(btn.dataset.consent);
+    panel.remove();
+    if (opener && opener !== doc.body && typeof opener.focus === 'function') opener.focus();
   });
-  doc.body.appendChild(banner);
-  return banner;
+  doc.body.appendChild(panel);
+  if (takeFocus) panel.querySelector('button')?.focus();
+  return panel;
+}
+
+/** The first-visit banner: only when a tracker is switched on and the visitor has not chosen yet. */
+export function initConsentBanner(doc = document) {
+  if (!anyTrackerConfigured() || getConsent() !== null) return null;
+  return showPanel(doc, { label: 'Cookie consent', html: CHOICE, takeFocus: false });
+}
+
+/** The footer's "Cookie settings": lets a visitor change their choice, or says nothing is tracked. */
+export function openCookieSettings(doc = document) {
+  const html = anyTrackerConfigured() ? CHOICE : NOTHING_TRACKED;
+  return showPanel(doc, { label: 'Cookie settings', html, takeFocus: true });
 }

@@ -1,0 +1,85 @@
+/* The IAFE landing page: opened from a printed card on a phone. Text only, no photo, no board.
+   Builds on the site look; the Walgreens story reuses the Retail partners rules in pages.css. */
+
+.iafe-lead .page-intro h2 { font-size: 72px; letter-spacing: -.03em; line-height: 1.03; }
+.iafe-lead { padding-bottom: 36px; }
+.iafe-lead .cta { margin-top: 22px; }
+
+.iafe-hero { padding: 46px 0 40px; }
+.iafe-hero h1 { max-width: 14em; font-size: 72px; letter-spacing: -.03em; }
+.iafe-booth {
+  display: inline-block;
+  margin-bottom: 18px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--tint-red);
+  color: var(--red);
+  font: 500 14px/1.4 var(--font-mono);
+}
+.iafe-sub { max-width: 560px; margin: 18px 0 26px; font-size: 21px; color: var(--mut); }
+
+/* Sell. Scan. Count. as a short list; the rules match the home page's cards. */
+.iafe-summary { padding-top: 24px; }
+.iafe-summary h2 { font-size: 44px; }
+.mods { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 28px; }
+.mod { padding: 26px 26px 10px; }
+.mod h3 { margin: 14px 0 8px; font: 700 40px/1 var(--font-head); letter-spacing: -.02em; }
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 11px 0;
+  border-top: 1px dashed var(--line);
+  font-weight: 600;
+}
+.row::before { content: ""; flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--live); }
+.row.soon::before { background: var(--amber); }
+.row .arrow { margin-left: auto; font-size: 15px; font-weight: 700; color: var(--red); }
+.iafe-all { margin-top: 26px; }
+.iafe-all .btn { padding-right: 20px; }
+.iafe-all .arrow { color: var(--ink); }
+
+.iafe-booth-sec { padding: 8px 0 44px; }
+.iafe-booth-sec h2 { font-size: 44px; }
+.iafe-demos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; margin-top: 22px; }
+.iafe-demos li {
+  position: relative;
+  padding: 14px 18px 14px 40px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--line);
+  font-weight: 600;
+}
+.iafe-demos li::before { content: ""; position: absolute; left: 18px; top: 22px; width: 9px; height: 9px; border-radius: 50%; background: var(--red); }
+
+.iafe-closing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px 32px;
+  margin-bottom: 84px;
+  padding: 28px 32px;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: var(--card-shadow);
+}
+.iafe-closing-contact { display: flex; flex-wrap: wrap; gap: 4px 28px; font-weight: 600; }
+.iafe-closing-contact a { display: inline-flex; align-items: center; min-height: 44px; }
+.iafe-closing-contact a:hover { color: var(--red); }
+.iafe-closing-contact small { font: 500 13px var(--font-mono); color: var(--mut); }
+
+@media (max-width: 1000px) {
+  .iafe-lead .page-intro h2 { font-size: 36px; }
+  .iafe-hero { padding: 22px 0 22px; }
+  .iafe-hero h1 { font-size: 38px; }
+  .iafe-booth { margin-bottom: 12px; font-size: 13px; }
+  .iafe-sub { margin: 12px 0 18px; font-size: 17px; }
+  .iafe-summary h2,
+  .iafe-booth-sec h2 { font-size: 34px; }
+  .mods,
+  .iafe-demos { grid-template-columns: minmax(0, 1fr); }
+  .iafe-booth-sec { padding-bottom: 30px; }
+  .iafe-closing { margin-bottom: 54px; padding: 22px 20px; }
+  .iafe-closing .btn { width: 100%; }
+}

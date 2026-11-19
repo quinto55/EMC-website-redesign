@@ -1,0 +1,607 @@
+/* The live dashboard demo on the platform page: a rendition of the real live board (EMC-Ticketing-Platform,
+   app/styles/live.css) on sample data. On computers the board is a dark screen in a monitor frame with a stand,
+   standing on the cream page at the wrap's full width; at 1000px and under it is a dark rounded card whose panels
+   stack. The board's own colors are the real board's; its type is the site's (Bricolage Grotesque for figures and
+   headings, Figtree for text, DM Mono for small labels). Every rule is scoped under .db. */
+
+.db {
+  --db-ground: #07090f;
+  --db-panel: #0e1220;
+  --db-raise: #151b2e;
+  --db-line: rgba(255, 255, 255, .08);
+  --db-line-2: rgba(255, 255, 255, .16);
+  --db-text: #f4f1ea;
+  --db-muted: #8b90a3;          /* 5.9:1 on the panels, 5.4:1 on the stubs */
+  --db-red: #c8102e;
+  --db-red-glow: rgba(200, 16, 46, .45);
+  --db-gold-1: #ffd66b;
+  --db-gold-2: #ff9c3d;
+  --db-gold: linear-gradient(90deg, var(--db-gold-1), var(--db-gold-2));
+  --db-amber: #ffb547;
+  --db-ok: #2fbf71;
+  --db-bad: #ff4d5e;
+  --db-t-online: #3987e5;
+  --db-t-box: #c47d10;
+  --db-t-cash: #d55181;
+  --db-bezel: #15171d;
+  /* Sizes follow the board's width (cqi is a hundredth of it), as the real board's follow the screen's. */
+  --db-gap: clamp(7px, .8cqi, 11px);
+  --db-pad: clamp(10px, 1.1cqi, 14px);
+  --db-body: clamp(12px, 1.17cqi, 14px);
+  --db-small: clamp(11px, 1cqi, 12.5px);
+  --db-figure: clamp(26px, 3.4cqi, 40px);
+  --db-radius: 10px;
+
+  container-type: inline-size;
+  color: var(--db-text);
+}
+.db *,
+.db *::before,
+.db *::after { box-sizing: border-box; }
+.db p,
+.db ol,
+.db ul,
+.db h3 { margin: 0; }
+.db :focus-visible { outline: 2px solid var(--db-gold-1); outline-offset: 2px; }
+
+/* ── The screen, in its monitor frame ──────────────────────────────────────────────────────────────────── */
+.db .db-screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: clamp(9px, 1.15cqi, 14px) solid var(--db-bezel);
+  border-radius: clamp(16px, 2cqi, 24px);
+  background:
+    radial-gradient(120% 60% at 50% -10%, rgba(37, 71, 224, .10), transparent 60%),
+    var(--db-ground);
+  box-shadow:
+    0 0 0 1px #2b2e37,
+    inset 0 0 0 1px rgba(255, 255, 255, .04),
+    0 34px 60px rgba(60, 35, 0, .22),
+    0 8px 18px rgba(60, 35, 0, .12);
+  font: 400 var(--db-body)/1.35 var(--font-text);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+/* The stand: a neck that widens to the desk, then the foot. */
+.db .db-stand { position: relative; height: 62px; }
+.db .db-stand::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: clamp(110px, 12cqi, 140px);
+  height: 50px;
+  translate: -50% 0;
+  clip-path: polygon(11% 0, 89% 0, 100% 100%, 0 100%);
+  background: linear-gradient(#0e0f13, #23262e 60%, #191b21);
+}
+.db .db-stand::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: clamp(300px, 36cqi, 420px);
+  height: 12px;
+  translate: -50% 0;
+  border-radius: 999px;
+  background: linear-gradient(#2a2d36, #121318);
+  box-shadow: 0 12px 20px rgba(60, 35, 0, .2);
+}
+
+/* ── Top bar ─────────────────────────────────────────────────────────────────────────────────────────── */
+.db .db-bar {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.2cqi, 20px);
+  padding: calc(var(--db-pad) * .7) var(--db-pad);
+  border-bottom: 1px solid var(--db-line);
+  background: rgba(14, 18, 32, .72);
+}
+.db .db-logo { flex: none; display: block; width: auto; height: clamp(30px, 3.1cqi, 40px); }
+.db .db-event {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-left: clamp(10px, 1.2cqi, 20px);
+  border-left: 1px solid var(--db-line-2);
+  font: 600 clamp(15px, 1.6cqi, 19px)/1.1 var(--font-head);
+  letter-spacing: -.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.db .db-live {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .55em;
+  font-size: var(--db-small);
+  font-weight: 700;
+  letter-spacing: .16em;
+}
+.db .db-live__dot {
+  position: relative;
+  width: .7em;
+  height: .7em;
+  border-radius: 50%;
+  background: var(--db-red);
+  box-shadow: 0 0 10px 1px var(--db-red-glow);
+}
+.db .db-live__dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--db-red);
+  border-radius: 50%;
+  animation: db-ping 1.8s cubic-bezier(0, 0, .2, 1) infinite;
+}
+@keyframes db-ping {
+  0% { transform: scale(1); opacity: .9; }
+  80%, 100% { transform: scale(2.8); opacity: 0; }
+}
+.db .db-clock {
+  flex: none;
+  font: 600 clamp(17px, 1.85cqi, 22px)/1 var(--font-head);
+  letter-spacing: -.01em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.db .db-clock__sec { color: var(--db-muted); }
+.db .db-clock__period { margin-left: .3em; font-size: .55em; color: var(--db-muted); }
+.db .db-pill {
+  flex: none;
+  padding: 3px 10px;
+  border: 1px solid rgba(255, 214, 107, .35);
+  border-radius: 999px;
+  background: rgba(255, 214, 107, .1);
+  color: var(--db-gold-1);
+  font: 500 var(--db-small)/1.3 var(--font-mono);
+  white-space: nowrap;
+}
+.db .db-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 .95em;
+  border: 1px solid var(--db-line-2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--db-text);
+  font: 600 var(--db-small)/1 var(--font-text);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.db .db-btn:hover { background: rgba(255, 255, 255, .06); }
+.db .db-btn[hidden] { display: none; }
+
+/* The sample ribbon: impossible to miss, never mistaken for real numbers. */
+.db .db-ribbon {
+  padding: .3em var(--db-pad);
+  border-bottom: 1px solid rgba(255, 214, 107, .35);
+  background: repeating-linear-gradient(135deg, rgba(255, 214, 107, .13) 0 14px, rgba(255, 214, 107, .04) 14px 28px), var(--db-ground);
+  color: var(--db-gold-1);
+  font: 500 var(--db-small)/1.4 var(--font-mono);
+  letter-spacing: .08em;
+  text-align: center;
+}
+
+/* ── The grid: tiles, the alerts row, then three columns (what is happening, the day, the operation) ──── */
+.db .db-grid {
+  flex: 1 1 auto;
+  display: grid;
+  gap: var(--db-gap);
+  padding: var(--db-gap);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.38fr) minmax(0, 1.16fr);
+  grid-template-rows: auto auto minmax(0, 1fr); /* full screen: the panels take the extra height */
+  grid-template-areas:
+    "tiles  tiles  tiles"
+    "alerts alerts alerts"
+    "stream day    ops";
+}
+.db .db-tiles { grid-area: tiles; }
+.db .db-alerts { grid-area: alerts; }
+.db .db-col { display: flex; flex-direction: column; gap: var(--db-gap); min-width: 0; }
+.db .db-col[data-col="stream"] { grid-area: stream; }
+.db .db-col[data-col="day"] { grid-area: day; }
+.db .db-col[data-col="ops"] { grid-area: ops; }
+/* Each column shares its height: fraud watch, the chart and the registers take what is left. */
+.db .db-col > [data-panel="fraud"] { flex: 1 1 auto; }
+.db .db-col > [data-panel="pace"] { flex: 1 1 auto; }
+.db .db-col > [data-panel="registers"] { flex: 1 1 auto; }
+
+.db .db-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  padding: var(--db-pad);
+  border: 1px solid var(--db-line);
+  border-radius: var(--db-radius);
+  background: var(--db-panel);
+}
+.db .db-panel__head { flex: none; display: flex; align-items: baseline; justify-content: space-between; gap: 1em; margin-bottom: calc(var(--db-pad) * .6); }
+.db .db-panel__title { font: 600 var(--db-body)/1.3 var(--font-text); letter-spacing: 0; }
+.db .db-panel > .db-panel__title { margin-bottom: calc(var(--db-pad) * .6); }
+
+/* ── Tiles: one scoreboard band, hairline-divided ───────────────────────────────────────────────────────── */
+.db .db-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid var(--db-line);
+  border-radius: var(--db-radius);
+  background: var(--db-panel);
+}
+.db .db-tile {
+  display: grid;
+  align-content: start;
+  gap: .25em;
+  min-width: 0;
+  padding: calc(var(--db-pad) * .8) var(--db-pad);
+  border-left: 1px solid var(--db-line);
+}
+.db .db-tile:first-child { border-left: 0; }
+.db .db-tile__label { color: var(--db-muted); font-size: var(--db-small); font-weight: 500; }
+.db .db-tile__value {
+  font: 600 var(--db-figure)/1 var(--font-head);
+  letter-spacing: -.025em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  transition: color .4s;
+}
+.db .db-tile[data-counting] .db-tile__value { color: var(--db-gold-1); text-shadow: 0 0 18px rgba(255, 156, 61, .45); transition: none; }
+.db .db-tile__unit { margin-right: .06em; color: var(--db-muted); font-size: .58em; font-weight: 500; vertical-align: .36em; }
+.db .db-tile__sub { color: var(--db-muted); font-size: var(--db-small); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── Alerts: one alert high, empty when there is nothing to say, so an alert never moves the panels ──── */
+.db .db-alerts { display: flex; flex-wrap: wrap; gap: var(--db-gap); min-height: calc(2.35em + 2px); }
+.db .db-alert {
+  flex: 1 1 24em;
+  display: flex;
+  align-items: center;
+  gap: .75em;
+  min-width: 0;
+  padding: .5em var(--db-pad);
+  border: 1px solid rgba(255, 181, 71, .5);
+  border-radius: var(--db-radius);
+  background: linear-gradient(90deg, rgba(255, 181, 71, .18), rgba(255, 181, 71, .05) 70%), var(--db-panel);
+  font-weight: 600;
+}
+.db .db-alert__text { min-width: 0; }
+.db .db-alert__icon { position: relative; flex: none; width: 1.35em; height: 1.35em; }
+.db .db-alert__icon svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.db .db-alert__icon path { fill: var(--db-amber); stroke: var(--db-amber); stroke-width: 1.5; stroke-linejoin: round; }
+.db .db-alert__icon .db-alert__mark { fill: none; stroke: var(--db-ground); stroke-width: 2.2; stroke-linecap: round; }
+.db .db-alert__icon::after {
+  content: "";
+  position: absolute;
+  inset: -.2em;
+  border: 2px solid var(--db-amber);
+  border-radius: 50%;
+  animation: db-ping 1.8s cubic-bezier(0, 0, .2, 1) infinite;
+}
+
+/* ── Latest sales: ticket stubs ───────────────────────────────────────────────────────────────────────── */
+.db .db-feed__list { display: flex; flex-direction: column; gap: clamp(5px, .6cqi, 8px); padding: 0; list-style: none; }
+.db .db-stub {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid var(--db-line);
+  border-radius: 8px;
+  background: var(--db-raise);
+}
+.db .db-stub__main { min-width: 0; padding: .5em .8em; }
+.db .db-stub__lines { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db .db-stub__where { color: var(--db-muted); font-size: var(--db-small); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* The perforation: a tear line with a half notch top and bottom. */
+.db .db-stub__amount {
+  position: relative;
+  display: grid;
+  align-content: center;
+  justify-items: end;
+  padding: .5em .85em .5em 1em;
+  border-left: 1px dashed var(--db-line-2);
+}
+.db .db-stub__amount::before,
+.db .db-stub__amount::after {
+  content: "";
+  position: absolute;
+  left: -6px;
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--db-line);
+  border-radius: 50%;
+  background: var(--db-panel);
+}
+.db .db-stub__amount::before { top: -6px; }
+.db .db-stub__amount::after { bottom: -6px; }
+.db .db-stub__amount strong { font-weight: 600; }
+.db .db-stub__amount span { color: var(--db-muted); font-size: var(--db-small); white-space: nowrap; }
+/* A sale arriving drops in at the top; its total flashes gold. */
+.db .db-arrive { animation: db-arrive 700ms cubic-bezier(.2, .8, .2, 1) both; }
+.db .db-arrive .db-stub__amount strong { animation: db-flash 1.6s ease-out both; }
+@keyframes db-arrive {
+  from { max-height: 0; opacity: 0; transform: translateY(-12px) scale(.98); }
+  to { max-height: 8em; opacity: 1; transform: none; }
+}
+@keyframes db-flash {
+  from { color: var(--db-gold-1); text-shadow: 0 0 14px rgba(255, 156, 61, .7); }
+  to { color: var(--db-text); text-shadow: none; }
+}
+
+/* ── The pace chart ───────────────────────────────────────────────────────────────────────────────────── */
+.db .db-pace__head { flex: none; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .4em 1.4em; }
+.db .db-pace__title { font: 600 clamp(16px, 1.7cqi, 21px)/1.15 var(--font-head); letter-spacing: -.015em; }
+.db .db-pace__range { color: var(--db-muted); font-weight: 400; }
+.db .db-legend { display: flex; flex-wrap: wrap; gap: .3em 1.1em; padding: 0; list-style: none; color: var(--db-muted); font-size: var(--db-small); }
+.db .db-legend li { display: inline-flex; align-items: center; gap: .45em; }
+.db .db-key { display: inline-block; width: 1.4em; height: 0; border-top: 2px solid; }
+.db .db-key--sold { border-image: var(--db-gold) 1; }
+.db .db-key--expected { border-top: 2px dashed rgba(244, 241, 234, .55); }
+.db .db-key--range { height: .7em; border: 0; border-radius: 2px; background: rgba(255, 214, 107, .16); }
+.db .db-chart { position: relative; flex: 1 1 auto; min-height: 180px; margin-top: calc(var(--db-pad) * .5); }
+.db .db-chart svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.db .db-rule { stroke: var(--db-line); stroke-width: 1; shape-rendering: crispEdges; }
+.db .db-axis { fill: var(--db-muted); font: 400 11px var(--font-mono); }
+.db .db-cone { fill: rgba(255, 214, 107, .12); }
+.db .db-expected { fill: none; stroke: rgba(244, 241, 234, .5); stroke-width: 1.5; stroke-dasharray: 5 5; }
+.db .db-sold { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.db .db-now { stroke: rgba(200, 16, 46, .7); stroke-width: 1; }
+.db .db-now__dot { fill: var(--db-gold-1); stroke: var(--db-ground); stroke-width: 2; }
+.db .db-now__ping {
+  fill: none;
+  stroke: var(--db-gold-1);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: db-ping 2.2s cubic-bezier(0, 0, .2, 1) infinite;
+}
+.db .db-label { fill: var(--db-text); font: 600 13px var(--font-text); }
+.db .db-label--muted { fill: var(--db-muted); font-weight: 500; }
+
+/* ── Ticket types: a meter list ───────────────────────────────────────────────────────────────────────── */
+.db .db-types__list { display: grid; align-content: start; padding: 0; list-style: none; }
+.db .db-type {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 13em;
+  grid-template-areas: "name status" "meter figs";
+  align-items: center;
+  gap: .2em 1.2em;
+  padding: clamp(4px, .55cqi, 8px) 0;
+  border-top: 1px solid var(--db-line);
+}
+.db .db-type:first-child { padding-top: 0; border-top: 0; }
+.db .db-type__name { grid-area: name; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db .db-type__status { grid-area: status; justify-self: end; font-size: var(--db-small); font-weight: 600; white-space: nowrap; }
+.db .db-type__figs { grid-area: figs; justify-self: end; color: var(--db-muted); font-size: var(--db-small); white-space: nowrap; }
+.db .db-meter { grid-area: meter; display: block; height: 8px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, .07); }
+.db .db-meter > span { display: block; width: var(--fill); height: 100%; border-radius: inherit; background: var(--db-gold); box-shadow: 0 0 10px rgba(255, 156, 61, .45); }
+.db .db-type[data-state="ok"] .db-type__status { color: var(--db-muted); font-weight: 500; }
+.db .db-type[data-state="sellout"] .db-type__status::before {
+  content: "";
+  display: inline-block;
+  width: .55em;
+  height: .55em;
+  margin-right: .45em;
+  border-radius: 50%;
+  background: var(--db-gold-2);
+  box-shadow: 0 0 8px rgba(255, 156, 61, .8);
+}
+.db .db-type[data-state="soldout"] .db-type__status { padding: .05em .5em; border-radius: 4px; background: var(--db-red); color: #fff; }
+.db .db-type[data-state="soldout"] .db-meter > span { background: var(--db-red); box-shadow: 0 0 10px var(--db-red-glow); }
+
+/* ── Gates: name and admitted, the last 30 minutes, the rate a minute ─────────────────────────────────── */
+.db .db-gates__list { display: grid; align-content: start; padding: 0; list-style: none; }
+.db .db-gate {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(4.5em, 8.5em) 4.4em;
+  grid-template-areas: "name spark rate" "sub spark rate";
+  align-items: center;
+  column-gap: .9em;
+  padding: clamp(4px, .6cqi, 8px) 0;
+  border-top: 1px solid var(--db-line);
+}
+.db .db-gate:first-child { padding-top: 0; border-top: 0; }
+.db .db-gate__name { grid-area: name; display: flex; align-items: center; gap: .5em; min-width: 0; font-weight: 600; white-space: nowrap; }
+.db .db-gate__name > span:first-child { overflow: hidden; text-overflow: ellipsis; }
+.db .db-gate__sub { grid-area: sub; color: var(--db-muted); font-size: var(--db-small); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db .db-gate__rate { grid-area: rate; justify-self: end; line-height: 1; white-space: nowrap; }
+.db .db-gate__rate strong { font: 600 1.7em/1 var(--font-head); letter-spacing: -.02em; }
+.db .db-gate__rate span { margin-left: .12em; color: var(--db-muted); font: 400 var(--db-small) var(--font-mono); }
+.db .db-flag {
+  flex: none;
+  padding: .05em .45em;
+  border-radius: 4px;
+  background: var(--db-amber);
+  color: var(--db-ground);
+  font-size: var(--db-small);
+  font-weight: 700;
+}
+.db .db-flag[hidden] { display: none; }
+.db .db-spark { grid-area: spark; display: block; width: 100%; height: auto; aspect-ratio: 120 / 32; overflow: visible; }
+.db .db-spark__base { stroke: var(--db-line); stroke-width: 1; }
+.db .db-spark__area { fill: rgba(244, 241, 234, .07); }
+.db .db-spark__line { fill: none; stroke: rgba(244, 241, 234, .42); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+.db .db-spark__now { fill: none; stroke: var(--db-gold-1); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; filter: drop-shadow(0 0 3px rgba(255, 156, 61, .7)); }
+.db .db-spark__dot { fill: var(--db-gold-1); stroke: var(--db-panel); stroke-width: 2; }
+
+/* ── Money: one thin bar split by tender, then each tender ───────────────────────────────────────────── */
+.db .db-money__avg { color: var(--db-muted); font-size: var(--db-small); white-space: nowrap; }
+.db .db-mix { flex: none; display: flex; gap: 2px; height: 8px; margin-bottom: calc(var(--db-pad) * .6); overflow: hidden; border-radius: 999px; }
+.db .db-mix > span { flex: var(--part) 1 0; min-width: 2px; }
+.db .db-tenders { display: grid; gap: .2em; padding: 0; list-style: none; }
+.db .db-tender { display: grid; grid-template-columns: auto minmax(0, 1fr) auto 3.2em; align-items: baseline; gap: .6em; }
+.db .db-swatch { align-self: center; width: .7em; height: .7em; border-radius: 3px; }
+.db .db-tender__label { color: var(--db-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db .db-tender__amount { font: 600 1.15em/1.3 var(--font-head); letter-spacing: -.01em; }
+.db .db-tender__share { justify-self: end; color: var(--db-muted); font: 400 var(--db-small) var(--font-mono); }
+.db [data-method="card_online"] > .db-swatch,
+.db .db-mix > [data-method="card_online"] { background: var(--db-t-online); }
+.db [data-method="card_present"] > .db-swatch,
+.db .db-mix > [data-method="card_present"] { background: var(--db-t-box); }
+.db [data-method="cash"] > .db-swatch,
+.db .db-mix > [data-method="cash"] { background: var(--db-t-cash); }
+
+/* ── Registers: who and the devices, then sales, card-sale time, drawer and last close ───────────────── */
+.db .db-regs__list { display: grid; align-content: start; padding: 0; list-style: none; }
+.db .db-reg {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "name devices" "figs figs";
+  align-items: baseline;
+  gap: .15em 1em;
+  padding: clamp(4px, .6cqi, 8px) 0;
+  border-top: 1px solid var(--db-line);
+}
+.db .db-reg:first-child { padding-top: 0; border-top: 0; }
+.db .db-reg__name { grid-area: name; display: flex; align-items: center; gap: .55em; min-width: 0; font-weight: 600; white-space: nowrap; }
+.db .db-reg__name > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.db .db-reg__cashier { flex: none; color: var(--db-muted); font-weight: 500; }
+.db .db-reg__devices { grid-area: devices; display: flex; gap: .9em; font-size: var(--db-small); }
+.db .db-reg__figs {
+  grid-area: figs;
+  display: grid;
+  grid-template-columns: 5.6em 6.4em minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: .8em;
+  color: var(--db-muted);
+  font-size: var(--db-small);
+  white-space: nowrap;
+}
+.db .db-reg__figs > * { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.db .db-reg__sales { color: var(--db-text); font: 600 1.3em/1.2 var(--font-head); letter-spacing: -.01em; }
+.db .db-reg__figs [data-close="over"],
+.db .db-reg__figs [data-close="short"] { color: var(--db-text); font-weight: 600; }
+.db .db-device { display: inline-flex; align-items: center; gap: .4em; color: var(--db-muted); white-space: nowrap; }
+.db .db-device__dot { flex: none; width: .62em; height: .62em; border-radius: 50%; }
+.db .db-device[data-state="online"] .db-device__dot { background: var(--db-ok); box-shadow: 0 0 6px rgba(47, 191, 113, .55); }
+.db .db-device[data-state="offline"] { color: var(--db-text); font-weight: 600; }
+.db .db-device[data-state="offline"] .db-device__dot { background: var(--db-bad); box-shadow: 0 0 8px rgba(255, 77, 94, .65); }
+
+/* ── Fraud watch: four counts, then the latest tries ─────────────────────────────────────────────────── */
+.db .db-fraud__counts {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: space-between;
+  gap: .6em;
+  margin-bottom: calc(var(--db-pad) * .6);
+  padding: 0;
+  list-style: none;
+}
+.db .db-fraud__counts li { display: grid; align-content: start; gap: .15em; min-width: 0; }
+.db .db-fraud__counts strong { font: 600 1.6em/1 var(--font-head); letter-spacing: -.02em; }
+.db .db-fraud__counts span { color: var(--db-muted); font-size: var(--db-small); line-height: 1.15; }
+.db .db-fraud__counts [data-zero] strong { color: var(--db-muted); font-weight: 500; }
+.db .db-fraud__list { display: grid; align-content: start; gap: clamp(4px, .5cqi, 7px); padding: 0; list-style: none; }
+.db .db-try {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "line line" "first age";
+  align-items: baseline;
+  gap: 0 .8em;
+  padding: .35em .65em;
+  border-left: 2px solid var(--db-red);
+  border-radius: 0 6px 6px 0;
+  background: linear-gradient(90deg, rgba(200, 16, 46, .14), rgba(200, 16, 46, .03) 75%);
+}
+.db .db-try__what { display: contents; }
+.db .db-try__line { grid-area: line; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db .db-try__tail { font-weight: 700; }
+.db .db-try__first { grid-area: first; min-width: 0; color: var(--db-muted); font-size: var(--db-small); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db .db-try__age { grid-area: age; justify-self: end; color: var(--db-muted); font-size: var(--db-small); white-space: nowrap; }
+
+/* ── The brief strip along the bottom ────────────────────────────────────────────────────────────────── */
+.db .db-brief {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  gap: .9em;
+  padding: calc(var(--db-pad) * .6) var(--db-pad);
+  border-top: 1px solid var(--db-line);
+  background: rgba(14, 18, 32, .72);
+  font-size: var(--db-small);
+}
+.db .db-brief__head { flex: none; display: flex; align-items: baseline; gap: .6em; white-space: nowrap; }
+.db .db-brief__label { color: var(--db-gold-1); font: 700 var(--db-small)/1.3 var(--font-text); letter-spacing: .1em; text-transform: uppercase; }
+.db .db-brief__tag { padding: 0 .55em; border: 1px solid var(--db-line-2); border-radius: 999px; color: var(--db-muted); font: 500 11px/1.5 var(--font-mono); }
+.db .db-brief__at { color: var(--db-muted); }
+.db .db-brief__text { min-width: 0; line-height: 1.35; }
+
+/* ── Full screen: the screen alone, filling the display ──────────────────────────────────────────────── */
+.db .db-screen:fullscreen { overflow: auto; border: 0; border-radius: 0; box-shadow: none; }
+.db .db-screen:-webkit-full-screen { overflow: auto; border: 0; border-radius: 0; box-shadow: none; }
+
+/* ── Computers: wider than 1000px, each alert stays on one line (the board never moves) ──────────────── */
+@media (min-width: 1001px) {
+  .db .db-alerts { flex-wrap: nowrap; height: calc(2.35em + 2px); }
+  .db .db-alert__text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+
+/* A narrow computer board (under about 1060px wide): the register figures take two lines and the fraud counts two
+   rows, as on phones, so nothing is cut short. */
+@container (max-width: 1060px) {
+  .db .db-reg__figs { grid-template-columns: minmax(0, 1fr) auto; row-gap: .1em; }
+  .db .db-fraud__counts { grid-template-columns: repeat(2, auto); justify-content: start; column-gap: 2.2em; row-gap: .5em; }
+}
+
+/* ── Phones and tablets: a dark rounded card, no stand; the panels stack ─────────────────────────────── */
+@media (max-width: 1000px) {
+  .db {
+    --db-gap: 8px;
+    --db-pad: 13px;
+    --db-body: 14px;
+    --db-small: 12px;
+    --db-figure: 28px;
+  }
+  .db .db-screen { border: 0; border-radius: 20px; box-shadow: 0 20px 40px rgba(60, 35, 0, .18); }
+  .db .db-stand { display: none; }
+
+  /* The bar wraps: the logo and the fair's name, then LIVE, the clock and the pill. */
+  .db .db-bar { flex-wrap: wrap; row-gap: 8px; column-gap: 12px; }
+  .db .db-logo { height: 32px; }
+  .db .db-event { flex: 1 1 calc(100% - 60px); font-size: 17px; }
+  /* Full screen is for a wall screen or a laptop; on a phone the board is already the whole screen's width. */
+  .db .db-btn { display: none; }
+
+  .db .db-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas: "tiles" "alerts" "pace" "feed" "gates" "money" "types" "registers" "fraud";
+  }
+  .db .db-col { display: contents; }
+  .db [data-panel="pace"] { grid-area: pace; }
+  .db [data-panel="feed"] { grid-area: feed; }
+  .db [data-panel="gates"] { grid-area: gates; }
+  .db [data-panel="money"] { grid-area: money; }
+  .db [data-panel="types"] { grid-area: types; }
+  .db [data-panel="registers"] { grid-area: registers; }
+  .db [data-panel="fraud"] { grid-area: fraud; }
+
+  .db .db-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .db .db-tile:nth-child(3) { border-left: 0; }
+  .db .db-tile:nth-child(n + 3) { border-top: 1px solid var(--db-line); }
+  .db .db-tile__sub { white-space: normal; }
+
+  .db .db-chart { flex: none; height: 230px; min-height: 0; }
+  .db .db-type { grid-template-columns: minmax(0, 1fr) auto; }
+  .db .db-gate { grid-template-columns: minmax(0, 1fr) minmax(3.5em, 6.5em) 4em; }
+  .db .db-reg__figs { grid-template-columns: minmax(0, 1fr) auto; row-gap: .1em; }
+  .db .db-brief { flex-wrap: wrap; row-gap: 2px; }
+}
+@media (max-width: 400px) {
+  .db .db-fraud__counts { grid-template-columns: repeat(2, auto); justify-content: start; column-gap: 2.2em; }
+}
+
+/* ── Reduced motion: no count-up (the script jumps), no slide-in, no pulse ───────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .db *,
+  .db *::before,
+  .db *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

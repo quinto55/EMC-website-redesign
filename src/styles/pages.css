@@ -1,0 +1,103 @@
+/* The shorter pages: Retail partners, Marketing, About, Privacy, Terms and the not-found page.
+   Same language as the home and Platform pages: cream page, white cards, numbered squares,
+   DM Mono labels, Bricolage headings. */
+
+/* ---------- every page's top ---------- */
+.page-intro { padding: 58px 0 8px; }
+.page-intro h1 { font-size: 72px; letter-spacing: -.03em; }
+.page-intro .lede { margin-top: 16px; max-width: 620px; font-size: 21px; }
+
+/* ---------- retail partners ---------- */
+.partner-logo { width: auto; height: 46px; margin-bottom: 26px; }
+
+.figures {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 40px;
+  margin-top: 40px;
+  padding: 30px 34px 22px;
+}
+.figure-num { font: 700 96px/1 var(--font-head); letter-spacing: -.035em; color: var(--red); }
+.figure-label { margin-top: 10px; font-size: 20px; line-height: 1.3; color: var(--ink); max-width: 360px; }
+.figure-source { grid-column: 1 / -1; margin-top: 14px; font: 500 12px var(--font-mono); color: var(--mut); }
+
+.steps { display: grid; gap: 14px; margin-top: 28px; counter-reset: none; }
+.step { display: flex; gap: 20px; align-items: flex-start; padding: 22px 26px; }
+.step .num-square { flex: none; width: 44px; height: 44px; font-size: 17px; }
+.step h3 { font-size: 26px; line-height: 1.15; }
+.step p { margin-top: 6px; color: var(--mut); }
+
+.also { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 30px; padding: 4px 0 34px; }
+.also-label { font: 500 13px var(--font-mono); color: var(--red); }
+.also-logos { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 30px; }
+.also-logos img { width: auto; height: 34px; }
+
+/* The home page's proof strip, without the years or the logos: one line, then the ask band. */
+.proof-fairs {
+  margin: 0 0 80px;
+  padding: 24px 30px;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--line), 0 18px 40px rgba(120, 80, 20, .14);
+}
+.proof-fairs .proof-line { font-size: 20px; color: var(--mut); }
+.proof-fairs .proof-line b { font-weight: 600; color: var(--ink); }
+
+/* ---------- marketing ---------- */
+.service-sec { padding-top: 40px; }
+.services { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.service { position: relative; padding-top: 34px; }
+.service::before { content: ""; position: absolute; left: 26px; top: 0; width: 44px; height: 8px; border-radius: 0 0 8px 8px; background: var(--red); }
+.service:nth-child(2)::before { background: var(--teal); }
+.service:nth-child(3)::before { background: var(--amber); }
+.service h3 { margin: 0 0 8px; font-size: 32px; }
+.service p { color: var(--mut); }
+.closing { margin-top: 36px; font: 700 32px/1.15 var(--font-head); letter-spacing: -.02em; }
+
+/* ---------- about ---------- */
+.page-intro h1 .big { font-weight: 700; color: var(--red); }
+.prose { max-width: 680px; padding: 28px 0 44px; }
+.prose p { font-size: 21px; line-height: 1.6; }
+.prose p + p { margin-top: 22px; }
+
+/* ---------- privacy and terms ---------- */
+.legal { max-width: 70ch; padding-bottom: 72px; }
+.legal h1 { font-size: 52px; }
+.legal__updated { margin-top: 12px; font: 500 13px var(--font-mono); color: var(--mut); }
+.legal h2 { margin: 40px 0 10px; font-size: 26px; letter-spacing: -.015em; }
+.legal p,
+.legal li { font-size: 17px; line-height: 1.65; }
+.legal ul { list-style: disc; padding-left: 1.3em; }
+.legal li + li { margin-top: 10px; }
+.legal a { color: var(--red); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- not found ---------- */
+.lost { padding: 80px 0 100px; }
+.lost-links { display: flex; flex-wrap: wrap; gap: 14px 16px; margin-top: 32px; }
+
+/* ---------- phones and tablets ---------- */
+@media (max-width: 1000px) {
+  .page-intro { padding-top: 34px; }
+  .page-intro h1 { font-size: 42px; }
+  .page-intro .lede { font-size: 19px; }
+  .partner-logo { height: 38px; margin-bottom: 20px; }
+  .figures { margin-top: 30px; padding: 24px 24px 18px; }
+  .figure-num { font-size: 72px; }
+  .figure-label { font-size: 18px; }
+  .step { gap: 16px; padding: 18px 20px; }
+  .step h3 { font-size: 22px; }
+  .services { grid-template-columns: minmax(0, 1fr); }
+  .service h3 { font-size: 28px; }
+  .closing { font-size: 26px; }
+  .prose p { font-size: 19px; }
+  .proof-fairs { margin-bottom: 54px; padding: 20px; }
+  .proof-fairs .proof-line { font-size: 18px; }
+  .legal h1 { font-size: 38px; }
+  .legal h2 { font-size: 23px; }
+  .lost { padding: 44px 0 60px; }
+  .lost-links .btn { flex: 1 1 100%; }
+}
+
+@media (max-width: 600px) {
+  .figures { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+}

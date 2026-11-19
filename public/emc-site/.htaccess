@@ -1,0 +1,42 @@
+# Cache and file-type settings for the new site's files. Applies only to this folder.
+# Every directive sits inside a guard, so a module the host lacks cannot cause a server error.
+# The videos are re-recorded under the same file names, so they are cached for one hour only.
+
+<IfModule mod_mime.c>
+# Make sure the host knows these file types.
+AddType video/mp4 .mp4
+AddType image/avif .avif
+AddType font/woff2 .woff2
+AddType application/manifest+json .webmanifest
+</IfModule>
+
+<IfModule mod_expires.c>
+ExpiresActive On
+# Images, logos and icons: one week.
+<FilesMatch "\.(jpe?g|png|webp|avif|svg|ico|webmanifest)$">
+ExpiresDefault "access plus 1 week"
+</FilesMatch>
+# Hashed build files (assets/) and fonts: one year.
+<FilesMatch "\.(js|css|woff2)$">
+ExpiresDefault "access plus 1 year"
+</FilesMatch>
+# Videos and their posters: one hour. This block comes last so it wins for the posters.
+<FilesMatch "(\.mp4|-poster\.jpg)$">
+ExpiresDefault "access plus 1 hour"
+</FilesMatch>
+</IfModule>
+
+<IfModule mod_headers.c>
+# Images, logos and icons: one week.
+<FilesMatch "\.(jpe?g|png|webp|avif|svg|ico|webmanifest)$">
+Header set Cache-Control "public, max-age=604800"
+</FilesMatch>
+# Hashed build files (assets/) and fonts: one year, never changes under the same name.
+<FilesMatch "\.(js|css|woff2)$">
+Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+# Videos and their posters: one hour. This block comes last so it wins for the posters.
+<FilesMatch "(\.mp4|-poster\.jpg)$">
+Header set Cache-Control "public, max-age=3600"
+</FilesMatch>
+</IfModule>

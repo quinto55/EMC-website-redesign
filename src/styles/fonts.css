@@ -1,0 +1,29 @@
+/* Self-hosted Latin subsets. The head preloads the Bricolage and Figtree files. */
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-weight: 200 800; /* variable: weight and optical size */
+  font-display: swap;
+  src: url('/emc-site/fonts/bricolage-grotesque-var.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Figtree';
+  font-style: normal;
+  font-weight: 300 900; /* variable: weight */
+  font-display: swap;
+  src: url('/emc-site/fonts/figtree-var.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'DM Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/emc-site/fonts/dm-mono-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'DM Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/emc-site/fonts/dm-mono-500.woff2') format('woff2');
+}

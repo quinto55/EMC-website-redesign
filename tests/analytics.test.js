@@ -15,14 +15,26 @@ function scriptSrcs() {
   return [...document.head.querySelectorAll('script[src]')].map((s) => s.src);
 }
 
+// Injected vendor <script src> elements stay in the DOM (so tests can read
+// their URLs) but happy-dom must never fetch or run them: no real network.
+const savedSettings = {};
 beforeEach(() => {
+  const st = window.happyDOM.settings;
+  savedSettings.file = st.disableJavaScriptFileLoading;
+  savedSettings.evalJs = st.disableJavaScriptEvaluation;
+  st.disableJavaScriptFileLoading = true;
+  st.disableJavaScriptEvaluation = true;
   localStorage.clear();
   document.head.querySelectorAll('script[src]').forEach((s) => s.remove());
   delete window.fbq; delete window._fbq; delete window.posthog;
   delete window.clarity; delete window._linkedin_partner_id;
   vi.resetModules();
 });
-afterEach(() => vi.doUnmock('../src/site-config.js'));
+afterEach(() => {
+  vi.doUnmock('../src/site-config.js');
+  window.happyDOM.settings.disableJavaScriptFileLoading = savedSettings.file;
+  window.happyDOM.settings.disableJavaScriptEvaluation = savedSettings.evalJs;
+});
 
 describe('with real (empty) config — installed dark', () => {
   it('injects nothing even with consent on prod host', async () => {
@@ -32,10 +44,20 @@ describe('with real (empty) config — installed dark', () => {
     loadVendors(document);
     expect(scriptSrcs()).toEqual([]);
   });
+
+  it('reports that no tracker is configured', async () => {
+    const { anyTrackerConfigured } = await import('../src/analytics.js');
+    expect(anyTrackerConfigured()).toBe(false);
+  });
 });
 
 describe('with test IDs', () => {
   beforeEach(() => vi.doMock('../src/site-config.js', () => IDS));
+
+  it('reports that a tracker is configured', async () => {
+    const { anyTrackerConfigured } = await import('../src/analytics.js');
+    expect(anyTrackerConfigured()).toBe(true);
+  });
 
   it('trackingAllowed needs prod host AND acceptance', async () => {
     const { setConsent } = await import('../src/consent.js');
@@ -102,5 +124,37 @@ describe('with test IDs', () => {
     initAnalytics(document, 'emctickets.com');
     document.dispatchEvent(new CustomEvent('emc:consent-accepted'));
     expect(scriptSrcs()).toEqual([]);
+  });
+});
+
+describe('trackEvent', () => {
+  beforeEach(() => vi.doMock('../src/site-config.js', () => IDS));
+
+  it('does nothing off the live hostnames or without accepted consent', async () => {
+    const { trackEvent } = await import('../src/analytics.js');
+    const capture = vi.fn();
+    window.posthog = { capture };
+    localStorage.setItem('emc-cookie-consent', 'accepted'); // not setConsent: its event would load vendors
+    trackEvent('lead_submitted', { request: 'talk' }, 'localhost');
+    localStorage.clear();
+    trackEvent('lead_submitted', { request: 'talk' }, 'emctickets.com');
+    expect(capture).not.toHaveBeenCalled();
+  });
+
+  it('with consent on a live hostname it calls posthog.capture when that exists', async () => {
+    const { trackEvent } = await import('../src/analytics.js');
+    const capture = vi.fn();
+    window.posthog = { capture };
+    localStorage.setItem('emc-cookie-consent', 'accepted'); // not setConsent: its event would load vendors
+    trackEvent('lead_submitted', { request: 'talk' }, 'emctickets.com');
+    expect(capture).toHaveBeenCalledWith('lead_submitted', { request: 'talk' });
+  });
+
+  it('never throws when posthog is missing or throws', async () => {
+    const { trackEvent } = await import('../src/analytics.js');
+    localStorage.setItem('emc-cookie-consent', 'accepted'); // not setConsent: its event would load vendors
+    expect(() => trackEvent('lead_submitted', {}, 'emctickets.com')).not.toThrow();
+    window.posthog = { capture() { throw new Error('x'); } };
+    expect(() => trackEvent('lead_submitted', {}, 'emctickets.com')).not.toThrow();
   });
 });

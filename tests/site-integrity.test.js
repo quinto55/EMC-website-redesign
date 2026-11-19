@@ -1,94 +1,91 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
+import { PAGES, SITE_URL, pageByFile } from '../build/pages.js';
+import { renderAll, ROOT } from './helpers/pages.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = resolve(__dirname, '..');
-const read = (f) => readFileSync(resolve(root, f), 'utf8');
+const read = (f) => readFileSync(resolve(ROOT, f), 'utf8');
+const rendered = renderAll();
+const PUBLIC_PATHS = ['/', '/platform/', '/retail-partners/', '/marketing/', '/about/', '/contact/', '/privacy/', '/terms/'];
 
-const SITE = 'https://emctickets.com';
-const EXPECTED_URLS = [
-  `${SITE}/`,
-  `${SITE}/what-we-do.html`,
-  `${SITE}/sell-onsite.html`,
-  `${SITE}/sell-online.html`,
-  `${SITE}/sell-social.html`,
-  `${SITE}/contact.html`,
-  `${SITE}/privacy.html`,
-  `${SITE}/terms.html`,
-];
-const urlToFile = (url) => {
-  const path = url.slice(SITE.length);
-  return path === '/' ? 'index.html' : path.slice(1);
-};
-
-describe('sitemap', () => {
-  const locs = [...read('public/sitemap.xml').matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => m[1]);
-
-  it('lists exactly the eight canonical pages', () => {
-    expect(locs.sort()).toEqual([...EXPECTED_URLS].sort());
-  });
-
-  it('maps every URL to an existing file', () => {
-    for (const url of locs) {
-      expect(existsSync(resolve(root, urlToFile(url))), url).toBe(true);
-    }
-  });
-});
-
-describe('robots.txt', () => {
-  it('allows crawling and names the sitemap', () => {
-    const robots = read('public/robots.txt');
-    expect(robots).toContain('Allow: /');
-    expect(robots).toContain(`Sitemap: ${SITE}/sitemap.xml`);
-  });
-});
-
-describe('per-page head meta', () => {
-  const pages = EXPECTED_URLS.map((url) => ({ url, file: urlToFile(url), html: read(urlToFile(url)) }));
-
-  it('every page has canonical, OG, and twitter tags', () => {
-    for (const { url, file, html } of pages) {
-      expect(html, file).toContain(`<link rel="canonical" href="${url}">`);
-      expect(html, file).toContain(`<meta property="og:url" content="${url}">`);
-      expect(html, file).toContain('<meta property="og:title" content="');
-      expect(html, file).toContain('<meta property="og:description" content="');
-      expect(html, file).toContain(`<meta property="og:image" content="${SITE}/og-image.png">`);
-      expect(html, file).toContain('<meta name="twitter:card" content="summary_large_image">');
-      expect(html, file).toContain('<meta name="theme-color" content="#07090f">');
+describe('site integrity', () => {
+  it('every registry page has a source file', () => {
+    for (const p of PAGES) {
+      expect(existsSync(resolve(ROOT, p.file)), p.file).toBe(true);
+      expect(pageByFile(p.file)).toBe(p);
     }
   });
 
-  it('titles are unique across pages', () => {
-    const titles = pages.map(({ html }) => html.match(/<title>(.*?)<\/title>/)[1]);
+  it('sitemap lists exactly the eight public pages', () => {
+    const locs = [...read('public/sitemap.xml').matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+    expect(locs).toEqual(PUBLIC_PATHS.map((p) => `${SITE_URL}${p}`));
+    const lastmods = [...read('public/sitemap.xml').matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((m) => m[1]);
+    expect(lastmods).toHaveLength(8);
+    expect(new Set(lastmods)).toEqual(new Set(['2026-11-18']));
+  });
+
+  it('iafe and the not-found page are noindexed and out of the sitemap', () => {
+    const sitemap = read('public/sitemap.xml');
+    for (const key of ['iafe', 'notFound']) {
+      const { page, html } = rendered.find((r) => r.page.key === key);
+      expect(html, key).toContain('<meta name="robots" content="noindex">');
+      expect(sitemap).not.toContain(page.path);
+    }
+    const iafe = rendered.find((r) => r.page.key === 'iafe').page;
+    expect(sitemap).not.toContain(iafe.path);
+  });
+
+  it('robots.txt keeps the WordPress rules and names the sitemap', () => {
+    expect(read('public/robots.txt')).toBe(
+      'User-agent: *\nDisallow: /wp-admin/\nAllow: /wp-admin/admin-ajax.php\n\nSitemap: https://emctickets.com/sitemap.xml\n',
+    );
+  });
+
+  it('titles are unique', () => {
+    const titles = PAGES.map((p) => p.title);
     expect(new Set(titles).size).toBe(titles.length);
   });
 
-  it('footer legal links present on every chrome page', () => {
-    for (const { file, html } of pages) {
-      expect(html, file).toContain('href="/privacy.html"');
-      expect(html, file).toContain('href="/terms.html"');
-    }
-  });
-
-  it('experience.html is noindexed and out of the sitemap', () => {
-    expect(read('experience.html')).toContain('<meta name="robots" content="noindex">');
-    expect(read('public/sitemap.xml')).not.toContain('experience');
-  });
-
-  it('any target=_blank link carries rel noopener', () => {
-    for (const { file, html } of pages) {
-      for (const m of html.matchAll(/<a [^>]*target="_blank"[^>]*>/g)) {
-        expect(m[0], `${file}: ${m[0]}`).toContain('noopener');
+  it('every internal link points at a real page or public file', () => {
+    const pagePaths = new Set(PAGES.map((p) => p.path));
+    for (const { page, doc } of rendered) {
+      for (const el of doc.querySelectorAll('[href], [src]')) {
+        const raw = el.getAttribute('href') ?? el.getAttribute('src');
+        if (!raw.startsWith('/') || raw.startsWith('//')) continue;
+        const path = raw.split('#')[0].split('?')[0];
+        if (path === '' || path.startsWith('/src/')) continue;
+        const ok = pagePaths.has(path) || existsSync(resolve(ROOT, 'public', `.${path}`));
+        expect(ok, `${page.file} links to ${raw}`).toBe(true);
       }
     }
   });
 
-  it('homepage carries Organization JSON-LD', () => {
-    const html = read('index.html');
-    expect(html).toContain('application/ld+json');
-    expect(html).toContain('"@type": "Organization"');
-    expect(html).toContain('"email": "info@emctickets.com"');
+  it('every hash link to another page names an id that exists there', () => {
+    const byPath = new Map(rendered.map((r) => [r.page.path, r.doc]));
+    for (const { page, doc } of rendered) {
+      for (const a of doc.querySelectorAll('a[href*="#"]')) {
+        const href = a.getAttribute('href');
+        const [path, hash] = href.split('#');
+        if (!hash || !path.startsWith('/')) continue;
+        const target = byPath.get(path);
+        if (!target) continue;
+        expect(target.getElementById(hash), `${page.file} -> ${href}`).not.toBeNull();
+      }
+    }
+  });
+
+  it('any target=_blank link carries rel noopener', () => {
+    for (const { page, doc } of rendered) {
+      for (const a of doc.querySelectorAll('a[target="_blank"]')) {
+        expect(a.getAttribute('rel') ?? '', `${page.file} ${a.outerHTML}`).toMatch(/\bnoopener\b/);
+      }
+    }
+  });
+
+  it('no rendered page has a leftover placeholder or token', () => {
+    for (const { page, html } of rendered) {
+      expect(html, page.file).not.toContain('<!--site:');
+      expect(html, page.file).not.toContain('{{');
+    }
   });
 });

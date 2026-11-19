@@ -1,311 +1,121 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <script>document.documentElement.classList.add('js');</script>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>EMC Tickets — One-stop ticket sale management</title>
-  <meta name="description" content="40 years powering festivals, fairs, theme parks and sports venues across the country.">
-  <link rel="canonical" href="https://emctickets.com/">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="EMC Tickets">
-  <meta property="og:title" content="EMC Tickets — One-stop ticket sale management">
-  <meta property="og:description" content="40 years powering festivals, fairs, theme parks and sports venues across the country.">
-  <meta property="og:url" content="https://emctickets.com/">
-  <meta property="og:image" content="https://emctickets.com/og-image.png">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="EMC Tickets — One-stop ticket sale management">
-  <meta name="twitter:description" content="40 years powering festivals, fairs, theme parks and sports venues across the country.">
-  <meta name="twitter:image" content="https://emctickets.com/og-image.png">
-  <meta name="theme-color" content="#07090f">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <link rel="manifest" href="/site.webmanifest">
-  <link rel="preload" href="/fonts/fraunces-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/fraunces-italic-var.woff2" as="font" type="font/woff2" crossorigin>
-  <script type="module" src="/src/main.js"></script>
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        "name": "EMC Tickets",
-        "url": "https://emctickets.com",
-        "logo": "https://emctickets.com/logo.svg",
-        "email": "info@emctickets.com",
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "8409 Land O Lakes Blvd",
-          "addressLocality": "Land O Lakes",
-          "addressRegion": "FL",
-          "postalCode": "34638",
-          "addressCountry": "US"
-        }
-      },
-      {
-        "@type": "WebSite",
-        "name": "EMC Tickets",
-        "url": "https://emctickets.com"
-      }
-    ]
+<!--site:head-->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "EMC Tickets",
+  "url": "{{SITE_URL}}/",
+  "logo": "{{SITE_URL}}/emc-site/img/emc-logo-on-light.png",
+  "telephone": "+1-{{TOLL_FREE}}",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "{{OFFICE_STREET}}",
+    "addressLocality": "Land O Lakes",
+    "addressRegion": "FL",
+    "postalCode": "34638",
+    "addressCountry": "US"
   }
-  </script>
+}
+</script>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <defs>
-      <linearGradient id="gold-grad" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#ffd66b"/>
-        <stop offset="100%" stop-color="#ff9c3d"/>
-      </linearGradient>
-    </defs>
-  </svg>
-
-  <header>
-    <nav class="site-nav" aria-label="Primary">
-      <a class="site-nav__brand" href="/index.html"><img src="/logo.svg" alt="EMC Tickets"></a>
-      <ul class="site-nav__links">
-        <li><a href="/index.html#industry-leader">Industry Leader</a></li>
-        <li><a href="/what-we-do.html">What We Do</a></li>
-        <li><a href="/sell-onsite.html">Sell Onsite</a></li>
-        <li><a href="/sell-online.html">Sell Online</a></li>
-        <li><a href="/sell-social.html">Sell Social</a></li>
-        <li><a href="/contact.html">Contact</a></li>
-      </ul>
-      <a class="btn btn-primary site-nav__cta" data-magnetic href="/contact.html">Event Intake</a>
-    </nav>
-  </header>
-
-  <main id="main">
-    <section class="flight" data-flight aria-label="A drone flight through a night fair">
-      <img class="flight__poster" src="/experience-frames/poster.jpg" alt="A lit ferris wheel over a night fairground">
-      <canvas class="flight__canvas" aria-hidden="true"></canvas>
-
-      <div class="flight__loader" role="status" aria-label="Loading the flight">
-        <span class="flight__loader-mark">EMC<span>.</span></span>
-        <span class="flight__loader-track"><span class="flight__loader-bar"></span></span>
-      </div>
-
-      <div class="flight__beat" data-start="0" data-end="0.08">
-        <span class="eyebrow">Fly the midway.</span>
-        <p class="flight__cue">Scroll to fly</p>
-      </div>
-      <div class="flight__beat" data-start="0.12" data-end="0.25">
-        <span class="eyebrow">Scanning</span>
-        <p class="flight__beat-title">Gates that never back up.</p>
-      </div>
-      <div class="flight__beat" data-start="0.35" data-end="0.50">
-        <span class="eyebrow">Sales</span>
-        <p class="flight__beat-title">Every light is a ticket.</p>
-      </div>
-      <div class="flight__beat" data-start="0.60" data-end="0.72">
-        <span class="eyebrow">Marketing &amp; Advertising</span>
-        <p class="flight__beat-title">The whole town heard.</p>
-      </div>
-      <div class="flight__beat flight__beat--finale" data-start="0.85" data-end="1">
-        <p class="flight__beat-title">40 years of nights like this.</p>
-        <a class="btn btn-primary" href="/contact.html" data-magnetic>Start an Event Intake</a>
-      </div>
-    </section>
-
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="hero__night" aria-hidden="true"></div>
-      <div class="hero__horizon" aria-hidden="true"></div>
-      <canvas class="hero__embers" aria-hidden="true"></canvas>
-      <video class="hero__video" aria-hidden="true"
-             autoplay muted loop playsinline preload="auto"
-             src="https://videos.pexels.com/video-files/31210326/13331991_2730_1440_24fps.mp4"></video>
-      <div class="hero__tint" aria-hidden="true"></div>
-      <div class="hero__overlay container">
-        <div class="hero__headline">
-          <span class="hero__eyebrow">Forty years powering live events</span>
-          <h1 class="hero__brand" id="hero-title">EMC<span class="hero__brand-accent">.</span></h1>
-          <p class="hero__tagline">One stop ticket sale management. Built by operators. Backed by 40 years inside the fair industry.</p>
-          <div class="hero__pillars">SALES <span>·</span> SCANNING <span>·</span> MARKETING <span>·</span> ADVERTISING</div>
-        </div>
-        <div class="hero__bottom">
-          <div class="hero__scroll-cue"><span>Scroll</span></div>
-          <div class="hero__meta">Land O Lakes, FL &nbsp;·&nbsp; emctickets.com</div>
+<a class="skip-link" href="#main">Skip to content</a>
+<!-- The stage: the photo sits behind the header and the hero (a later full-window cover can sit over it). -->
+<div class="stage">
+  <div class="hero-photo">
+    <picture>
+      <source type="image/avif" sizes="100vw"
+        srcset="/emc-site/img/hero-800.avif 800w, /emc-site/img/hero-1280.avif 1280w, /emc-site/img/hero-1760.avif 1760w">
+      <source type="image/webp" sizes="100vw"
+        srcset="/emc-site/img/hero-800.webp 800w, /emc-site/img/hero-1280.webp 1280w, /emc-site/img/hero-1760.webp 1760w">
+      <img src="/emc-site/img/hero-1280.jpg" sizes="100vw"
+        srcset="/emc-site/img/hero-800.jpg 800w, /emc-site/img/hero-1280.jpg 1280w, /emc-site/img/hero-1760.jpg 1760w"
+        width="1760" height="844" alt="" fetchpriority="high">
+    </picture>
+  </div>
+<!--site:header-->
+<main id="main">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Ticketing for fairs and festivals</p>
+        <h1>One system from <span class="hl">first ticket</span> to <span class="hl">final report</span>.</h1>
+        <p class="hero-sub">Sell everywhere, scan at any gate and watch every ticket count as it happens.</p>
+        <div class="cta">
+          <a class="btn" href="#talk">Let's talk about your fair</a>
+          <a class="btn ghost" href="/platform/">See it work</a>
         </div>
       </div>
-    </section>
-
-    <section class="partners" aria-label="Retail partners">
-      <div class="container">
-        <p class="partners__caption">Retail Partners</p>
-        <div class="partners__row">
-          <span class="partners__name"><img src="/logos/circle-k.png" alt="Circle K" height="30"></span>
-          <span class="partners__name"><img src="/logos/walgreens.png" alt="Walgreens" height="30"></span>
-          <span class="partners__name"><img src="/logos/menards.png" alt="Menards" height="30"></span>
-        </div>
+      <div class="hero-board">
+        <p class="chip">Running right now</p>
+        <!--site:board-->
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section class="fairs" aria-label="Events EMC has powered">
-      <div class="container">
-        <p class="eyebrow fairs__eyebrow" data-reveal>Trusted by the nights you know</p>
-        <p class="fairs__names" data-reveal>
-          <span class="fairs__name">Florida State Fair</span>
-          <span class="fairs__dot" aria-hidden="true">·</span>
-          <span class="fairs__name">Country Thunder</span>
-          <span class="fairs__dot" aria-hidden="true">·</span>
-          <span class="fairs__name">South Carolina State Fair</span>
-          <span class="fairs__dot" aria-hidden="true">·</span>
-          <span class="fairs__name">Coastal Carolina State Fair</span>
-        </p>
+  <div class="wrap">
+    <div class="proof">
+      <p class="yrs"><b>40+</b> <span>years in the industry</span></p>
+      <p class="proof-line">The <b>Florida State Fair</b>, <b>South Carolina State Fair</b> and <b>Coastal Carolina Fair</b> all run their retail ticketing through EMC.</p>
+      <div class="logos">
+        <span class="visually-hidden">Tickets on sale at</span>
+        <img src="/emc-site/logos/walgreens.png" width="720" height="150" alt="Walgreens">
+        <img src="/emc-site/logos/circle-k.svg" width="371" height="101" alt="Circle K">
+        <img src="/emc-site/logos/menards.svg" width="770" height="160" alt="Menards">
       </div>
-    </section>
+    </div>
 
-    <section class="section" id="what-we-do" aria-labelledby="wwd-title">
-      <div class="container">
-        <header class="what-we-do__head" data-reveal>
-          <span class="eyebrow">What We Do</span>
-          <h2 id="wwd-title">A complete ticket operation, run by a team that's done it for forty years.</h2>
-          <p>Sales, scanning, marketing, advertising — one continuous loop for festivals, fairs, theme parks, and sports venues.</p>
-        </header>
-
-        <div class="cards">
-          <article class="card" data-hotspot data-reveal>
-            <span class="card__frame" aria-hidden="true"></span>
-            <span class="card__rail card__rail--l" aria-hidden="true">ADMIT&nbsp;ONE&nbsp;&#9733;</span>
-            <span class="card__rail card__rail--r" aria-hidden="true">ADMIT&nbsp;ONE&nbsp;&#9733;</span>
-            <div class="card__serial" aria-hidden="true"><span>EMC TICKETS</span><span>№ 047291</span></div>
-            <svg class="card__icon" viewBox="0 0 40 40" fill="none" stroke="url(#gold-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M6 12h28v6a3 3 0 0 0 0 6v6H6v-6a3 3 0 0 0 0-6z"/>
-              <path d="M25 12v3M25 19v3M25 26v3" stroke-dasharray="2 3"/>
-            </svg>
-            <div class="card__perf" aria-hidden="true"></div>
-            <h3 class="card__title">Presale &amp; Advance</h3>
-            <p class="card__body">Online, mobile, retail, and box-office channels in one inventory.</p>
-          </article>
-
-          <article class="card" data-hotspot data-reveal>
-            <span class="card__frame" aria-hidden="true"></span>
-            <span class="card__rail card__rail--l" aria-hidden="true">ADMIT&nbsp;ONE&nbsp;&#9733;</span>
-            <span class="card__rail card__rail--r" aria-hidden="true">ADMIT&nbsp;ONE&nbsp;&#9733;</span>
-            <div class="card__serial" aria-hidden="true"><span>EMC TICKETS</span><span>№ 047292</span></div>
-            <svg class="card__icon" viewBox="0 0 40 40" fill="none" stroke="url(#gold-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M7 17v8l14 5V12z"/>
-              <path d="M7 17H5v8h2M12 27v6h5v-4"/>
-              <path d="M26 15a7 7 0 0 1 0 12M29 11a12 12 0 0 1 0 20"/>
-            </svg>
-            <div class="card__perf" aria-hidden="true"></div>
-            <h3 class="card__title">Marketing &amp; Ads</h3>
-            <p class="card__body">Media buying, promotions, radio, TV, billboards, web, social.</p>
-          </article>
-
-          <article class="card" data-hotspot data-reveal>
-            <span class="card__frame" aria-hidden="true"></span>
-            <span class="card__rail card__rail--l" aria-hidden="true">ADMIT&nbsp;ONE&nbsp;&#9733;</span>
-            <span class="card__rail card__rail--r" aria-hidden="true">ADMIT&nbsp;ONE&nbsp;&#9733;</span>
-            <div class="card__serial" aria-hidden="true"><span>EMC TICKETS</span><span>№ 047293</span></div>
-            <svg class="card__icon" viewBox="0 0 40 40" fill="none" stroke="url(#gold-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M8 14v-4a2 2 0 0 1 2-2h4M26 8h4a2 2 0 0 1 2 2v4M32 26v4a2 2 0 0 1-2 2h-4M14 32h-4a2 2 0 0 1-2-2v-4"/>
-              <path d="M6 20h28"/>
-            </svg>
-            <div class="card__perf" aria-hidden="true"></div>
-            <h3 class="card__title">Redemption &amp; Gate</h3>
-            <p class="card__body">Fast scanning hardware with friendly UX guests don't fight.</p>
-          </article>
-
-          <article class="card" data-hotspot data-reveal>
-            <span class="card__frame" aria-hidden="true"></span>
-            <span class="card__rail card__rail--l" aria-hidden="true">ADMIT&nbsp;ONE&nbsp;&#9733;</span>
-            <span class="card__rail card__rail--r" aria-hidden="true">ADMIT&nbsp;ONE&nbsp;&#9733;</span>
-            <div class="card__serial" aria-hidden="true"><span>EMC TICKETS</span><span>№ 047294</span></div>
-            <svg class="card__icon" viewBox="0 0 40 40" fill="none" stroke="url(#gold-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M6 10h18v11H12l-6 5z"/>
-              <path d="M28 16h6v11h-3l-4 4v-4h-7v-4"/>
-            </svg>
-            <div class="card__perf" aria-hidden="true"></div>
-            <h3 class="card__title">Social Management</h3>
-            <p class="card__body">Professional posting and guest engagement across channels.</p>
-          </article>
+    <section class="sec tools" aria-labelledby="tools-heading">
+      <p class="kicker">The platform</p>
+      <h2 id="tools-heading">Sell. Scan. Count.</h2>
+      <p class="lede">Pick any tool and see it work. No sign-up.</p>
+      <div class="mods">
+        <div class="card mod">
+          <span class="num-square">01</span>
+          <h3>Sell</h3>
+          <p>Online, at the window and in stores.</p>
+          <ul class="rows">
+            <li><a class="row" href="/platform/#online-sales">Online sales <span class="arrow">Watch it</span></a></li>
+            <li><a class="row" href="/platform/#box-office">Box office POS <span class="arrow">Watch it</span></a></li>
+            <li><a class="row" href="/retail-partners/">Retail stores <span class="arrow">See how</span></a></li>
+          </ul>
         </div>
-      </div>
-    </section>
-
-    <section class="section" id="industry-leader" aria-labelledby="leader-title">
-      <div class="forty" data-forty>
-        <div class="container forty__stage">
-          <div class="forty__num" role="img" aria-label="40 years in entertainment">
-            <div class="forty__mask-stage">
-              <video class="forty__video" muted loop playsinline preload="metadata"
-                     src="https://videos.pexels.com/video-files/33945522/14403884_2560_1440_60fps.mp4"></video>
-            </div>
-            <svg class="forty__svg" aria-hidden="true" focusable="false">
-              <defs>
-                <clipPath id="forty-clip">
-                  <text class="forty__digits" text-anchor="middle" dominant-baseline="central">0</text>
-                </clipPath>
-              </defs>
-            </svg>
-            <div class="forty__num-caption" aria-hidden="true">Years in entertainment</div>
-          </div>
-          <div class="forty__body">
-            <span class="eyebrow">Industry Leader</span>
-            <h2 id="leader-title">We've been in your shoes.</h2>
-            <ul class="forty__captions">
-              <li class="forty__caption">Small-town fairs</li>
-              <li class="forty__caption">Multi-day festivals</li>
-              <li class="forty__caption">Theme parks</li>
-              <li class="forty__caption">Sports venues</li>
-            </ul>
-          </div>
+        <div class="card mod">
+          <span class="num-square teal">02</span>
+          <h3>Scan</h3>
+          <p>Any gate. Duplicates blocked.</p>
+          <ul class="rows">
+            <li><a class="row" href="/platform/#gate-scanning">Gate scanning <span class="arrow">See how</span></a></li>
+            <li><span class="row soon">RFID wristbands <span class="tag">Later in 2027</span></span></li>
+          </ul>
         </div>
-      </div>
-    </section>
-
-    <section class="section intake" aria-labelledby="intake-title">
-      <div class="container" data-reveal>
-        <span class="intake__admit" aria-hidden="true">Admit One</span>
-        <h2 id="intake-title">Tell us about your event.</h2>
-        <p>Share a few details and we'll come back with a sales, scanning, and marketing plan tuned to your audience.</p>
-        <a class="btn btn-primary" data-magnetic href="/contact.html">Start an Event Intake</a>
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container">
-      <div class="site-footer__grid">
-        <div class="site-footer__col site-footer__col--brand">
-          <p class="site-footer__wordmark" aria-hidden="true">EMC<span>.</span></p>
-          <p>One stop ticket sale management.</p>
-          <p class="site-footer__pillars">Sales · Scanning · Marketing · Advertising</p>
-        </div>
-        <div class="site-footer__col">
-          <h4>Office</h4>
-          <p>8409 Land O Lakes Blvd<br>Land O Lakes, FL 34638</p>
-        </div>
-        <div class="site-footer__col">
-          <h4>Phone</h4>
-          <p>
-            <a href="tel:+18133899530">(813) 389-9530</a><br>
-            24/7 Toll Free <a href="tel:+18002902090">(800) 290-2090</a>
-          </p>
-        </div>
-        <div class="site-footer__col">
-          <h4>More</h4>
-          <ul>
-            <li><a href="/what-we-do.html">What We Do</a></li>
-            <li><a href="/sell-onsite.html">Sell Onsite</a></li>
-            <li><a href="/sell-online.html">Sell Online</a></li>
-            <li><a href="/sell-social.html">Sell Social</a></li>
-            <li><a href="/contact.html">Contact</a></li>
+        <div class="card mod">
+          <span class="num-square amber">03</span>
+          <h3>Count</h3>
+          <p>Every ticket, as it happens.</p>
+          <ul class="rows">
+            <li><a class="row" href="/platform/#live-dashboard">Live dashboard <span class="arrow">Try it</span></a></li>
+            <li><a class="row" href="/platform/#daily-reports">Daily reports <span class="arrow">See how</span></a></li>
           </ul>
         </div>
       </div>
-      <div class="site-footer__legal">
-        <span>&copy; EMC Tickets</span>
-        <span><a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Service</a></span>
-        <span>Land O Lakes, Florida</span>
+
+      <div class="guests">
+        <h3 class="guests-label">New for your guests</h3>
+        <ul class="guest-cards">
+          <li><a href="/platform/#guest-map"><b>Interactive fair map</b> <span>Your grounds on every phone.</span></a></li>
+          <li><a href="/platform/#guest-pip"><b>Pip</b> <span>A talking AI clown for the front gate.</span></a></li>
+          <li><a href="/platform/#guest-call-line"><b>Ticket-buyer call line</b> <span>Ticket answers by phone.</span></a></li>
+        </ul>
       </div>
-    </div>
-  </footer>
+    </section>
+  </div>
+</main>
+</div>
+<!--site:ask-->
+<!--site:footer-->
 </body>
 </html>

@@ -1,7 +1,10 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { PAGES } from './build/pages.js';
+import sitePlugin from './build/vite-plugin-site.js';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  appType: 'mpa',
   server: {
     watch: {
       // WSL2 + Windows-drive (/mnt/c) checkouts don't emit inotify events,
@@ -10,21 +13,11 @@ export default defineConfig({
       interval: 300,
     },
   },
+  plugins: [sitePlugin({ staging: mode === 'staging' })],
   build: {
+    assetsDir: 'emc-site/assets',
     rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'index.html'),
-        whatWeDo: resolve(__dirname, 'what-we-do.html'),
-        sellOnsite: resolve(__dirname, 'sell-onsite.html'),
-        sellOnline: resolve(__dirname, 'sell-online.html'),
-        sellSocial: resolve(__dirname, 'sell-social.html'),
-        contact: resolve(__dirname, 'contact.html'),
-        privacy: resolve(__dirname, 'privacy.html'),
-        terms: resolve(__dirname, 'terms.html'),
-        experience: resolve(__dirname, 'experience.html'),
-        revealHero: resolve(__dirname, 'reveal-hero.html'),
-        notFound: resolve(__dirname, '404.html'),
-      },
+      input: Object.fromEntries(PAGES.map((p) => [p.key, resolve(__dirname, p.file)])),
     },
   },
-});
+}));

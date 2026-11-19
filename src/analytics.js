@@ -8,6 +8,11 @@ import {
   META_PIXEL_ID,
 } from './site-config.js';
 
+/** True when at least one tracker ID in site-config.js is filled in. */
+export function anyTrackerConfigured() {
+  return [POSTHOG_KEY, CLARITY_ID, LINKEDIN_PARTNER_ID, META_PIXEL_ID].some(Boolean);
+}
+
 export function trackingAllowed(hostname = location.hostname) {
   return PROD_HOSTNAMES.includes(hostname) && getConsent() === 'accepted';
 }
@@ -70,4 +75,13 @@ export function initAnalytics(doc = document, hostname = location.hostname) {
     () => loadVendors(doc),
     { once: true }
   );
+}
+
+/** One named event to PostHog, only on the live domain and only after the visitor accepted. */
+export function trackEvent(name, props = {}, hostname = location.hostname) {
+  try {
+    if (!trackingAllowed(hostname)) return;
+    const ph = window.posthog;
+    if (ph && typeof ph.capture === 'function') ph.capture(name, props);
+  } catch { /* analytics never breaks the page */ }
 }

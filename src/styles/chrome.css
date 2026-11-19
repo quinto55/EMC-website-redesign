@@ -1,0 +1,314 @@
+/* The parts every page shares: header and phone menu, the ask band and its form,
+   the footer and the cookie banner. */
+
+/* ---------- header ---------- */
+.top { position: relative; z-index: 30; }
+.top-bar { display: flex; align-items: center; gap: 30px; padding-top: 14px; padding-bottom: 14px; }
+.top-logo { flex: none; border-radius: 8px; }
+.top .logo { height: 60px; width: auto; }
+.top-nav { display: flex; gap: 4px; font-weight: 600; font-size: 16px; }
+.top-nav a { padding: 9px 14px; border-radius: 999px; white-space: nowrap; }
+.top-nav a:hover,
+.top-nav a[aria-current="page"] { background: var(--hover); }
+.util { margin-left: auto; display: flex; gap: 22px; align-items: center; font-size: 15px; font-weight: 600; color: var(--mut); }
+.util a:not(.btn) { white-space: nowrap; }
+.util a:not(.btn):hover { color: var(--ink); }
+.menu {
+  display: none;
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+}
+.menu::before,
+.menu::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background: currentColor;
+  transition: transform .15s ease;
+}
+.menu::before { top: 13px; box-shadow: 0 7px 0 currentColor, 0 14px 0 currentColor; }
+.menu::after { display: none; }
+.menu[aria-expanded="true"]::before { top: 20px; box-shadow: none; transform: rotate(45deg); }
+.menu[aria-expanded="true"]::after { display: block; top: 20px; transform: rotate(-45deg); }
+
+/* On the home page the header sits on the hero photo. */
+.top[data-tone="photo"] { color: #fff; --focus: #fff; }
+.top[data-tone="photo"] .top-nav a:hover,
+.top[data-tone="photo"] .top-nav a[aria-current="page"] { background: rgba(255, 255, 255, .16); }
+.top[data-tone="photo"] .util { color: rgba(255, 255, 255, .9); }
+.top[data-tone="photo"] .util a:not(.btn):hover { color: #fff; }
+.top[data-tone="photo"] .menu { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .4); color: #fff; }
+
+/* The phone menu panel drops down over the page. */
+.menu-panel { position: absolute; left: 0; right: 0; top: 100%; }
+.menu-card {
+  --focus: var(--ink);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 22px;
+  padding: 6px 20px 18px;
+  box-shadow: var(--float-shadow);
+  animation: drop .2s ease-out;
+}
+.menu-pages a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  font: 700 26px/1.1 var(--font-head);
+  letter-spacing: -.02em;
+  border-top: 1px dashed var(--line);
+}
+.menu-pages li:first-child a { border-top: 0; }
+.menu-pages a::after {
+  content: "";
+  margin-left: auto;
+  margin-right: 4px;
+  width: 10px;
+  height: 10px;
+  border-top: 2.5px solid var(--red);
+  border-right: 2.5px solid var(--red);
+  transform: rotate(45deg);
+}
+.menu-pages a[aria-current="page"] { color: var(--red); }
+.menu-util { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 8px; }
+.menu-util a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--cream);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+  font-weight: 600;
+  font-size: 15px;
+  text-align: center;
+}
+@keyframes drop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+/* ---------- the ask band ---------- */
+.ask {
+  --focus: #fff;
+  margin-bottom: 84px;
+  background: var(--red);
+  color: #fff;
+  border-radius: 28px;
+  padding: 48px 52px;
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 52px;
+  align-items: center;
+  scroll-margin-top: 24px;
+}
+.ask h2 { font-size: 52px; }
+.ask .who { font-size: 19px; margin-top: 18px; font-weight: 600; }
+.ask .who-name { white-space: nowrap; }
+.ask .who-dot { margin: 0 .35em; }
+.ask .who a:hover,
+.ask .tel a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.ask .tel { font: 700 46px/1.15 var(--font-head); letter-spacing: -.02em; margin-top: 6px; }
+.ask .tel a { white-space: nowrap; }
+.ask .tel small { display: block; font: 500 13px var(--font-mono); letter-spacing: 0; opacity: .9; margin-bottom: 2px; }
+
+/* The white card beside the copy: the email fallback now, the form once it can send. */
+.ask-card { --focus: var(--ink); background: #fff; color: var(--ink); border-radius: 20px; padding: 24px; }
+.ask-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  margin-top: 4px;
+  padding: 15px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font: 700 16px/1.2 var(--font-text);
+}
+.ask-button:disabled { opacity: .65; cursor: progress; }
+.ask-fallback { display: grid; gap: 14px; text-align: center; }
+.ask-fallback .ask-button { margin-top: 0; }
+.ask-or { font-size: 15px; color: var(--mut); }
+.ask-or a { color: var(--ink); font-weight: 700; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; }
+.ask-form { display: grid; gap: 10px; }
+.ask-form label { font-size: 14px; font-weight: 600; }
+.ask-form .opt { font-weight: 400; color: var(--mut); }
+.ask-form input:not([type="checkbox"]),
+.ask-form textarea {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--ghost-shadow);
+  border-radius: 12px;
+  background: var(--field);
+  font: 400 16px/1.4 var(--font-text); /* 16px keeps phones from zooming in */
+}
+.ask-form textarea { min-height: 84px; resize: vertical; }
+.ask-note { font-size: 13px; color: var(--mut); }
+.ask-note a { text-decoration: underline; text-underline-offset: 2px; }
+.ask-status { font-size: 15px; font-weight: 600; color: var(--red); }
+.ask-status:empty { display: none; }
+.ask-status:focus,
+.ask-thanks:focus { outline: none; }
+.ask-status a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
+.ask-error { display: block; margin-top: 4px; font-size: 14px; font-weight: 600; color: var(--red); }
+.ask-form [aria-invalid="true"] { border-color: var(--red); }
+.ask-thanks { font-size: 18px; font-weight: 600; }
+.ask-thanks a { text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+
+/* ---------- footer ---------- */
+.foot { padding: 4px 0 36px; }
+.foot-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1.1fr; gap: 40px; padding-bottom: 40px; }
+.foot-logo { display: inline-block; border-radius: 8px; }
+.foot .logo { height: 60px; width: auto; }
+.foot-tag { font: 500 13px var(--font-mono); color: var(--mut); margin-top: 14px; }
+.foot-label { font: 500 13px var(--font-mono); color: var(--red); margin-bottom: 8px; }
+.foot-col li a { display: inline-flex; align-items: center; min-height: 36px; font-weight: 600; }
+.foot-col li a:hover,
+.foot-contact a:hover { color: var(--red); }
+.foot address { font-style: normal; color: var(--mut); display: grid; gap: 10px; }
+.foot address a { color: var(--ink); font-weight: 600; }
+.foot-tel small { display: block; font: 500 12px var(--font-mono); color: var(--mut); }
+.foot-tel a { font: 700 24px/1.2 var(--font-head); letter-spacing: -.02em; white-space: nowrap; }
+.foot-base {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--ghost-shadow);
+  font-size: 14px;
+  color: var(--mut);
+}
+.foot-legal { display: flex; flex-wrap: wrap; gap: 0 22px; }
+.foot-legal a,
+.foot-legal button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mut);
+}
+.foot-legal a:hover,
+.foot-legal button:hover { color: var(--ink); }
+/* Without JavaScript there are no cookies to set, so the settings button would do nothing. */
+html:not(.js) [data-cookie-settings] { display: none; }
+
+/* ---------- cookie banner ---------- */
+.cookie-banner {
+  --focus: var(--ink);
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 60;
+  display: grid;
+  gap: 14px;
+  max-width: 540px;
+  padding: 20px 22px 22px;
+  border-radius: 22px;
+  background: var(--cream);
+  color: var(--ink);
+  box-shadow: var(--float-shadow);
+}
+.cookie-banner__text { font-size: 15px; line-height: 1.5; }
+.cookie-banner__text a { font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.cookie-banner__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.cookie-banner__actions .btn { padding: 11px 22px; font-size: 15px; }
+
+/* ---------- computers ---------- */
+@media (min-width: 1001px) {
+  .menu-panel { display: none !important; } /* the full menu is in the bar */
+  .cookie-banner { left: 24px; right: auto; bottom: 24px; }
+}
+/* Narrow computers: tighten the bar so the menu and the utilities still fit on one line. */
+@media (min-width: 1001px) and (max-width: 1140px) {
+  .top-bar { gap: 18px; }
+  .top-nav { gap: 0; }
+  .top-nav a { padding: 9px 10px; }
+  .util { gap: 16px; }
+}
+
+/* ---------- phones and tablets ---------- */
+@media (max-width: 1000px) {
+  .top-bar { gap: 10px; padding-top: 12px; padding-bottom: 12px; }
+  .top .logo { height: 46px; }
+  .top-nav,
+  .util a:not(.btn) { display: none; }
+  .util { gap: 10px; }
+  .top .btn { padding: 11px 18px; font-size: 15px; box-shadow: 0 4px 0 var(--red-shadow); }
+  .menu { display: block; }
+
+  /* Without JavaScript the menu button could not open anything, so phones get the menu
+     laid out under the bar instead: the pages as pills, then the two utilities.
+     The head sets html.js before this sheet loads, so pages with JavaScript never see this. */
+  html:not(.js) .menu { display: none; }
+  html:not(.js) #site-menu[hidden] { display: block !important; position: static; }
+  html:not(.js) .menu-card { padding: 0 0 14px; border-radius: 0; background: none; box-shadow: none; animation: none; }
+  html:not(.js) .top[data-tone="photo"] .menu-card { --focus: #fff; }
+  html:not(.js) .menu-pages { display: flex; flex-wrap: wrap; gap: 8px; }
+  html:not(.js) .menu-pages a {
+    min-height: 44px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: inset 0 0 0 1.5px var(--line);
+    font: 600 15px/1.2 var(--font-text);
+    letter-spacing: 0;
+  }
+  html:not(.js) .menu-pages a::after { display: none; }
+  html:not(.js) .menu-pages a[aria-current="page"] { background: var(--hover); color: var(--ink); }
+
+  .ask { grid-template-columns: minmax(0, 1fr); padding: 30px 22px; gap: 26px; border-radius: 24px; margin-bottom: 40px; }
+  .ask h2 { font-size: 38px; }
+  .ask .who { font-size: 17px; }
+  .ask .who-dot { display: none; }
+  .ask .who-name { display: block; }
+  .ask .tel { font-size: 38px; }
+
+  .foot-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 20px; padding-bottom: 28px; }
+  .foot-brand,
+  .foot-contact { grid-column: 1 / -1; }
+  .foot-col li a,
+  .foot-legal a,
+  .foot-legal button { min-height: 44px; }
+
+  /* Contact links that sit in a line of text: vertical padding on an inline link grows
+     what a thumb can hit to 44px without moving the text around it. */
+  .ask .who a,
+  .ask-or a,
+  .foot address a { padding-top: 12px; padding-bottom: 12px; }
+  .ask .tel a { padding-top: 5px; padding-bottom: 5px; }
+  .foot-base { flex-direction: column-reverse; align-items: flex-start; }
+}
+@media (max-width: 370px) {
+  .ask .tel { font-size: 34px; }
+}
+
+/* ---------- the Contact page ---------- */
+.contact-top { padding-bottom: 48px; }
+.contact-card { margin-top: 28px; max-width: 560px; }
+.contact-name { font: 700 24px/1.2 var(--font-head); letter-spacing: -.02em; margin-bottom: 14px; }
+.contact-list { display: grid; gap: 16px; }
+.contact-list dt { font: 500 13px var(--font-mono); color: var(--mut); margin-bottom: 2px; }
+.contact-list dd { font-size: 19px; font-weight: 600; }
+.contact-list a { text-decoration: underline; text-underline-offset: 3px; display: inline-block; padding: 8px 0; }
+.contact-list a[href^="tel"] { font: 700 28px/1.2 var(--font-head); letter-spacing: -.02em; white-space: nowrap; }

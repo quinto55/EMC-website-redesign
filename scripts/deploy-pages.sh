@@ -4,7 +4,7 @@
 # vite preserves dist/.git when emptying the outDir)
 set -euo pipefail
 cd "$(dirname "$0")/.."
-npx vite build
+npx vite build --mode staging
 cd dist
 git add -A
 git commit -m "deploy: EMC-website-redesign@$(git -C .. rev-parse --short HEAD)" || echo "nothing new to deploy"
