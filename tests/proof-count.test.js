@@ -340,6 +340,84 @@ describe('initProofCount', () => {
     expectFinal();
   });
 
+  it('a late observer callback after the strip has finished cannot replay or re-arm it', () => {
+    mount();
+    view(0);
+    view(1);
+    for (let i = 0; i < 200; i++) frame();
+    expect(strip().classList.contains('is-done')).toBe(true);
+    // a callback queued before the disconnect still arrives: the first one waits 300 ms, a later one plays at once
+    const late = observers[0].cb;
+    late([{ target: strip(), isIntersecting: true, intersectionRatio: 1 }], observers[0]);
+    late([{ target: strip(), isIntersecting: true, intersectionRatio: 1 }], observers[0]);
+    vi.advanceTimersByTime(5000);
+    expect(armed()).toBe(false);
+    expect(frames.size).toBe(0);
+    expectFinal();
+  });
+
+  it('a late callback after destroy() cannot arm the strip', () => {
+    const counter = mount();
+    const cb = observers[0].cb;
+    cb([{ target: strip(), isIntersecting: true, intersectionRatio: 1 }], observers[0]); // the 300 ms wait starts
+    counter.destroy();
+    cb([{ target: strip(), isIntersecting: true, intersectionRatio: 1 }], observers[0]);
+    vi.advanceTimersByTime(5000);
+    expect(armed()).toBe(false);
+    expect(frames.size).toBe(0);
+    expectFinal();
+  });
+
+  it('a throw after arming finishes at once, without waiting for the safety timer', () => {
+    mount();
+    view(0);
+    const orig = globalThis.requestAnimationFrame;
+    globalThis.requestAnimationFrame = () => { throw new Error('no frames today'); };
+    expect(() => view(1)).not.toThrow();
+    globalThis.requestAnimationFrame = orig;
+    expectFinal();
+    expect(strip().classList.contains('is-done')).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('a throw while counting finishes at once as well', () => {
+    let broken = false;
+    mount({ now: () => { if (broken) throw new Error('clock failed'); return clock; } });
+    view(0);
+    view(1);
+    for (let i = 0; i < 5; i++) frame();
+    expect(armed()).toBe(true);
+    broken = true;
+    expect(() => frame()).not.toThrow();
+    expectFinal();
+    expect(strip().classList.contains('is-done')).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('a data-count-to that is not a number leaves the served digits alone', () => {
+    document.body.innerHTML = STRIP.replace(/data-count-to="[^"]*"/, 'data-count-to="forty"');
+    const counter = initProofCount(document, { reducedMotion: false, now: () => clock });
+    view(1);
+    vi.advanceTimersByTime(5000);
+    expect(digits().textContent).toBe('40');
+    expect(digits().textContent).not.toContain('NaN');
+    expect(armed()).toBe(false);
+    expect(frames.size).toBe(0);
+    expect(() => counter.destroy()).not.toThrow();
+    expect(digits().textContent).toBe('40');
+  });
+
+  it('finish() resets the classes and the text even if disconnecting the observer throws', () => {
+    mount();
+    view(0);
+    view(1);
+    for (let i = 0; i < 10; i++) frame();
+    expect(armed()).toBe(true);
+    observers[0].disconnect = () => { throw new Error('disconnect failed'); };
+    try { setHidden(true); } catch { /* the reset must already have happened */ }
+    expectFinal();
+  });
+
   it('does nothing on a page without the strip', () => {
     document.body.innerHTML = '<p>No strip here</p>';
     expect(() => initProofCount(document).destroy()).not.toThrow();

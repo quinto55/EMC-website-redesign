@@ -31,6 +31,7 @@ export function initProofCount(doc = document, { reducedMotion, now = () => perf
   const strip = digits && digits.closest('.proof');
   if (!strip) return { destroy() {} };
   const target = Number(digits.dataset.countTo);
+  if (!Number.isFinite(target)) return { destroy() {} }; // nothing to count to: the served digits stay as they are
   if (reducedMotion === undefined) {
     reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches === true;
   }
@@ -41,6 +42,7 @@ export function initProofCount(doc = document, { reducedMotion, now = () => perf
   let safety = null;
   let tail = null;
   let settled = false;
+  let played = false;
 
   const show = (n) => {
     const s = String(n);
@@ -52,13 +54,14 @@ export function initProofCount(doc = document, { reducedMotion, now = () => perf
   function finish() {
     if (settled) return;
     settled = true;
-    if (observer) observer.disconnect();
-    if (raf !== null) cancelAnimationFrame(raf);
-    for (const t of [wait, safety, tail]) clearTimeout(t);
-    doc.removeEventListener('visibilitychange', onVisibility);
+    // The visible state first, so that nothing below can leave the strip hidden or half counted.
     show(target);
     strip.classList.remove('is-armed', 'is-counted');
     strip.classList.add('is-done');
+    for (const t of [wait, safety, tail]) clearTimeout(t);
+    if (raf !== null) cancelAnimationFrame(raf);
+    doc.removeEventListener('visibilitychange', onVisibility);
+    if (observer) observer.disconnect();
   }
 
   if (reducedMotion || typeof IntersectionObserver !== 'function' || typeof requestAnimationFrame !== 'function') {
@@ -67,26 +70,36 @@ export function initProofCount(doc = document, { reducedMotion, now = () => perf
   }
 
   function play() {
-    observer.disconnect(); // once per page view
+    if (played || settled) return; // once per page view, whatever a late observer callback says
+    played = true;
+    observer.disconnect();
     if (doc.hidden) return finish();
-    safety = setTimeout(finish, SAFETY_MS);
-    doc.addEventListener('visibilitychange', onVisibility);
-    const frames = countFrames(target, STEPS);
-    const last = frames.length - 1;
-    strip.classList.add('is-armed');
-    show(frames[0]);
-    const start = now();
-    const step = () => {
-      raf = null;
-      const i = Math.min(last, Math.floor(((now() - start) / COUNT_MS) * last));
-      show(frames[i]);
-      if (i < last) raf = requestAnimationFrame(step);
-      else {
-        strip.classList.add('is-counted');
-        tail = setTimeout(finish, TAIL_MS);
-      }
-    };
-    raf = requestAnimationFrame(step);
+    try {
+      safety = setTimeout(finish, SAFETY_MS);
+      doc.addEventListener('visibilitychange', onVisibility);
+      const frames = countFrames(target, STEPS);
+      const last = frames.length - 1;
+      strip.classList.add('is-armed');
+      show(frames[0]);
+      const start = now();
+      const step = () => {
+        raf = null;
+        try {
+          const i = Math.min(last, Math.floor(((now() - start) / COUNT_MS) * last));
+          show(frames[i]);
+          if (i < last) raf = requestAnimationFrame(step);
+          else {
+            strip.classList.add('is-counted');
+            tail = setTimeout(finish, TAIL_MS);
+          }
+        } catch {
+          finish();
+        }
+      };
+      raf = requestAnimationFrame(step);
+    } catch {
+      finish(); // anything that fails after arming: the final state now, not when the safety timer fires
+    }
   }
 
   let first = true;
