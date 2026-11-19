@@ -95,7 +95,7 @@ Order:
 4. `index.html`.
 5. **The rules block.** Open the root `.htaccess` on the host. Paste the whole contents of `deploy/htaccess-block.conf` at the very top, above everything already there (including WordPress's own block), with any lines you added in section 2, items 4 and 5. Change nothing below it. Save.
 
-   **Straight after saving, open https://emctickets.com/ and https://emctickets.com/flstatefair/ in a private browser window.** Good: the new home page, and the event site as it was before. If either shows a server error (500) or the event site has changed, go straight to section 6, Undo.
+   **Straight after saving, open https://emctickets.com/ and https://emctickets.com/flstatefair/ in a private browser window.** Good: the new home page, and the event site as it was before. On a computer the new home page opens behind a curtain: a night-time fair picture with the EMC logo, the words "Behind every great fair." and "Scroll to pull back the curtain". That is the new home page. Scroll, click, or wait about six seconds and it pulls back. On a phone there is no curtain. If either shows a server error (500) or the event site has changed, go straight to section 6, Undo.
 
 Do not upload `MANIFEST.txt` separately: it is already inside `emc-site/`. Do not upload `dist-host/` as a folder; its contents go into the web root.
 
@@ -120,7 +120,7 @@ Good: opening https://emctickets.com/ in a private browser window shows the new 
 
    Good: the first command prints `200` (the site answered the search) and the second prints `0` (the search reached WordPress, not the new home page). The `0` alone proves nothing, because an error page also prints `0`. If either prints anything else, **undo first** (section 6), then investigate: the old pages' forms and search may not be reaching WordPress.
 
-3. Look at the site by eye in a private window, on a phone and on a computer: the home page, Platform, Contact.
+3. Look at the site by eye in a private window, on a phone and on a computer: the home page (on a computer, watch the curtain pull back once), Platform, Contact.
 
 4. **One real form submission.** Send it from the live domain, or from localhost with `?formtest=1` added to the page address. Do not send the first test from a free preview sub-domain: the form service may block those. Good: the message arrives at the receiving email address. (This only works once the form key is in place; see the open items.)
 
