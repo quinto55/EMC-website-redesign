@@ -12,6 +12,14 @@ AddType font/woff2 .woff2
 AddType application/manifest+json .webmanifest
 </IfModule>
 
+<IfModule mod_deflate.c>
+# Compress styles, scripts, svg and json on the way out (about a third of the size). Images, fonts and videos are
+# already compressed, so they are left alone. SetOutputFilter is a core directive, so this guard is all it needs.
+<FilesMatch "\.(css|js|svg|json|webmanifest)$">
+SetOutputFilter DEFLATE
+</FilesMatch>
+</IfModule>
+
 <IfModule mod_expires.c>
 ExpiresActive On
 # Images, logos and icons: one week.

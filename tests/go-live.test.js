@@ -265,6 +265,34 @@ describe('the cache file shipped inside the build', () => {
   });
 });
 
+describe('compression in the cache file', () => {
+  const H = read('public/emc-site/.htaccess');
+  const block = H.match(/<IfModule mod_deflate\.c>([\s\S]*?)<\/IfModule>/);
+  it('has one guarded mod_deflate block, near the top, before the cache rules', () => {
+    expect(H.match(/<IfModule mod_deflate\.c>/g)).toHaveLength(1);
+    expect(block).not.toBeNull();
+    expect(H.indexOf('<IfModule mod_deflate.c>')).toBeLessThan(H.indexOf('<IfModule mod_expires.c>'));
+    expect(H.indexOf('<IfModule mod_deflate.c>')).toBeLessThan(H.indexOf('<IfModule mod_headers.c>'));
+  });
+  it('compresses styles, scripts, svg, json and the manifest, and nothing that is already compressed', () => {
+    const files = block[1].match(/<FilesMatch "([^"]+)">\s*SetOutputFilter DEFLATE\s*<\/FilesMatch>/);
+    expect(files, 'a FilesMatch that sets the DEFLATE filter').not.toBeNull();
+    const re = new RegExp(files[1]);
+    for (const name of ['site-AbC123.css', 'home-AbC123.js', 'logo.svg', 'videos.json', 'site.webmanifest']) expect(re.test(name), name).toBe(true);
+    for (const name of ['a.mp4', 'a.webm', 'a.jpg', 'a.png', 'a.webp', 'a.avif', 'a.woff2', 'a.ico', 'a-poster.jpg', 'a.html']) expect(re.test(name), name).toBe(false);
+    // only core directives, so a host without mod_filter cannot be made to fail by this block
+    expect(block[1]).not.toMatch(/AddOutputFilterByType|BrowserMatch|Header /);
+  });
+  it('leaves the cache rules where they were: the curtain\'s week is still the last rule of each block', () => {
+    const exp = H.match(/<IfModule mod_expires\.c>[\s\S]*?<\/IfModule>/)[0];
+    const hdr = H.match(/<IfModule mod_headers\.c>[\s\S]*?<\/IfModule>/)[0];
+    for (const b of [exp, hdr]) {
+      const matches = [...b.matchAll(/<FilesMatch "([^"]+)">/g)].map((m) => m[1]);
+      expect(matches).toEqual(['\\.(jpe?g|png|webp|avif|svg|ico|webmanifest)$', '\\.(js|css|woff2)$', '(\\.mp4|-poster\\.jpg)$', '^fair-(loop\\.(webm|mp4)|poster\\.jpg)$']);
+    }
+  });
+});
+
 describe('scripts and settings', () => {
   it('builds the staging site with the staging mode and nothing else changed', () => {
     const s = read('scripts/deploy-pages.sh');
