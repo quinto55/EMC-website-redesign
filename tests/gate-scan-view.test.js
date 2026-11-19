@@ -184,6 +184,27 @@ describe('the gate scan demo', () => {
     expect(text(phone)).not.toContain('first used');
   });
 
+  it('pressed hundreds of times, the clock stops at the sample day\'s last minute and the count is written as the board writes it', () => {
+    const { el, scan, status, board } = mounted();
+    let presses = 0;
+    const press = (until) => {
+      for (; presses < until; presses++) scan.click();
+    };
+    // The 519th press is at 10:58 PM and the 520th at 10:59 PM; the fair closes at 11 PM, so the clock stops there.
+    press(519);
+    expect(result(el).text).toBe('Duplicate North Gate · 10:58 PM');
+    press(520);
+    expect(result(el).text).toBe('Duplicate North Gate · 10:59 PM');
+    press(600);
+    expect(result(el).text).toBe('Duplicate North Gate · 10:59 PM');
+    expect(status.textContent).toBe('Duplicate. North Gate, 10:59 PM.');
+    expect(boardRead(board).counts).toEqual(['599 Presented again']);
+    press(1200);
+    expect(result(el).text).toBe('Duplicate North Gate · 10:59 PM');
+    expect(status.textContent).toBe('Duplicate. North Gate, 10:59 PM.');
+    expect(boardRead(board).counts).toEqual(['1,199 Presented again']);
+  });
+
   it('no "first used" inside the phone in any state', () => {
     const { scan, reset, phone } = mounted();
     const states = [text(phone)];

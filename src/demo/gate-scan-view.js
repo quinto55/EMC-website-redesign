@@ -1,19 +1,21 @@
 // Runs the gate scanning demo on the markup the page was served with. Browser only.
 import { initialScanState, scanReduce, scanResult, renderGateScanInner, SAMPLE_TICKET, barcodeTail } from './gate-scan.js';
 import { tryItemHTML } from './dashboard-markup.js';
+import { count } from './board-engine.js';
+import { DAY_END_MIN } from './pace.js';
 
 /**
  * Where and when the visitor's nth scan happens. The first is at Main Gate at 2:14 PM; every later one is at North
  * Gate, from 2:21 PM, a minute apart: a shared or copied ticket tried at another gate, and each press reads (and is
- * announced) as a new scan.
+ * announced) as a new scan. However often it is pressed, the clock stops at the sample day's last minute (10:59 PM;
+ * the fair closes at 11 PM).
  */
 const FIRST = { minute: 14 * 60 + 14, gate: 'Main Gate' };
 const AGAIN = { minute: 14 * 60 + 21, gate: 'North Gate' };
 function scanAt(n) {
-  const { minute, gate } = n <= 1 ? FIRST : { minute: AGAIN.minute + (n - 2), gate: AGAIN.gate };
-  const m = minute % (24 * 60);
-  const h = Math.floor(m / 60);
-  return { gate, at: `${h % 12 === 0 ? 12 : h % 12}:${String(m % 60).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}` };
+  const { minute, gate } = n <= 1 ? FIRST : { minute: Math.min(AGAIN.minute + (n - 2), DAY_END_MIN - 1), gate: AGAIN.gate };
+  const h = Math.floor(minute / 60);
+  return { gate, at: `${h % 12 === 0 ? 12 : h % 12}:${String(minute % 60).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}` };
 }
 
 const ICONS = {
@@ -93,7 +95,7 @@ export function mountGateScan(el) {
 
     const refused = state.step === 'refused';
     board.hidden = !refused;
-    boardCount.textContent = refused ? String(state.scans - 1) : '0';
+    boardCount.textContent = refused ? count(state.scans - 1) : '0';
     // The latest try, as the board's row draws it (the dashboard's own row markup; the board would add its age).
     boardTries.innerHTML = refused ? tryItemHTML({
       id: 'try', tail: barcodeTail(SAMPLE_TICKET.barcode), gate: lastScan.gate,
