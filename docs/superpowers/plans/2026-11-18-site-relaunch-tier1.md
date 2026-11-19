@@ -1057,3 +1057,84 @@ it('new page paths come from the registry', () => { /* NEW_PAGES equals PAGES pa
 - [ ] **Step 5:** Merge to `main` with `--no-ff`, run the tests on the merge, delete the branch, push `main` to origin (standing instruction).
 - [ ] **Step 6: Staging:** `bash scripts/deploy-pages.sh`, then check `https://quinto55.github.io/` and `/iafe/` load and carry `noindex`.
 - [ ] **Step 7:** Update the ledger and the project memory; list for Anthony the new copy to read (Marketing, About, Privacy, the form messages) and the three open questions.
+
+---
+
+### Task 12: The full dashboard on the home page
+
+*Added 2026-11-19 after tier 1 was on staging. Anthony: "Put the full dashboard on the home page too."*
+
+The home page keeps the hero from the approved mockup (photo, headline, the compact board). The full dashboard, the same one the Platform page shows, gets its own section directly under the proof strip. Both boards on the home page are driven by one sample day, so their figures always agree.
+
+**Files:**
+- Create: `src/demo/home-live.js`, `tests/home-live.test.js`
+- Modify: `index.html` (the new section), `src/entry/home.js`, `src/demo/board-view.js` and `src/demo/dashboard-view.js` (each exposes a view that can be driven from outside; `mountBoard` and `mountDashboard` keep working as they do now), `build/pages.js` (home `styles` adds `/src/styles/dashboard.css`), `src/styles/home.css` (the section), `src/styles/dashboard.css` or `src/styles/platform.css` only if a layout rule the board needs lives in `platform.css` today and must be shared, `tests/home.test.js`, `tests/no-js.test.js`
+
+**Interfaces:**
+- Consumes: `createDashState`, `advance`, `dashSnapshot` from `src/demo/dashboard-engine.js`; `snapshot` from `src/demo/board-engine.js`; `renderBoardInner`, `boardFigures`, `feedRowHTML` from `src/demo/board-markup.js`; the dashboard's markup and in-place update code in `src/demo/dashboard-view.js`; `<!--site:board-->` and `<!--site:dashboard-->`.
+- Produces:
+  ```js
+  // src/demo/board-view.js
+  export function createBoardView(el, { feedSize = 3 } = {}): { render(boardState): void }       // updates the served board in place
+  export function mountBoard(el, opts)                                                            // unchanged behavior, now built on createBoardView
+
+  // src/demo/dashboard-view.js
+  export function createDashboardView(el): { render(dashSnapshot): void, settle(): void, destroy(): void }   // settle() finishes any count-up at once
+  export function mountDashboard(el, opts)                                                         // unchanged behavior, now built on createDashboardView
+
+  // src/demo/home-live.js
+  export function mountHomeLive({ boardEl, dashEl, intervalMs = 1700, rng = Math.random } = {}): { tick(): void, destroy(): void }
+  ```
+  `mountHomeLive` holds one dashboard state. Each tick advances it once and renders both views from it: the dashboard from `dashSnapshot(state)`, the compact board from the board state inside it. Either element may be missing; the other still works.
+
+- [ ] **Step 1: Write the failing tests.**
+
+`tests/home-live.test.js` (fake timers; render the home page with `renderPage`, load it into the document):
+```js
+it('one tick moves both boards and their figures agree', () => {
+  // after 25 ticks with mulberry32(5) and reduced motion on (so the dashboard's figures do not count up):
+  // compact "Tickets sold today" === dashboard "Tickets today"; compact "Scanned in" === dashboard "Admitted";
+  // compact "Sales today" === dashboard "Gross today" (both whole dollars);
+  // compact Online share === the dashboard's Online card share; compact Box office share === Box-office card + Cash shares;
+  // the compact feed's first row names the same sale as the dashboard's first "Latest sales" row
+});
+it('there is one timer: a tick interval produces exactly one sale on both boards', () => {});
+it('keeps ticking while either board is on screen, stops when neither is, and does not catch up', () => {
+  // stubbed IntersectionObserver: hero board visible + dashboard off screen -> ticks; both off -> none for 60 s;
+  // dashboard visible again -> exactly one sale per interval
+});
+it('stops while the tab is hidden and does not catch up afterwards', () => {});
+it('a missing dashboard element still leaves a working compact board, and the reverse', () => {});
+it('destroy() stops everything; a later tick() does nothing', () => {});
+```
+
+`tests/home.test.js`, add:
+```js
+it('shows the full dashboard in its own section under the proof strip', () => {
+  // order in <main>: hero, .proof, section#live-board, the "Sell. Scan. Count." section
+  // section#live-board: kicker 'Live dashboard'; h2 'Every ticket, as it happens.';
+  // lede 'Real-time validation. 24/7 dashboard. Watch tickets sold, scanned in and sales as they happen.';
+  // contains [data-dashboard][data-sample]; ends with a[href="#talk"] "Let's talk about your fair"
+  // the hero still contains [data-board] and 'Running right now'
+});
+```
+`tests/no-js.test.js`, add: the home page as served contains the dashboard with `3,947` and `$61,284`, and the compact board with the same two figures.
+
+- [ ] **Step 2: Run** the new and changed test files. Expected: FAIL.
+
+- [ ] **Step 3: Split each view from its timer.** `createBoardView` is the in-place update `mountBoard` does today (three figures, two bars, one new feed row in, the oldest out), taking a board state; it must add a row only when the newest sale changed, so rendering the same state twice changes nothing. `createDashboardView` is the dashboard's existing in-place update, taking a snapshot. `mountBoard` and `mountDashboard` become: create the state, create the view, tick on a timer through `runWhileVisible`. Their existing tests must pass unchanged.
+
+- [ ] **Step 4: Implement `mountHomeLive`.** One state from `createDashState()`, one `setInterval`. It runs while the tab is visible and at least one of the two elements is on screen (an `IntersectionObserver` on each; with no `IntersectionObserver`, treat both as on screen). When the dashboard is off screen its figures are set without the count-up (`settle()`), so no animation frame runs for something nobody sees. After `destroy()` nothing runs.
+
+- [ ] **Step 5: Write the section** in `index.html`, directly after the proof strip and before the "Sell. Scan. Count." section:
+  - `<section class="sec live-board" id="live-board" aria-labelledby="live-board-h">`
+  - kicker "Live dashboard"; `<h2 id="live-board-h">Every ticket, as it happens.</h2>`; lede "Real-time validation. 24/7 dashboard. Watch tickets sold, scanned in and sales as they happen."
+  - `<!--site:dashboard-->`
+  - a link to `#talk` reading "Let's talk about your fair", with the drawn arrow.
+  The board uses the full width of the page wrap with its monitor frame on computers, and is the dark rounded card with stacked panels on phones, exactly as on the Platform page. `src/entry/home.js` calls `mountHomeLive` with the hero's `[data-board]` and the section's `[data-dashboard]`, guarded so a failure leaves both boards as served and the rest of the page working.
+
+- [ ] **Step 6: Run** `npm test`. Expected: PASS, exit 0.
+
+- [ ] **Step 7: Look at it.** `npm run dev`; `node .superpowers/tools/shots.mjs --widths 360,390,768,1024,1280,1440 /` and again with `--nojs`. The hero is unchanged from before this task (compare the first screen at 1280 and 390 with `.superpowers/shots/final/home-1280-part1.png` and `home-390-part1.png`). The dashboard section matches the Platform page's board. No sideways scroll at 360. In a real browser, with the dashboard scrolled into view, the compact board's three figures and the dashboard's tiles show the same numbers (write a few lines of Playwright that read both after ten seconds and print them).
+
+- [ ] **Step 8: Commit** `feat(home): the full live dashboard on the home page, on the same sample day as the hero board`.
