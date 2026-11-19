@@ -37,12 +37,13 @@ export function mountHomeLive({ boardEl = null, dashEl = null, intervalMs = 1700
   let state = createDashState();
   const pause = createPause();
   const board = boardEl ? createBoardView(boardEl, { pause }) : null;
-  let dash = dashEl ? createDashboardView(dashEl, { pause }) : null;
+  let dash = null;
   try {
+    dash = dashEl ? createDashboardView(dashEl, { pause }) : null;
     dash?.render(dashSnapshot(state)); // what the board already shows: this only fits its chart to its box
   } catch (err) {
     console.error(err);
-    dash.destroy(); // a dashboard that cannot start is left as served; the compact board still runs
+    dash?.destroy(); // a dashboard that cannot be built or started is left as served; the compact board still runs
     dash = null;
   }
   let dashInView = true;

@@ -426,6 +426,34 @@ describe('the home page boards on one sample day', () => {
         delete document.fullscreenEnabled;
       }
     });
+
+    it('a dashboard that fails while it is being set up is left as served; the compact board ticks and its Pause works', () => {
+      reduced = true;
+      const { boardEl, dashEl } = loadHome();
+      dashEl.querySelector('.db-chart').remove(); // the dashboard view cannot be built without its chart
+      const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
+      expect(errors).toHaveBeenCalled();
+      expect(dashEl.querySelector('button[data-pause]').hasAttribute('hidden')).toBe(true); // left as served
+      const sales = compact(boardEl).sales;
+      vi.advanceTimersByTime(1000);
+      expect(compact(boardEl).sales).not.toBe(sales);
+      expect(dashboard(dashEl).orders).toBe(1512); // left as served
+      // The hero board's Pause button pauses it, and Resume starts it again.
+      const pause = boardEl.querySelector('button[data-pause]');
+      expect(pause.hasAttribute('hidden')).toBe(false);
+      pause.click();
+      expect(pause.querySelector('[data-pause-label]').textContent).toBe('Resume');
+      const paused = compact(boardEl);
+      vi.advanceTimersByTime(10000);
+      expect(compact(boardEl)).toEqual(paused);
+      expect(vi.getTimerCount()).toBe(0);
+      pause.click();
+      expect(pause.querySelector('[data-pause-label]').textContent).toBe('Pause');
+      vi.advanceTimersByTime(1000);
+      expect(compact(boardEl).sales).not.toBe(paused.sales);
+      live.destroy();
+      expect(vi.getTimerCount()).toBe(0);
+    });
   });
 
   describe('the pause buttons (WCAG 2.2.2)', () => {
