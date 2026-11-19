@@ -158,17 +158,23 @@ export function mountCurtain(doc = document, opts = {}) {
     listeners.push([target, type, fn, options]);
   };
 
+  // The page comes back first (no listener left to hold its scrolling, then no layer over it and no marks), and only
+  // then the frame, the timers and the video: a video that throws while it is let go cannot leave the page covered.
   function teardown() {
     mode = 'done';
     for (const [target, type, fn, options] of listeners) target.removeEventListener(type, fn, options);
     listeners.length = 0;
+    root.remove();
+    clearMarks();
     if (rafId !== null) caf(rafId);
     rafId = null;
     for (const t of [idleTimer, readyTimer, finishTimer]) clearTimeout(t);
     idleTimer = readyTimer = finishTimer = null;
-    releaseVideo();
-    root.remove();
-    clearMarks();
+    try {
+      releaseVideo();
+    } catch (err) {
+      console.error(err);
+    }
   }
   /** Runs a step; if it throws, the visitor gets the page. */
   function guard(step) {
@@ -320,17 +326,21 @@ export function mountCurtain(doc = document, opts = {}) {
   }
 
   // While it is up, the page does not scroll: what would scroll it opens the curtain instead (downward) or nothing.
+  // Once it is gone these four do nothing, even if a browser failed to remove them.
   function onWheel(e) {
+    if (mode === 'done') return;
     if (e.ctrlKey) return; // the browser's zoom
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; // a sideways swipe (back and forward on a trackpad)
     if (e.cancelable) e.preventDefault();
     if (e.deltaY > 0) open();
   }
   function onTouchMove(e) {
+    if (mode === 'done') return;
     if (e.cancelable) e.preventDefault();
     open();
   }
   function onKey(e) {
+    if (mode === 'done') return;
     if (e.altKey || e.ctrlKey || e.metaKey) return;
     if (OPEN_KEYS.has(e.key)) {
       if (e.key !== 'Enter') e.preventDefault(); // Enter scrolls nothing; on the cue it is the button's own press
@@ -343,6 +353,7 @@ export function mountCurtain(doc = document, opts = {}) {
     if (!root.contains(e.target)) open(); // the keyboard has gone on into the page
   }
   function onScroll() {
+    if (mode === 'done') return;
     if (win.scrollY <= 0 && win.scrollX <= 0) return;
     try {
       win.scrollTo({ top: 0, left: 0, behavior: 'instant' });

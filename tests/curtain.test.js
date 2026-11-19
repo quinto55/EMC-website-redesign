@@ -656,4 +656,86 @@ describe('access and clean-up', () => {
     expect(root()).toBeNull();
     expect(() => handle.destroy()).not.toThrow();
   });
+
+  it('a video that throws while it is let go still leaves the page: no cloth, no marks, scrolling free', async () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    // A browser nobody has run this in: the video takes a frame callback, then throws when it is cancelled.
+    const throwingVideo = (doc) => {
+      const v = stubbedVideo(doc);
+      v.requestVideoFrameCallback = vi.fn(() => 7);
+      v.cancelVideoFrameCallback = vi.fn(() => {
+        throw new Error('cancelVideoFrameCallback failed');
+      });
+      return v;
+    };
+    const caught = (step) => {
+      try {
+        step();
+        return null;
+      } catch (err) {
+        return err;
+      }
+    };
+    const thePage = (when) => {
+      expect(root(), `${when}: no layer left over the page`).toBeNull();
+      expect(html().className, when).toBe('js');
+      expect(frames.size, when).toBe(0);
+      expect(vi.getTimerCount(), when).toBe(0);
+      expect(wheel(120).defaultPrevented, when).toBe(false);
+    };
+
+    // destroy() while it is up.
+    await mount({ createVideo: throwingVideo });
+    frame(); // the video is asked for
+    const thrown = caught(() => handle.destroy());
+    expect(videos[0].cancelVideoFrameCallback).toHaveBeenCalled();
+    thePage('destroy');
+    expect(thrown, 'destroy() does not throw').toBeNull();
+    expect(errors).toHaveBeenCalledTimes(1);
+    expect(() => handle.destroy(), 'a second destroy is harmless').not.toThrow();
+
+    // Opening while frames have stopped (a hidden tab): the finish timer takes it down.
+    html().className = 'js';
+    await mount({ createVideo: throwingVideo });
+    frame();
+    wheel(120);
+    expect(isOpening()).toBe(true);
+    const late = caught(() => vi.advanceTimersByTime(2700));
+    expect(videos[1].cancelVideoFrameCallback).toHaveBeenCalled();
+    thePage('finish timer');
+    expect(late, 'nothing escapes the timer').toBeNull();
+    expect(errors).toHaveBeenCalledTimes(2);
+  });
+
+  it('once it is gone, a listener the browser failed to remove holds nothing: wheel, swipe, keys and scroll all pass', async () => {
+    // Removal does nothing here, as in a browser that failed to remove a listener; what was added is removed at the end.
+    const added = [];
+    for (const target of [window, document]) {
+      const add = target.addEventListener.bind(target);
+      vi.spyOn(target, 'addEventListener').mockImplementation((type, fn, o) => {
+        added.push([target, type, fn, o]);
+        return add(type, fn, o);
+      });
+      vi.spyOn(target, 'removeEventListener').mockImplementation(() => {});
+    }
+    try {
+      await mount();
+      frame();
+      handle.destroy();
+      expect(root()).toBeNull();
+      expect(added.length).toBeGreaterThan(0);
+      expect(wheel(120).defaultPrevented).toBe(false);
+      expect(wheel(-120).defaultPrevented).toBe(false);
+      const swipe = new Event('touchmove', { bubbles: true, cancelable: true });
+      document.dispatchEvent(swipe);
+      expect(swipe.defaultPrevented).toBe(false);
+      for (const k of [' ', 'ArrowDown', 'PageDown', 'End', 'ArrowUp', 'PageUp', 'Home']) expect(key(k).defaultPrevented, k).toBe(false);
+      window.scrollTo(0, 400);
+      window.dispatchEvent(new Event('scroll'));
+      expect(window.scrollY, 'no pull back to the top').toBe(400);
+    } finally {
+      vi.restoreAllMocks();
+      for (const [target, type, fn, o] of added) target.removeEventListener(type, fn, o);
+    }
+  });
 });
