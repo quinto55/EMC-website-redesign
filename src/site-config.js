@@ -4,6 +4,9 @@ export const CONTACT_EMAIL = 'info@emctickets.com';
 
 /* Analytics IDs — an empty string disables that vendor entirely.
    Paste real EMC account IDs here when they exist; nothing else to wire.
+   Before switching a tracker on, look at the home page's first view on a
+   computer: the cookie banner it brings up sits at the bottom left, over
+   the curtain's cue.
    ACTIVATION NOTE: the PostHog/LinkedIn loaders in analytics.js are condensed,
    not vendor-verbatim — smoke-test each vendor on a staging host the first
    time its real ID goes in. */
