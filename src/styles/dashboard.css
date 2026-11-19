@@ -375,7 +375,10 @@
   border-top: 1px solid var(--db-line);
 }
 .db .db-type:first-child { padding-top: 0; border-top: 0; }
-.db .db-type__name { grid-area: name; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db .db-type__name { grid-area: name; display: flex; align-items: center; gap: .5em; min-width: 0; font-weight: 600; white-space: nowrap; }
+.db .db-type__name > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* The type's kind (Admission, Rides, Parking), as on the real board: the name gives way first. */
+.db .db-type__kind { flex: none; color: var(--db-muted); font-size: var(--db-small); font-weight: 500; }
 .db .db-type__status { grid-area: status; justify-self: end; font-size: var(--db-small); font-weight: 600; white-space: nowrap; }
 .db .db-type__figs { grid-area: figs; justify-self: end; color: var(--db-muted); font-size: var(--db-small); white-space: nowrap; }
 .db .db-meter { grid-area: meter; display: block; height: 8px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, .07); }
@@ -588,6 +591,8 @@
 
   .db .db-chart { flex: none; height: 230px; min-height: 0; }
   .db .db-type { grid-template-columns: minmax(0, 1fr) auto; }
+  /* A narrow row has no room for the name and its kind side by side: the kind goes under the name, never cutting it. */
+  .db .db-type__name { flex-wrap: wrap; row-gap: .1em; }
   .db .db-gate { grid-template-columns: minmax(0, 1fr) minmax(3.5em, 6.5em) 4em; }
   .db .db-reg__figs { grid-template-columns: minmax(0, 1fr) auto; row-gap: .1em; }
   .db .db-brief { flex-wrap: wrap; row-gap: 2px; }

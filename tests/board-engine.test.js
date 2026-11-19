@@ -6,19 +6,25 @@ const deepFreeze = (o) => {
   Object.values(o).forEach((v) => v && typeof v === 'object' && deepFreeze(v));
   return Object.freeze(o);
 };
+/** The Admission types, named here rather than read from the engine: Adult, Child and the Family 4-pack. */
+const ADMISSION = ['adult', 'child', 'family'];
+/** Admission tickets in a `sold` table, counted independently of the engine. */
+const admissionSold = (sold) => ADMISSION.reduce((a, id) => a + (sold[id]?.online ?? 0) + (sold[id]?.box ?? 0), 0);
 
 describe('the board engine', () => {
   it('every sale keeps the books straight', () => {
     const rng = mulberry32(7);
     let state = createBoardState();
-    // An independent ledger, kept from the sale objects alone.
-    let tickets = 3947;
+    // An independent ledger, kept from the sale objects alone: an add-on sale moves the money, not the tickets.
+    let tickets = 2880;
     let sales = 61284;
+    let addOnSales = 0;
     for (let i = 0; i < 500; i++) {
       const prev = state;
       const r = nextSale(state, rng);
       state = r.state;
-      tickets += r.sale.qty;
+      if (ADMISSION.includes(r.sale.typeId)) tickets += r.sale.qty;
+      else addOnSales += 1;
       sales += r.sale.amount;
       const s = snapshot(state);
       expect(s.tickets).toBe(tickets);
@@ -47,21 +53,45 @@ describe('the board engine', () => {
         expect(['Card', 'Cash']).toContain(r.sale.tender);
       }
     }
+    expect(addOnSales).toBeGreaterThan(100); // both kinds of sale were exercised
   });
 
-  it('never scans more people in than tickets sold, even when the gates are caught up', () => {
+  it('scans are admissions: scanned never passes Admission tickets sold, over a long run and from a state where they are equal', () => {
+    // A long run from the opening books.
+    const rng = mulberry32(19);
+    let state = createBoardState();
+    for (let i = 0; i < 5000; i++) {
+      state = nextSale(state, rng).state;
+      expect(snapshot(state).scanned, `sale ${i}`).toBeLessThanOrEqual(admissionSold(state.sold));
+    }
+    // From gates caught up with (or one short of) the Admission tickets sold.
     for (const short of [0, 1]) {
       for (let seed = 1; seed <= 40; seed++) {
         const base = createBoardState();
-        let state = { ...base, scannedByGate: { main: snapshot(base).tickets - short, north: 0, midway: 0 } };
+        let state = { ...base, scannedByGate: { main: admissionSold(base.sold) - short, north: 0, midway: 0 } };
         const rng = mulberry32(seed);
         for (let i = 0; i < 20; i++) {
           state = nextSale(state, rng).state;
           const s = snapshot(state);
-          expect(s.scanned, `short ${short}, seed ${seed}, sale ${i}`).toBeLessThanOrEqual(s.tickets);
+          expect(s.scanned, `short ${short}, seed ${seed}, sale ${i}`).toBeLessThanOrEqual(admissionSold(state.sold));
+          expect(s.scanned).toBeLessThanOrEqual(s.tickets);
         }
       }
     }
+  });
+
+  it('a sale of an add-on alone makes no room for scans', () => {
+    const base = createBoardState();
+    const caughtUp = { ...base, scannedByGate: { main: admissionSold(base.sold), north: 0, midway: 0 } };
+    // Always 0.9: four parking passes at the box office, and two scans drawn.
+    const r = nextSale(caughtUp, () => 0.9);
+    expect([r.sale.typeId, r.sale.qty]).toEqual(['parking', 4]);
+    expect(snapshot(r.state).scanned).toBe(admissionSold(base.sold));
+    expect(snapshot(r.state).tickets).toBe(snapshot(caughtUp).tickets);
+    // Always 0.5: three ride wristbands online, and one scan drawn.
+    const w = nextSale(caughtUp, () => 0.5);
+    expect([w.sale.typeId, w.sale.qty]).toEqual(['wristband', 3]);
+    expect(snapshot(w.state).scanned).toBe(admissionSold(base.sold));
   });
 
   it('is the same run for the same seed', () => {
@@ -100,9 +130,9 @@ describe('the board engine', () => {
     expect(snapshot(state, { feedSize: 5 }).feed.length).toBe(5);
   });
 
-  it('starts at the baseline: 3,947 tickets, $61,284, 2,618 scanned', () => {
+  it('starts at the baseline: 2,880 tickets, $61,284, 2,618 scanned', () => {
     const s = snapshot(createBoardState());
-    expect([s.tickets, s.sales, s.scanned]).toEqual([3947, 61284, 2618]);
+    expect([s.tickets, s.sales, s.scanned]).toEqual([2880, 61284, 2618]);
     expect(s.gates.map((g) => g.scanned)).toEqual([1412, 731, 475]);
     expect(s.feed.length).toBe(3);
   });
@@ -122,7 +152,7 @@ describe('the board engine', () => {
   });
 
   it('formats numbers', () => {
-    expect(count(3947)).toBe('3,947');
+    expect(count(2880)).toBe('2,880');
     expect(money(61284)).toBe('$61,284');
   });
 });

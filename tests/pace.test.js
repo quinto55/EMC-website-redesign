@@ -30,8 +30,8 @@ describe('the day curve', () => {
 
 describe('the pace series', () => {
   it('never decreases and ends exactly at the tickets sold now', () => {
-    const series = paceSeries(3947, NOW);
-    expect(series[series.length - 1]).toEqual({ minute: 1122, tickets: 3947 });
+    const series = paceSeries(2880, NOW);
+    expect(series[series.length - 1]).toEqual({ minute: 1122, tickets: 2880 });
     expect(series[0]).toEqual({ minute: DAY_START_MIN, tickets: 0 });
     for (let i = 1; i < series.length; i++) {
       expect(series[i].tickets).toBeGreaterThanOrEqual(series[i - 1].tickets);
@@ -40,7 +40,7 @@ describe('the pace series', () => {
   });
 
   it('has one point per half hour from open to now, then now', () => {
-    const minutes = paceSeries(3947, NOW).map((p) => p.minute);
+    const minutes = paceSeries(2880, NOW).map((p) => p.minute);
     const halfHours = [];
     for (let m = DAY_START_MIN; m < NOW; m += 30) halfHours.push(m);
     expect(minutes).toEqual([...halfHours, NOW]);
@@ -51,10 +51,10 @@ describe('the pace series', () => {
 
 describe('the forecast', () => {
   it('projects the tickets sold now over the share of the day gone, to the nearest 10, with a range', () => {
-    const f = forecast(3947, NOW);
+    const f = forecast(2880, NOW);
     for (const v of [f.projected, f.low, f.high]) expect(v % 10, String(v)).toBe(0);
-    expect(f.projected).toBe(Math.round(3947 / shareBy(NOW) / 10) * 10);
-    expect(3947).toBeLessThanOrEqual(f.low);
+    expect(f.projected).toBe(Math.round(2880 / shareBy(NOW) / 10) * 10);
+    expect(2880).toBeLessThanOrEqual(f.low);
     expect(f.low).toBeLessThanOrEqual(f.projected);
     expect(f.projected).toBeLessThanOrEqual(f.high);
     expect(f.high).toBeGreaterThan(f.low);

@@ -27,7 +27,7 @@ describe('the board markup', () => {
   it('shows the fair, both labels and the baseline figures', () => {
     const h = html();
     for (const s of ['Demo County Fair, Friday', 'Live', 'Sample data', 'Tickets sold today', 'Scanned in', 'Sales today',
-      '3,947', '2,618', '$61,284', 'Online', 'Box office', '62%', '38%']) expect(h, s).toContain(s);
+      '2,880', '2,618', '$61,284', 'Online', 'Box office', '62%', '38%']) expect(h, s).toContain(s);
     const el = boardEl();
     expect(el.matches('[data-sample][data-board]')).toBe(true);
     expect(el.getAttribute('role')).toBe('group');
@@ -52,10 +52,11 @@ describe('the live board', () => {
   it('tick() updates the figures and puts the new sale first in the feed', () => {
     const el = boardEl();
     const board = mountBoard(el, { rng: mulberry32(9) });
-    const before = kpi(el, 'sold');
+    // Every sale moves the money (an add-on sale leaves Tickets sold today as it was).
+    const before = kpi(el, 'money');
     const firstBefore = el.querySelector('.feed li').textContent;
     board.tick();
-    expect(kpi(el, 'sold')).not.toBe(before);
+    expect(kpi(el, 'money')).not.toBe(before);
     expect(el.querySelector('.feed li').textContent).not.toBe(firstBefore);
     expect(el.querySelectorAll('.feed li').length).toBe(3);
     expect(el.querySelector('.feed li b').textContent).toMatch(/^[1-4] × /);
@@ -108,19 +109,20 @@ describe('the live board', () => {
     const first = el.querySelector('.feed li');
     const board = mountBoard(el);
     expect(el.querySelector('.feed li')).toBe(first);
-    expect(kpi(el, 'sold')).toBe('3,947');
+    expect(kpi(el, 'sold')).toBe('2,880');
     board.destroy();
   });
 
   it('ticks once per interval while visible', () => {
     const el = boardEl();
     const board = mountBoard(el, { intervalMs: 1700, rng: mulberry32(4) });
-    expect(kpi(el, 'sold')).toBe('3,947');
+    expect(kpi(el, 'sold')).toBe('2,880');
+    // Every sale moves the money (an add-on sale leaves Tickets sold today as it was).
     vi.advanceTimersByTime(1700 * 5);
-    const after5 = kpi(el, 'sold');
-    expect(after5).not.toBe('3,947');
+    const after5 = kpi(el, 'money');
+    expect(after5).not.toBe('$61,284');
     vi.advanceTimersByTime(1700);
-    expect(kpi(el, 'sold')).not.toBe(after5);
+    expect(kpi(el, 'money')).not.toBe(after5);
     board.destroy();
   });
 
@@ -129,9 +131,9 @@ describe('the live board', () => {
     const board = mountBoard(el, { intervalMs: 1000, rng: mulberry32(6) });
     setHidden(true);
     vi.advanceTimersByTime(60000);
-    expect(kpi(el, 'sold')).toBe('3,947');
+    expect(kpi(el, 'sold')).toBe('2,880');
     setHidden(false);
-    expect(kpi(el, 'sold')).toBe('3,947');
+    expect(kpi(el, 'sold')).toBe('2,880');
     vi.advanceTimersByTime(1000);
     const oneSale = nextSale(createBoardState(), mulberry32(6)).state;
     expect(kpi(el, 'sold')).toBe(count(snapshot(oneSale).tickets));
@@ -152,10 +154,10 @@ describe('the live board', () => {
       const board = mountBoard(el, { intervalMs: 1000, rng: mulberry32(8) });
       observers[0].fire(false);
       vi.advanceTimersByTime(10000);
-      expect(kpi(el, 'sold')).toBe('3,947');
+      expect(kpi(el, 'money')).toBe('$61,284');
       observers[0].fire(true);
       vi.advanceTimersByTime(1000);
-      expect(kpi(el, 'sold')).not.toBe('3,947');
+      expect(kpi(el, 'money')).not.toBe('$61,284'); // every sale moves the money
       board.destroy();
     } finally {
       globalThis.IntersectionObserver = real;
@@ -169,7 +171,7 @@ describe('the live board', () => {
     vi.advanceTimersByTime(10000);
     setHidden(false);
     vi.advanceTimersByTime(10000);
-    expect(kpi(el, 'sold')).toBe('3,947');
+    expect(kpi(el, 'sold')).toBe('2,880');
   });
 });
 

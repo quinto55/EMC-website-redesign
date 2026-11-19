@@ -3,6 +3,7 @@ import { renderDashboardHTML } from '../src/demo/dashboard-markup.js';
 import { createDashState, advance, dashSnapshot } from '../src/demo/dashboard-engine.js';
 import { mulberry32, count } from '../src/demo/board-engine.js';
 import { mountDashboard } from '../src/demo/dashboard-view.js';
+import { addOnsLine } from '../src/demo/sample-fair.js';
 
 const html = () => renderDashboardHTML(dashSnapshot(createDashState()));
 const PANELS = ['feed', 'pace', 'gates', 'money', 'fraud', 'types', 'registers'];
@@ -59,15 +60,49 @@ describe('the dashboard markup', () => {
     for (const s of ['Demo County Fair', 'LIVE', 'Sample data', 'SAMPLE · simulated crowd',
       'Tickets today', 'Gross today', 'Orders', 'Admitted',
       'Latest sales', 'Gates', 'Money', 'Fraud watch', 'Ticket types today', 'Registers',
-      'Sold so far', 'Expected at this pace', 'Forecast range',
+      'Admission tickets sold so far', 'Expected at this pace', 'Forecast range',
       'Presented again', 'Voided', 'Wrong event', 'Wrong day', 'AI brief',
       'Online card', 'Box-office card', 'Cash', 'Average order $40.53', '4 refunds, $96.00',
       'Main Gate', 'North Gate', 'Midway Gate', 'Sam', 'Riley', 'Jordan', 'Reader', 'Printer',
-      '3,947', '$61,284', '1,512', '2,618']) expect(h, s).toContain(s);
-    expect(h).toMatch(/On pace for 6,150 today/);
-    expect(h).toContain('(5,900 to 6,400)');
-    expect(h).toMatch(/\+\d[\d,]* since 6:30 PM/);
+      '2,880', 'plus 279 parking and 788 rides', '$61,284', '1,512', '2,618']) expect(h, s).toContain(s);
+    expect(h).toMatch(/On pace for 4,490 today/);
+    expect(h).toContain('(4,290 to 4,690)');
     expect(h).toMatch(/\d+ a minute at the gates/);
+  });
+
+  it('the dashboard tile reads Tickets today 2,880 with the add-ons line under it, and the legend says what the chart counts', () => {
+    const el = boardEl();
+    const ticketsTile = el.querySelector('[data-tile="tickets"]');
+    expect(ticketsTile.querySelector('.db-tile__label').textContent).toBe('Tickets today');
+    expect(tile(el, 'tickets')).toBe('2,880');
+    // The line under it names the add-ons, in place of the quarter hour's count (as on the real board with add-ons sold).
+    expect(ticketsTile.querySelector('[data-f="tickets-sub"]').textContent).toBe('plus 279 parking and 788 rides');
+    expect(el.textContent).not.toMatch(/ since /);
+    // The chart counts Admission only: the legend's first label is the real board's ADMISSION_SOLD, the line ends at
+    // 2,880 and the forecast is projected from it.
+    const legend = [...el.querySelectorAll('.db-legend li')].map((li) => li.textContent);
+    expect(legend).toEqual(['Admission tickets sold so far', 'Expected at this pace', 'Forecast range']);
+    expect(el.querySelector('[data-c="sold-label"]').textContent).toBe('2,880');
+    expect(el.querySelector('[data-c="proj-label"]').textContent).toBe('4,490');
+    expect(el.querySelector('[data-f="pace-head"]').textContent).toBe('On pace for 4,490 today');
+    // Gross, orders and admitted are as before.
+    expect([tile(el, 'gross'), tile(el, 'orders'), tile(el, 'admitted')]).toEqual(['61,284', '1,512', '2,618']);
+  });
+
+  it('each ticket type row names its kind, and the sell-out note uses the real words', () => {
+    const el = boardEl();
+    const rows = [...el.querySelectorAll('[data-panel="types"] .db-type')].map((li) => ({
+      name: li.querySelector('.db-type__name > span:first-child').textContent,
+      kind: li.querySelector('.db-type__kind').textContent,
+      status: li.querySelector('.db-type__status').textContent,
+    }));
+    expect(rows).toEqual([
+      { name: 'Adult admission', kind: 'Admission', status: "Won't sell out today" },
+      { name: 'Child admission', kind: 'Admission', status: "Won't sell out today" },
+      { name: 'Ride wristband', kind: 'Rides', status: 'Sells out ~9:29 PM' },
+      { name: 'Family 4-pack', kind: 'Admission', status: "Won't sell out today" },
+      { name: 'Parking pass', kind: 'Parking', status: "Won't sell out today" },
+    ]);
   });
 
   it('is one sample board, labelled, with a heading on every panel', () => {
@@ -77,7 +112,7 @@ describe('the dashboard markup', () => {
     expect(el.getAttribute('aria-label')).toMatch(/sample/i);
     const headings = Object.fromEntries(PANELS.map((p) => [p, el.querySelector(`[data-panel="${p}"] h3`)?.textContent.replace(/\s+/g, ' ').trim()]));
     expect(headings).toEqual({
-      feed: 'Latest sales', pace: 'On pace for 6,150 today (5,900 to 6,400)', gates: 'Gates', money: 'Money',
+      feed: 'Latest sales', pace: 'On pace for 4,490 today (4,290 to 4,690)', gates: 'Gates', money: 'Money',
       fraud: 'Fraud watch', types: 'Ticket types today', registers: 'Registers',
     });
     expect(el.querySelectorAll('h1, h2')).toHaveLength(0);
@@ -120,7 +155,7 @@ describe('the live dashboard', () => {
     const firstStub = el.querySelector('[data-panel="feed"] li');
     const board = mountDashboard(el);
     expect(el.querySelector('[data-panel="feed"] li')).toBe(firstStub);
-    expect(tile(el, 'tickets')).toBe('3,947');
+    expect(tile(el, 'tickets')).toBe('2,880');
     board.destroy();
   });
 
@@ -131,10 +166,11 @@ describe('the live dashboard', () => {
     const tiles = [...el.querySelectorAll('[data-tile]')];
     const chart = el.querySelector('[data-panel="pace"] svg');
     const board = mountDashboard(el, { rng: mulberry32(9) });
-    const before = { tickets: tile(el, 'tickets'), orders: tile(el, 'orders') };
+    // Every sale moves the gross (an add-on sale leaves Tickets today as it was).
+    const before = { gross: tile(el, 'gross'), orders: tile(el, 'orders') };
     board.tick();
     flushFrames();
-    expect(tile(el, 'tickets')).not.toBe(before.tickets);
+    expect(tile(el, 'gross')).not.toBe(before.gross);
     expect(tile(el, 'orders')).toBe('1,513');
     expect(host.querySelector('[data-dashboard]')).toBe(el);
     PANELS.forEach((p, i) => expect(el.querySelector(`[data-panel="${p}"]`), p).toBe(panels[i]));
@@ -158,6 +194,7 @@ describe('the live dashboard', () => {
     expect(tile(el, 'tickets')).toBe(count(s.totals.tickets));
     expect(tile(el, 'gross')).toBe(count(s.totals.gross));
     expect(tile(el, 'admitted')).toBe(count(s.totals.admitted));
+    expect(el.querySelector('[data-f="tickets-sub"]').textContent).toBe(addOnsLine(s.totals.addOns));
     const fresh = new DOMParser().parseFromString(renderDashboardHTML(s), 'text/html').querySelector('[data-dashboard]');
     const words = (n) => n.textContent.replace(/\s+/g, ' ').trim();
     for (const p of PANELS) expect(words(el.querySelector(`[data-panel="${p}"]`)), p).toBe(words(fresh.querySelector(`[data-panel="${p}"]`)));
@@ -171,7 +208,8 @@ describe('the live dashboard', () => {
     const board = mountDashboard(el, { rng: mulberry32(9) });
     expect(frames.size).toBe(0);
     board.tick();
-    const target = el.querySelector('[data-tile="tickets"]');
+    // Every sale moves the gross (an add-on sale leaves Tickets today as it was).
+    const target = el.querySelector('[data-tile="gross"]');
     expect(target.hasAttribute('data-counting')).toBe(true);
     flushFrames(100, 4); // 400 ms in: on the way
     expect(target.hasAttribute('data-counting')).toBe(true);

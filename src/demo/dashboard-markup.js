@@ -2,7 +2,7 @@
 // top bar, the SAMPLE ribbon, four tiles, the alerts row, three columns of panels and the brief strip.
 // Pure (no browser globals): the generator renders the opening board at build time, and the view uses the same
 // field, chart and row functions to update the served board in place.
-import { FAIR } from './sample-fair.js';
+import { FAIR, TICKET_KIND_LABEL, addOnsLine } from './sample-fair.js';
 import { count } from './board-engine.js';
 import { cents } from './dashboard-engine.js';
 import { DAY_START_MIN, DAY_END_MIN, shareBy } from './pace.js';
@@ -19,10 +19,17 @@ export const TRIES_SHOWN = 3;
 /** One decimal under 10 a minute (a quiet gate is not "0"), whole numbers above, as on the real board. */
 const rateText = (r) => (r < 10 ? String(Math.round(r * 10) / 10) : count(Math.round(r)));
 
+/**
+ * The pace headline as the real board writes it for an event that sells add-ons (pace.tsx, `paceHeadline`): the
+ * forecast counts Admission tickets, and the legend's first label says so. The range is written with "to".
+ */
 function paceHeadline(p) {
-  if (!p.projected) return { text: 'Forecast after the first sale', range: '' };
+  if (!p.projected) return { text: 'Forecast after the first admission ticket', range: '' };
   return { text: `On pace for ${count(p.projected)} today`, range: `(${count(p.low)} to ${count(p.high)})` };
 }
+
+/** The legend's first label, the real board's `ADMISSION_SOLD`: what the chart and its forecast count. */
+export const ADMISSION_SOLD = 'Admission tickets sold so far';
 
 /** Every text on the board that can change, by key: the markup prints them, the view writes them again. */
 export function dashFields(snap) {
@@ -32,7 +39,9 @@ export function dashFields(snap) {
     'clock-hm': snap.clock.hm,
     'clock-sec': `:${snap.clock.seconds}`,
     'clock-period': snap.clock.period,
-    'tickets-sub': `+${count(t.sinceCount)} since ${t.sinceLabel}`,
+    // The add-ons sold, in place of the real board's "+N since" line, as it does whenever add-ons have sold (the sample
+    // fair always has).
+    'tickets-sub': addOnsLine(t.addOns) ?? '',
     'gross-sub': `Average order ${cents(t.avgOrder)}`,
     'orders-sub': t.refundCount === 0 ? 'No refunds today' : `${count(t.refundCount)} ${t.refundCount === 1 ? 'refund' : 'refunds'}, ${cents(t.refunds)}`,
     'admitted-sub': t.gateRate > 0 ? `${count(t.gateRate)} a minute at the gates` : 'No admissions in the last 10 minutes',
@@ -97,8 +106,9 @@ const clampDay = (m) => Math.min(DAY_END_MIN, Math.max(DAY_START_MIN, m));
 const fixed = (n) => n.toFixed(1);
 
 /**
- * Today's tickets against the expected day, with the forecast range ahead of now: every element of the chart as
- * { c (its hook), tag, cls, attrs, text }. Five axis lines and five hour labels always, so a tick only moves them.
+ * Today's Admission tickets against the expected day, with the forecast range ahead of now: every element of the
+ * chart as { c (its hook), tag, cls, attrs, text }. Five axis lines and five hour labels always, so a tick only moves
+ * them.
  */
 export function paceChartParts(pace, size = CHART_SIZE) {
   const { w, h } = size;
@@ -252,13 +262,15 @@ export function renderDashboardInner(snap, { size = CHART_SIZE } = {}) {
 
   const pace = '<div class="db-panel db-pace" data-panel="pace"><div class="db-pace__head">' +
     `<h3 class="db-pace__title">${field(f, 'pace-head')} ${field(f, 'pace-range', 'span', 'db-pace__range')}</h3>` +
-    '<ul class="db-legend"><li><span class="db-key db-key--sold" aria-hidden="true"></span>Sold so far</li>' +
+    `<ul class="db-legend"><li><span class="db-key db-key--sold" aria-hidden="true"></span>${ADMISSION_SOLD}</li>` +
     '<li><span class="db-key db-key--expected" aria-hidden="true"></span>Expected at this pace</li>' +
     '<li><span class="db-key db-key--range" aria-hidden="true"></span>Forecast range</li></ul></div>' +
     `<div class="db-chart">${chartSVG(snap.pace, size)}</div></div>`;
 
   const types = '<div class="db-panel db-types" data-panel="types"><h3 class="db-panel__title">Ticket types today</h3><ul class="db-types__list">' +
-    snap.types.map((x) => `<li class="db-type" data-type="${x.id}" data-state="${x.state}"><span class="db-type__name">${esc(x.name)}</span>` +
+    // Each row names its kind after the name, as the real board does for an event that sells add-ons.
+    snap.types.map((x) => `<li class="db-type" data-type="${x.id}" data-state="${x.state}">` +
+      `<span class="db-type__name"><span>${esc(x.name)}</span><span class="db-type__kind">${esc(TICKET_KIND_LABEL[x.kind])}</span></span>` +
       field(f, `type-${x.id}-status`, 'span', 'db-type__status') +
       `<span class="db-meter" aria-hidden="true"><span style="--fill:${meterFill(x)}"></span></span>` +
       field(f, `type-${x.id}-figs`, 'span', 'db-type__figs') + '</li>').join('') +

@@ -46,7 +46,11 @@ export function createBoardState(baseline = LIVE_BASELINE) {
 const pick = (list, rng) => list[Math.min(list.length - 1, Math.floor(rng() * list.length))];
 const sum = (obj) => Object.values(obj).reduce((a, v) => a + v, 0);
 
-/** One new sale (5 Online to 3 Box office), plus 0 to 2 scans at a random gate, never past the tickets sold. */
+/**
+ * One new sale (5 Online to 3 Box office), plus 0 to 2 scans at a random gate. A scan is an admission, the first valid
+ * scan of an Admission ticket (as on the real board), so the scans never pass the Admission tickets sold, and a sale of
+ * an add-on alone makes no room for one.
+ */
 export function nextSale(state, rng = Math.random) {
   const type = pick(TICKET_TYPES, rng);
   const qty = 1 + Math.min(3, Math.floor(rng() * 4));
@@ -60,8 +64,8 @@ export function nextSale(state, rng = Math.random) {
   };
 
   const sold = { ...state.sold, [type.id]: { ...state.sold[type.id], [channelId]: state.sold[type.id][channelId] + qty } };
-  const tickets = totals(sold).tickets;
-  const room = tickets - sum(state.scannedByGate);
+  const admissionTickets = totals(sold).tickets; // Admission only
+  const room = admissionTickets - sum(state.scannedByGate);
   const scans = Math.min(Math.floor(rng() * 3), Math.max(0, room));
   const gate = pick(GATES, rng).id;
   const scannedByGate = { ...state.scannedByGate, [gate]: state.scannedByGate[gate] + scans };
@@ -69,6 +73,7 @@ export function nextSale(state, rng = Math.random) {
   return { state: { sold, scannedByGate, feed: [sale, ...state.feed].slice(0, FEED_KEPT), seq }, sale };
 }
 
+/** The compact board's figures: `tickets` are the Admission tickets (the add-ons count in `sales` only). */
 export function snapshot(state, { feedSize = 3 } = {}) {
   const t = totals(state.sold);
   return {

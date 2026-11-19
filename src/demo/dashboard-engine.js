@@ -1,9 +1,11 @@
 // The live dashboard's engine, modeled on the real live board (EMC-Ticketing-Platform: app/lib/live/analytics.ts and
 // app/components/live/*). It wraps the home board's engine, so both boards sell the same tickets, take the same money
 // and scan the same people; this adds what the real board shows around them: orders, the tender mix, registers, gate
-// minutes, fraud watch, the pace of the day and the brief. Plain data in, plain data out: state is never mutated.
+// minutes, fraud watch, the pace of the day and the brief. As on the real board, Tickets today, the pace line, the
+// forecast and Admitted count Admission tickets only; the add-ons (ride wristbands, parking passes) are named beside
+// them and count in gross, orders and the money. Plain data in, plain data out: state is never mutated.
 // Pure module (no browser globals): the page generator renders the opening board at build time.
-import { TICKET_TYPES, GATES, totals, wholePercents } from './sample-fair.js';
+import { TICKET_TYPES, GATES, totals, wholePercents, addOnsLine } from './sample-fair.js';
 import { createBoardState, nextSale, mulberry32, count } from './board-engine.js';
 import { DAY_END_MIN, soldBy, paceSeries, forecast } from './pace.js';
 
@@ -232,10 +234,12 @@ export function createDashState({ minute = 18 * 60 + 42 } = {}) {
     at: clock - FEED_AGES[i],
   }));
 
-  // The last hour's sales of each type, spread evenly over its minutes: the curve's share of the day, by type.
-  const lastHourAll = t.tickets - soldBy(minute - HOUR_MINUTES, t.tickets, minute);
+  // The last hour's sales of each type, spread evenly over its minutes: the curve's share of the day, by type. Every
+  // type counts here, add-ons too: each type's own pace is what its sell-out note reads.
+  const allTypes = sum(t.byType.map((x) => x.tickets));
+  const lastHourAll = allTypes - soldBy(minute - HOUR_MINUTES, allTypes, minute);
   const typeMinutes = Object.fromEntries(t.byType.map((x) => [x.id, {
-    minutes: Array(HOUR_MINUTES).fill((x.tickets * lastHourAll) / t.tickets / HOUR_MINUTES),
+    minutes: Array(HOUR_MINUTES).fill((x.tickets * lastHourAll) / allTypes / HOUR_MINUTES),
     current: 0,
   }]));
 
@@ -261,7 +265,7 @@ export function createDashState({ minute = 18 * 60 + 42 } = {}) {
     },
     tries: 0,
     feed,
-    pace: { base: { tickets: t.tickets, minute }, marks: [] },
+    pace: { base: { tickets: t.tickets, minute }, marks: [] }, // Admission tickets, as the real board's pace counts
     typeMinutes,
     brief: null,
   };
@@ -279,7 +283,10 @@ function roll(buckets, rolls, keep) {
   return out;
 }
 
-/** Moves the sample clock on: whole minutes roll the gates' and types' buckets; each quarter hour crossed is marked. */
+/**
+ * Moves the sample clock on: whole minutes roll the gates' and types' buckets; each quarter hour crossed is marked
+ * with the Admission tickets sold by then.
+ */
 function passTime(state, seconds) {
   const clock = state.clock + seconds;
   const rolls = Math.floor(clock / 60) - Math.floor(state.clock / 60);
@@ -389,31 +396,31 @@ function figures(state) {
   };
 }
 
-/** The AI brief's sample text: only snapshot figures, ranges written with "to", then any alert word for word. */
+/**
+ * The AI brief's sample text: only snapshot figures (the Admission tickets, then the add-ons sold, as the real board's
+ * summary names them), ranges written with "to", then any alert word for word.
+ */
 function writeBrief(state) {
   const f = figures(state);
   const p = f.forecast;
+  const sold = [`${count(f.t.tickets)} tickets sold`, addOnsLine(f.t.addOns), `$${count(f.t.sales)} gross`, `${count(f.admitted)} admitted`];
   const text = [
-    `As of ${minuteLabel(f.minute)}: ${count(f.t.tickets)} tickets sold, $${count(f.t.sales)} gross, ${count(f.admitted)} admitted, ` +
+    `As of ${minuteLabel(f.minute)}: ${sold.filter(Boolean).join(', ')}, ` +
       `with ${count(p.projected)} projected for the day (${count(p.low)} to ${count(p.high)}).`,
     ...f.alerts.map((a) => a.text),
   ].join(' ');
   return { at: state.clock, text };
 }
 
-/** Tickets sold by `minute`: the day before the board opened, then the quarter hours marked since. */
-function ticketsAt(state, minute) {
-  const { base, marks } = state.pace;
-  if (minute <= base.minute) return soldBy(minute, base.tickets, base.minute);
-  const mark = [...marks].reverse().find((m) => m.minute <= minute);
-  return mark ? mark.tickets : base.tickets;
-}
-
+/**
+ * A ticket type's note, in the real board's words (pace.tsx, `typeStatus`): "Sold out"; "Sells out ~9:29 PM", the
+ * minute it runs out at the last hour's pace, only when that is before closing; otherwise "Won't sell out today".
+ */
 function typeStatus(left, lastHour, minute) {
   if (left <= 0) return { state: 'soldout', note: 'Sold out' };
   if (lastHour > 0) {
     const at = minute + (left / lastHour) * 60;
-    if (at < DAY_END_MIN) return { state: 'sellout', note: `Sells out about ${minuteLabel(Math.round(at / 5) * 5)}` };
+    if (at < DAY_END_MIN) return { state: 'sellout', note: `Sells out ~${minuteLabel(at)}` };
   }
   return { state: 'ok', note: "Won't sell out today" };
 }
@@ -438,10 +445,9 @@ export function dashSnapshot(state) {
   const clockSeconds = Math.floor(state.clock % 60);
   const whole = Math.floor(minute);
   const hours = Math.floor((((whole % 1440) + 1440) % 1440) / 60);
-  const slotStart = Math.floor(minute / SLOT_MINUTES) * SLOT_MINUTES;
   const slowNames = new Set(f.slow.map((g) => g.name));
 
-  // The pace line: the day before the board opened, each quarter hour marked since, then now.
+  // The pace line (Admission tickets): the day before the board opened, each quarter hour marked since, then now.
   const { base, marks } = state.pace;
   const series = paceSeries(base.tickets, base.minute);
   for (const m of marks) if (m.minute > base.minute) series.push(m);
@@ -461,14 +467,13 @@ export function dashSnapshot(state) {
     },
     totals: {
       tickets: t.tickets,
+      addOns: t.addOns,
       gross: t.sales,
       orders: state.orders,
       admitted: f.admitted,
       avgOrder: Math.round((t.sales / state.orders) * 100) / 100,
       refundCount: state.refunds.count,
       refunds: state.refunds.amount,
-      sinceLabel: minuteLabel(slotStart),
-      sinceCount: t.tickets - ticketsAt(state, slotStart),
       gateRate: Math.round(sum(GATES.map((g) => gateRate(state.gates[g.id].minutes)))),
     },
     feed: state.feed.map(({ at: when, ...x }) => ({ ...x, ageLabel: ageLabel(when, state.clock) })),
@@ -492,7 +497,7 @@ export function dashSnapshot(state) {
       const left = CAPACITY[type.id] - sold;
       const hour = state.typeMinutes[type.id];
       const lastHour = sum(hour.minutes) + hour.current;
-      return { id: type.id, name: type.name, sold, left, ...typeStatus(left, lastHour, minute) };
+      return { id: type.id, name: type.name, kind: type.kind, sold, left, ...typeStatus(left, lastHour, minute) };
     }),
     registers: state.registers.map((r) => ({
       id: r.id,

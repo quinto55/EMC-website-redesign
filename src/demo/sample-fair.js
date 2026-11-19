@@ -3,13 +3,25 @@
 
 export const FAIR = { name: 'Demo County Fair', day: 'Friday' };
 
+/**
+ * Each type has a kind, as on the real board (EMC-Ticketing-Platform: app/lib/commerce/ticket-kinds.ts). Admission
+ * tickets are what the boards count as tickets and what the gates admit; the ride wristband and the parking pass are
+ * add-ons, listed beside the tickets and counted in the money and the orders only.
+ */
 export const TICKET_TYPES = [
-  { id: 'adult', name: 'Adult admission', price: 12 },
-  { id: 'child', name: 'Child admission', price: 6 },
-  { id: 'wristband', name: 'Ride wristband', price: 30 },
-  { id: 'family', name: 'Family 4-pack', price: 40 },
-  { id: 'parking', name: 'Parking pass', price: 10 },
+  { id: 'adult', name: 'Adult admission', price: 12, kind: 'admission' },
+  { id: 'child', name: 'Child admission', price: 6, kind: 'admission' },
+  { id: 'wristband', name: 'Ride wristband', price: 30, kind: 'rides' },
+  { id: 'family', name: 'Family 4-pack', price: 40, kind: 'admission' },
+  { id: 'parking', name: 'Parking pass', price: 10, kind: 'parking' },
 ];
+
+/** Each kind's label, word for word as the real board prints it after a ticket type's name (`TICKET_KIND_LABEL`). */
+export const TICKET_KIND_LABEL = { admission: 'Admission', parking: 'Parking', rides: 'Rides', other: 'Other' };
+/** The add-on kinds, in the order the real board names them (`ADD_ON_KINDS`). */
+const ADD_ON_KINDS = ['parking', 'rides', 'other'];
+/** Each add-on kind's words for one and for more, as the real board writes them (`ADD_ON_WORDS`). */
+const ADD_ON_WORDS = { parking: ['parking', 'parking'], rides: ['ride', 'rides'], other: ['other add-on', 'other add-ons'] };
 
 // Two channels only, as in the real dashboard. Store sales are never shown live.
 export const CHANNELS = [
@@ -23,7 +35,7 @@ export const GATES = [
   { id: 'midway', name: 'Midway Gate' },
 ];
 
-/** Where the live board and the dashboard open: 3,947 tickets, $61,284, 2,618 scanned. */
+/** Where the boards open: 2,880 tickets plus 279 parking and 788 rides, $61,284, 2,618 scanned. */
 export const LIVE_BASELINE = {
   sold: {
     adult: { online: 1183, box: 726 },
@@ -54,12 +66,27 @@ export function wholePercents(values) {
   return out;
 }
 
-/** Totals for a `sold` table ({ typeId: { channelId: qty } }). Channel share is of sales, in whole percents. */
+/**
+ * The line under Tickets today, word for word as the real board writes it (`addOnsLine`): "plus 279 parking and 788
+ * rides", or null when no add-on has sold.
+ */
+export function addOnsLine(addOns) {
+  if (addOns.length === 0) return null;
+  const items = addOns.map((a) => `${a.sold.toLocaleString('en-US')} ${ADD_ON_WORDS[a.kind][a.sold === 1 ? 0 : 1]}`);
+  return `plus ${items.length === 1 ? items[0] : `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`}`;
+}
+
+/**
+ * Totals for a `sold` table ({ typeId: { channelId: qty } }), counted as the real board counts them: `tickets` are the
+ * Admission tickets only; `addOns` names each add-on kind that has sold ({ kind, sold }, in the real board's order);
+ * `sales`, `byType` (each type's own count and sales) and `byChannel` count every type. Channel share is of sales, in
+ * whole percents.
+ */
 export function totals(sold) {
   const qty = (typeId, channelId) => sold[typeId]?.[channelId] ?? 0;
   const byType = TICKET_TYPES.map((t) => {
     const tickets = CHANNELS.reduce((a, c) => a + qty(t.id, c.id), 0);
-    return { id: t.id, name: t.name, tickets, sales: tickets * t.price };
+    return { id: t.id, name: t.name, kind: t.kind, tickets, sales: tickets * t.price };
   });
   const channels = CHANNELS.map((c) => {
     const tickets = TICKET_TYPES.reduce((a, t) => a + qty(t.id, c.id), 0);
@@ -67,8 +94,10 @@ export function totals(sold) {
     return { id: c.id, name: c.name, tickets, sales };
   });
   const shares = wholePercents(channels.map((c) => c.sales));
+  const ofKind = (kind) => byType.reduce((a, t) => a + (t.kind === kind ? t.tickets : 0), 0);
   return {
-    tickets: byType.reduce((a, t) => a + t.tickets, 0),
+    tickets: ofKind('admission'),
+    addOns: ADD_ON_KINDS.map((kind) => ({ kind, sold: ofKind(kind) })).filter((a) => a.sold > 0),
     sales: byType.reduce((a, t) => a + t.sales, 0),
     byType,
     byChannel: channels.map((c, i) => ({ ...c, share: shares[i] })),

@@ -118,7 +118,7 @@ describe('the home page boards on one sample day', () => {
     expect(before.c.sold).toBe(before.d.tickets);
 
     live.tick();
-    expect(compact(boardEl).sold).not.toBe(before.c.sold);
+    expect(compact(boardEl).sales).not.toBe(before.c.sales); // every sale moves the money; an add-on leaves the tickets
     expect(dashboard(dashEl).orders).toBe(before.d.orders + 1);
     for (let i = 1; i < 25; i++) live.tick();
 
@@ -156,6 +156,40 @@ describe('the home page boards on one sample day', () => {
     }
     live.destroy();
   }, 120000);
+
+  it('the hero board and the dashboard still agree on every figure after 3,000 ticks', () => {
+    reduced = true;
+    const { boardEl, dashEl } = loadHome();
+    const live = mountHomeLive({ boardEl, dashEl, rng: mulberry32(13) });
+    // The same day kept alongside, to count Admission tickets and add-ons independently of the boards.
+    const rng = mulberry32(13);
+    let state = createDashState();
+    const sold = (id) => state.board.sold[id].online + state.board.sold[id].box;
+    const fmt = (n) => n.toLocaleString('en-US');
+    const addOnsSub = () => dashEl.querySelector('[data-f="tickets-sub"]').textContent;
+    let addOnOnly = 0;
+    for (let tick = 1; tick <= 3000; tick++) {
+      const ticketsBefore = compact(boardEl).sold;
+      live.tick();
+      state = advance(state, rng, { seconds: 1.7 });
+      const c = compact(boardEl);
+      const d = dashboard(dashEl);
+      const admission = sold('adult') + sold('child') + sold('family');
+      const at = `tick ${tick}`;
+      expect([c.sold, d.tickets], at).toEqual([admission, admission]);
+      expect(c.scanned, at).toBe(d.admitted);
+      expect(d.admitted, at).toBeLessThanOrEqual(admission);
+      expect(c.sales, at).toBe(d.gross);
+      expect(c.sale, at).toBe(d.sale);
+      expect(addOnsSub(), at).toBe(`plus ${fmt(sold('parking'))} parking and ${fmt(sold('wristband'))} rides`);
+      if (state.applied && !['adult', 'child', 'family'].includes(state.applied.sale.typeId)) {
+        addOnOnly += 1;
+        expect(c.sold, `${at}: an add-on sale leaves the tickets`).toBe(ticketsBefore);
+      }
+    }
+    expect(addOnOnly).toBeGreaterThan(300); // add-on sales were exercised
+    live.destroy();
+  }, 180000);
 
   it('there is one timer: a tick interval produces exactly one sale on both boards', () => {
     reduced = true;
@@ -220,7 +254,8 @@ describe('the home page boards on one sample day', () => {
     fire(dashEl, true);
     vi.advanceTimersByTime(1000);
     expect(frames.size).toBe(1);
-    expect(dashEl.querySelector('[data-tile="tickets"]').hasAttribute('data-counting')).toBe(true);
+    // Every sale moves the gross (an add-on sale leaves Tickets today as it was).
+    expect(dashEl.querySelector('[data-tile="gross"]').hasAttribute('data-counting')).toBe(true);
     fire(dashEl, false);
     expect(frames.size).toBe(0);
     expect(dashEl.querySelector('[data-counting]')).toBeNull();
@@ -236,7 +271,7 @@ describe('the home page boards on one sample day', () => {
     setHidden(true);
     vi.advanceTimersByTime(60000);
     expect(dashboard(dashEl).orders).toBe(1512);
-    expect(compact(boardEl).sold).toBe(3947);
+    expect(compact(boardEl).sold).toBe(2880);
     setHidden(false);
     expect(dashboard(dashEl).orders).toBe(1512);
     vi.advanceTimersByTime(1000);
@@ -252,7 +287,7 @@ describe('the home page boards on one sample day', () => {
     let { boardEl, dashEl } = loadHome();
     const boardOnly = mountHomeLive({ boardEl, dashEl: null, intervalMs: 1000, rng: mulberry32(3) });
     vi.advanceTimersByTime(1000);
-    expect(compact(boardEl).sold).not.toBe(3947);
+    expect(compact(boardEl).sales).not.toBe(61284); // every sale moves the money
     expect(dashboard(dashEl).orders).toBe(1512); // left as served
     boardOnly.destroy();
 
@@ -260,7 +295,7 @@ describe('the home page boards on one sample day', () => {
     const dashOnly = mountHomeLive({ boardEl: null, dashEl, intervalMs: 1000, rng: mulberry32(3) });
     vi.advanceTimersByTime(1000);
     expect(dashboard(dashEl).orders).toBe(1513);
-    expect(compact(boardEl).sold).toBe(3947); // left as served
+    expect(compact(boardEl).sold).toBe(2880); // left as served
     dashOnly.destroy();
   });
 
@@ -311,12 +346,13 @@ describe('the home page boards on one sample day', () => {
     const live = mountHomeLive({ boardEl, dashEl, intervalMs: 3600 * 1000, rng: mulberry32(7) });
     vi.advanceTimersByTime(3600 * 1000 * 4);
     expect(dashboard(dashEl).orders).toBe(1516);
-    expect(compact(boardEl).sold).not.toBe(3947);
+    expect(compact(boardEl).sales).not.toBe(61284);
     vi.advanceTimersByTime(3600 * 1000);
     expect(dashboard(dashEl).orders).toBe(1512);
-    expect(compact(boardEl)).toMatchObject({ sold: 3947, scanned: 2618, sales: 61284, rows: 3 });
+    expect(compact(boardEl)).toMatchObject({ sold: 2880, scanned: 2618, sales: 61284, rows: 3 });
     expect(feedRows(boardEl).map((li) => li.outerHTML)).toEqual(served.rows);
-    expect(dashboard(dashEl)).toMatchObject({ tickets: 3947, admitted: 2618, gross: 61284 });
+    expect(dashboard(dashEl)).toMatchObject({ tickets: 2880, admitted: 2618, gross: 61284 });
+    expect(dashEl.querySelector('[data-f="tickets-sub"]').textContent).toBe('plus 279 parking and 788 rides');
     expect(dashEl.querySelectorAll('[data-panel="feed"] li')).toHaveLength(4);
     expect(compact(boardEl).sale).toBe(dashboard(dashEl).sale);
     live.destroy();

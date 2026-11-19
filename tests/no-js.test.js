@@ -71,7 +71,7 @@ describe('with JavaScript off', () => {
     const home = rendered.find((r) => r.page.key === 'home');
     const board = home.doc.querySelector('[data-board][data-sample]');
     expect(board).not.toBeNull();
-    for (const s of ['3,947', '2,618', '$61,284', 'Sample data', 'Demo County Fair']) expect(board.textContent, s).toContain(s);
+    for (const s of ['2,880', '2,618', '$61,284', 'Sample data', 'Demo County Fair']) expect(board.textContent, s).toContain(s);
     expect(board.querySelectorAll('.feed li').length).toBe(3);
   });
 
@@ -81,10 +81,11 @@ describe('with JavaScript off', () => {
     const board = home.doc.querySelector('.hero [data-board][data-sample]');
     expect(dash).not.toBeNull();
     expect(board).not.toBeNull();
-    for (const s of ['3,947', '$61,284']) {
+    for (const s of ['2,880', '2,618', '$61,284']) {
       expect(dash.textContent, s).toContain(s);
       expect(board.textContent, s).toContain(s);
     }
+    expect(dash.querySelector('[data-tile="tickets"] [data-f="tickets-sub"]').textContent).toBe('plus 279 parking and 788 rides');
     for (const s of ['Sample data', 'Demo County Fair', 'Latest sales', 'AI brief']) expect(dash.textContent, s).toContain(s);
     // The two shares agree too: Online = Online card, Box office = Box-office card + Cash, and the bars follow them.
     const pct = (el) => Number(el.textContent.replace('%', ''));
@@ -140,7 +141,7 @@ describe('with JavaScript off', () => {
     const platform = rendered.find((r) => r.page.key === 'platform');
     const board = platform.doc.querySelector('#live-dashboard [data-dashboard][data-sample]');
     expect(board).not.toBeNull();
-    for (const s of ['3,947', '$61,284', '2,618', 'Sample data', 'Demo County Fair', 'Latest sales', 'AI brief']) expect(board.textContent, s).toContain(s);
+    for (const s of ['2,880', 'plus 279 parking and 788 rides', '$61,284', '2,618', 'Sample data', 'Demo County Fair', 'Latest sales', 'AI brief']) expect(board.textContent, s).toContain(s);
     expect(board.querySelectorAll('[data-panel="feed"] li').length).toBe(4);
     expect(board.querySelector('[data-panel="pace"] svg path')).not.toBeNull();
     // The one control waits for JavaScript.

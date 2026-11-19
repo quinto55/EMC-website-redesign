@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { TICKET_TYPES, GATES, LIVE_BASELINE, totals as fairTotals } from '../src/demo/sample-fair.js';
+import { TICKET_TYPES, GATES, LIVE_BASELINE, totals as fairTotals, addOnsLine } from '../src/demo/sample-fair.js';
 import { createBoardState, snapshot, mulberry32 } from '../src/demo/board-engine.js';
 import { forecast } from '../src/demo/pace.js';
 import { createDashState, advance, dashSnapshot, slowGates, GATE_MINUTES, CAPACITY } from '../src/demo/dashboard-engine.js';
@@ -10,6 +10,12 @@ const deepFreeze = (o) => {
 };
 const sum = (xs) => xs.reduce((a, v) => a + v, 0);
 const PLACES = ['Online', 'Gate 1', 'Gate 2', 'Box Office 1'];
+/** The Admission types, named here rather than read from the engine: Adult, Child and the Family 4-pack. */
+const ADMISSION = ['adult', 'child', 'family'];
+/** Tickets today as the real board counts them, from a ledger's per-type counts: Admission only. */
+const admissionOf = (byType) => sum(ADMISSION.map((id) => byType[id]));
+/** The add-ons the real board lists under Tickets today, from a ledger's per-type counts (parking, then rides). */
+const addOnsOf = (byType) => [{ kind: 'parking', sold: byType.parking }, { kind: 'rides', sold: byType.wristband }].filter((a) => a.sold > 0);
 
 /** Independent books, kept only from what each advance says it applied (`state.applied`), starting at the baseline. */
 function ledger() {
@@ -52,7 +58,7 @@ function expectSane(value, path = 'snapshot') {
 describe('the dashboard engine', () => {
   it('opens on the same books as the home board', () => {
     const s = dashSnapshot(createDashState());
-    expect(s.totals.tickets).toBe(3947);
+    expect(s.totals.tickets).toBe(2880);
     expect(s.totals.gross).toBe(61284);
     expect(s.totals.admitted).toBe(2618);
     expect(s.clock.label).toBe('6:42 PM');
@@ -66,8 +72,7 @@ describe('the dashboard engine', () => {
     expect(s.totals.orders).toBe(1512);
     expect(s.totals.avgOrder).toBe(40.53);
     expect([s.totals.refundCount, s.totals.refunds]).toEqual([4, 96]);
-    expect(s.totals.sinceLabel).toBe('6:30 PM');
-    expect(s.totals.sinceCount).toBeGreaterThan(0);
+    expect(s.totals.addOns).toEqual([{ kind: 'parking', sold: 279 }, { kind: 'rides', sold: 788 }]);
     expect(s.registers.map((r) => [r.name, r.cashier])).toEqual([['Gate 1', 'Sam'], ['Gate 2', 'Riley'], ['Box Office 1', 'Jordan']]);
     const { recent, ...counts } = s.fraud;
     expect(counts).toEqual({ presentedAgain: 12, voided: 3, wrongEvent: 0, wrongDay: 2 });
@@ -75,19 +80,57 @@ describe('the dashboard engine', () => {
     expect(s.feed).toHaveLength(4);
     expect(s.feed[0].ageLabel).toBe('just now');
     expect(s.types.map((t) => t.name)).toEqual(TICKET_TYPES.map((t) => t.name));
-    expect(s.pace.series[s.pace.series.length - 1]).toEqual({ minute: 1122, tickets: 3947 });
-    expect({ projected: s.pace.projected, low: s.pace.low, high: s.pace.high }).toEqual(forecast(3947, 1122));
+    expect(s.pace.series[s.pace.series.length - 1]).toEqual({ minute: 1122, tickets: 2880 });
+    const f = forecast(2880, 1122);
+    expect({ projected: s.pace.projected, low: s.pace.low, high: s.pace.high }).toEqual(f);
+    expect(f).toEqual({ projected: 4490, low: 4290, high: 4690 });
     expect(s.brief).toEqual({
       timeLabel: '6:42 PM',
-      text: 'As of 6:42 PM: 3,947 tickets sold, $61,284 gross, 2,618 admitted, with 6,150 projected for the day (5,900 to 6,400).',
+      text: 'As of 6:42 PM: 2,880 tickets sold, plus 279 parking and 788 rides, $61,284 gross, 2,618 admitted, with 4,490 projected for the day (4,290 to 4,690).',
     });
   });
 
-  it('says when a ticket type will sell out, only when that is before closing', () => {
+  it('each ticket type row names its kind, and the sell-out note uses the real words', () => {
     const s = dashSnapshot(createDashState());
+    expect(s.types.map((t) => [t.id, t.kind])).toEqual([
+      ['adult', 'admission'], ['child', 'admission'], ['wristband', 'rides'], ['family', 'admission'], ['parking', 'parking'],
+    ]);
     const note = Object.fromEntries(s.types.map((t) => [t.id, t.note]));
-    expect(note.wristband).toBe('Sells out about 9:30 PM');
+    // The real board's typeStatus: "Sells out ~" and the minute it runs out at the last hour's pace (9:29:06 PM here).
+    expect(note.wristband).toBe('Sells out ~9:29 PM');
     for (const id of ['adult', 'child', 'family', 'parking']) expect(note[id], id).toBe("Won't sell out today");
+  });
+
+  it('an add-on sale moves gross, orders and money but not Tickets today or the pace line', () => {
+    // Opening at 6:44 PM, a minute's advance crosses the 6:45 PM quarter hour, which the pace line marks.
+    const state = createDashState({ minute: 18 * 60 + 44 });
+    const before = dashSnapshot(state);
+    // Always 0.9: four parking passes at the box office, paid in cash at Box Office 1.
+    const parked = advance(state, () => 0.9, { seconds: 61 });
+    expect([parked.applied.sale.typeId, parked.applied.sale.qty, parked.applied.sale.channelId]).toEqual(['parking', 4, 'box']);
+    const s = dashSnapshot(parked);
+    expect(s.totals.tickets).toBe(before.totals.tickets);
+    expect(s.totals.tickets).toBe(2880);
+    expect(s.totals.addOns).toEqual([{ kind: 'parking', sold: 283 }, { kind: 'rides', sold: 788 }]);
+    expect(s.totals.gross).toBe(before.totals.gross + 40);
+    expect(s.totals.orders).toBe(before.totals.orders + 1);
+    expect(s.tenders.find((x) => x.id === 'cash').amount).toBe(before.tenders.find((x) => x.id === 'cash').amount + 40);
+    expect(s.registers.find((r) => r.name === 'Box Office 1').sales).toBe(before.registers.find((r) => r.name === 'Box Office 1').sales + 40);
+    expect(s.types.find((x) => x.id === 'parking').sold).toBe(283);
+    // The pace line, its quarter-hour mark and the forecast count Admission only.
+    expect(s.pace.series.find((p) => p.minute === 18 * 60 + 45)).toEqual({ minute: 18 * 60 + 45, tickets: 2880 });
+    expect(s.pace.series[s.pace.series.length - 1].tickets).toBe(2880);
+    expect(Math.max(...s.pace.series.map((p) => p.tickets))).toBe(2880);
+    expect({ projected: s.pace.projected, low: s.pace.low, high: s.pace.high }).toEqual(forecast(2880, s.clock.minute));
+    // Always 0.5: three ride wristbands online.
+    const rode = advance(parked, () => 0.5);
+    expect([rode.applied.sale.typeId, rode.applied.sale.qty]).toEqual(['wristband', 3]);
+    const r = dashSnapshot(rode);
+    expect(r.totals.tickets).toBe(2880);
+    expect(r.totals.addOns).toEqual([{ kind: 'parking', sold: 283 }, { kind: 'rides', sold: 791 }]);
+    expect(r.totals.gross).toBe(s.totals.gross + 90);
+    expect(r.tenders.find((x) => x.id === 'card_online').amount).toBe(s.tenders.find((x) => x.id === 'card_online').amount + 90);
+    expect(r.pace.series[r.pace.series.length - 1].tickets).toBe(2880);
   });
 
   it('every panel agrees with the books after any number of sales', () => {
@@ -123,7 +166,9 @@ describe('the dashboard engine', () => {
         expect(x.sold, `${at} ${x.id} within capacity`).toBeLessThanOrEqual(CAPACITY[x.id]);
         expect(x.left, `${at} ${x.id} left`).toBe(CAPACITY[x.id] - x.sold);
       }
-      expect(sum(Object.values(books.tickets)), at).toBe(t.tickets);
+      // Tickets today are the Admission tickets; the add-ons are listed beside them.
+      expect(admissionOf(books.tickets), at).toBe(t.tickets);
+      expect(t.addOns, at).toEqual(addOnsOf(books.tickets));
 
       // Gates: each gate's admitted figure is what the applied scans added to its baseline; its minute buckets track
       // the same scans and never hold more than it admitted; 30 minutes each; the rate is the last 10 minutes' mean.
@@ -194,23 +239,8 @@ describe('the dashboard engine', () => {
     const later = dashSnapshot(state);
     expect(later.clock.label).toBe('6:44 PM');
     expect(later.feed[1].ageLabel).toBe('2 min ago');
-    expect(later.totals.sinceLabel).toBe('6:30 PM');
     state = advance(state, mulberry32(5), { seconds: 60 * 30 });
     expect(dashSnapshot(state).clock.label).toBe('7:14 PM');
-    expect(dashSnapshot(state).totals.sinceLabel).toBe('7:00 PM');
-  });
-
-  it('counts "+N since" from the start of the current quarter hour', () => {
-    let state = createDashState({ minute: 18 * 60 + 44 });
-    const rng = mulberry32(21);
-    // Run past 6:45 PM: the count starts again from the tickets sold at that moment.
-    while (dashSnapshot(state).clock.minute < 18 * 60 + 45) state = advance(state, rng);
-    const crossed = dashSnapshot(state);
-    expect(crossed.totals.sinceLabel).toBe('6:45 PM');
-    const last = state.board.feed[0];
-    expect(crossed.totals.sinceCount).toBe(last.qty);
-    state = advance(state, rng);
-    expect(dashSnapshot(state).totals.sinceCount).toBe(last.qty + state.board.feed[0].qty);
   });
 
   it('never mutates the state it was given', () => {
@@ -272,7 +302,7 @@ describe('the dashboard engine', () => {
     expect(s.brief.timeLabel).toBe('6:45 PM');
     const t = s.totals;
     const fmt = (n) => n.toLocaleString('en-US');
-    expect(s.brief.text.startsWith(`As of 6:45 PM: ${fmt(t.tickets)} tickets sold, $${fmt(t.gross)} gross, ${fmt(t.admitted)} admitted, with ${fmt(s.pace.projected)} projected for the day (${fmt(s.pace.low)} to ${fmt(s.pace.high)}).`)).toBe(true);
+    expect(s.brief.text.startsWith(`As of 6:45 PM: ${fmt(t.tickets)} tickets sold, ${addOnsLine(t.addOns)}, $${fmt(t.gross)} gross, ${fmt(t.admitted)} admitted, with ${fmt(s.pace.projected)} projected for the day (${fmt(s.pace.low)} to ${fmt(s.pace.high)}).`)).toBe(true);
     // Any alert at that moment is in it, word for word.
     for (const a of s.alerts) expect(s.brief.text).toContain(a.text);
     expect(s.brief.text).not.toMatch(/[–—]/);
@@ -335,6 +365,11 @@ describe('a board left open', () => {
         }
       }
       for (const g of s.gates) expect(g.admitted, `${at} ${g.id} admitted`).toBe(books.scans[g.id]);
+      // Tickets today are the Admission tickets, the add-ons are listed beside them, and every admission is one of them.
+      expect(s.totals.tickets, `${at} tickets`).toBe(admissionOf(books.tickets));
+      expect(s.totals.addOns, `${at} add-ons`).toEqual(addOnsOf(books.tickets));
+      expect(s.totals.admitted, `${at} admitted within tickets`).toBeLessThanOrEqual(s.totals.tickets);
+      for (const x of s.types) if (x.state === 'sellout') expect(x.note, `${at} ${x.id}`).toMatch(/^Sells out ~\d{1,2}:\d{2} (AM|PM)$/);
 
       // Lists keep their size; the forecast stays above what is sold.
       expect(s.feed).toHaveLength(4);
