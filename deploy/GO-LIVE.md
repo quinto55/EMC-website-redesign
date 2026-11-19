@@ -41,7 +41,7 @@ Work on a computer that has this repository, Node 22, bash and python3 (the buil
 
    It first prints how many names it read and which package names it compared, then builds. It stops, builds nothing and leaves no zip if the listing is empty, in long format, does not look like a WordPress web root, or has a name clash (case does not matter). The check sees only real files and folders in the web root. It cannot see WordPress's own pages, such as a WordPress page called About: a new page folder replaces a WordPress page of the same address the moment it is uploaded (intended for `/about/`).
 
-   Good: it ends with `Package ready: dist-host/ (62 files, 23M) and dist-host.zip (22M)` (the numbers can differ a little) and a top-level line naming exactly twelve entries. **If it prints `CLASH` for any name, stop.** That name already exists on the host and uploading would overwrite it. Download a copy of every file or folder reported as a clash before anything is overwritten, and keep the copies with your backups. Do not go on until the controller has decided what to do.
+   Good: it ends with `Package ready: dist-host/ (64 files, 18M) and dist-host.zip (18M)` (the numbers can differ a little) and a top-level line naming exactly twelve entries. **If it prints `CLASH` for any name, stop.** That name already exists on the host and uploading would overwrite it. Download a copy of every file or folder reported as a clash before anything is overwritten, and keep the copies with your backups. Do not go on until the controller has decided what to do.
 
 4. **Read the real `.htaccess`.** Open the file you downloaded and look for two things.
 
