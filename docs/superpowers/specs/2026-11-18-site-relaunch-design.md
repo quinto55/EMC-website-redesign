@@ -1,7 +1,10 @@
 # EMC site relaunch for IAFE: Design
 
 **Date:** 2026-11-18
-**Status:** Draft, awaiting Anthony's approval
+**Status:** Build started 2026-11-18 (Anthony: "Please continue the website
+redesign"). Claude's calls in section 7 and the open questions in section 8
+still need his answers; none of them blocks the tier 1 build.
+**Build plan:** `docs/superpowers/plans/2026-11-18-site-relaunch-tier1.md`
 **Approved mockup:** `docs/superpowers/specs/assets/2026-11-18-site-relaunch/mockup.html`
 (open it through any local web server; it is the reference for the look, the
 copy on the home page and the curtain behavior)
