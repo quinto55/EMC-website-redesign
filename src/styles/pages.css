@@ -50,7 +50,8 @@
 .service::before { content: ""; position: absolute; left: 26px; top: 0; width: 44px; height: 8px; border-radius: 0 0 8px 8px; background: var(--red); }
 .service:nth-child(2)::before { background: var(--teal); }
 .service:nth-child(3)::before { background: var(--amber); }
-.service h3 { margin: 0 0 8px; font-size: 32px; }
+.service:nth-child(4)::before { background: var(--yellow); }
+.service h2 { margin: 0 0 8px; font-size: 32px; line-height: 1.15; letter-spacing: -.015em; }
 .service p { color: var(--mut); }
 .closing { margin-top: 36px; font: 700 32px/1.15 var(--font-head); letter-spacing: -.02em; }
 
@@ -87,7 +88,7 @@
   .step { gap: 16px; padding: 18px 20px; }
   .step h3 { font-size: 22px; }
   .services { grid-template-columns: minmax(0, 1fr); }
-  .service h3 { font-size: 28px; }
+  .service h2 { font-size: 28px; }
   .closing { font-size: 26px; }
   .prose p { font-size: 19px; }
   .proof-fairs { margin-bottom: 54px; padding: 20px; }

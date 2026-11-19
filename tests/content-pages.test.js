@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { renderAll, visibleText } from './helpers/pages.js';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { renderAll, visibleText, ROOT } from './helpers/pages.js';
 
 const byKey = Object.fromEntries(renderAll().map((r) => [r.page.key, r]));
 const text = (key) => visibleText(byKey[key].doc);
@@ -116,9 +118,49 @@ describe('marketing and about', () => {
   it('marketing has four cards', () => {
     expect(byKey.marketing.doc.querySelectorAll('main .card').length).toBe(4);
   });
+  it('the four cards\' titles are h2s, so no heading level is skipped after the h1', () => {
+    const doc = byKey.marketing.doc;
+    const titles = [...doc.querySelectorAll('main .card')].map((c) => c.querySelector('h2, h3'));
+    expect(titles.map((h) => h.tagName)).toEqual(['H2', 'H2', 'H2', 'H2']);
+    expect(titles.map(norm)).toEqual(['Media buying', 'Promotions', 'Ad production', 'Social media']);
+    const levels = [...doc.querySelectorAll('main h1, main h2, main h3, main h4')].map((h) => Number(h.tagName[1]));
+    expect(levels[0]).toBe(1);
+    levels.forEach((l, i) => { if (i) expect(l - levels[i - 1], `heading ${i}`).toBeLessThanOrEqual(1); });
+  });
+  it('the four cards\' tabs are four different palette colors, and the cards keep their title size', () => {
+    const css = readFileSync(resolve(ROOT, 'src/styles/pages.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
+    const tab = (sel) => css.match(new RegExp(`\\.service${sel.replace(/[()]/g, '\\$&')}::before \\{[^}]*background: (var\\(--[a-z-]+\\))`))?.[1];
+    const tabs = [tab(''), tab(':nth-child(2)'), tab(':nth-child(3)'), tab(':nth-child(4)')];
+    expect(tabs).toEqual(['var(--red)', 'var(--teal)', 'var(--amber)', 'var(--yellow)']);
+    const tokens = readFileSync(resolve(ROOT, 'src/styles/tokens.css'), 'utf8');
+    for (const t of tabs) expect(tokens, t).toContain(`${t.slice(4, -1)}:`);
+    // an h2 starts from the base sheet's bigger line height and tighter letters: the card title says it is the old h3's
+    expect(css).toMatch(/\.service h2 \{ margin: 0 0 8px; font-size: 32px; line-height: 1\.15; letter-spacing: -\.015em; \}/);
+    expect(css).toMatch(/\.service h2 \{ font-size: 28px; \}/);
+    expect(css).not.toMatch(/\.service h3/);
+  });
   it('about sets 40+ apart inside the headline', () => {
     const h1 = byKey.about.doc.querySelector('main h1');
     expect(norm(h1.querySelector('b, .big'))).toBe('40+');
+  });
+});
+
+describe('the numbered squares', () => {
+  const luminance = (hex) => {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const ratio = (a, b) => { const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x); return (hi + 0.05) / (lo + 0.05); };
+
+  it('every square\'s numeral has at least 4.5:1 against its background (the teal one is ink, like the amber one)', () => {
+    const tokens = readFileSync(resolve(ROOT, 'src/styles/tokens.css'), 'utf8');
+    const token = (name) => tokens.match(new RegExp(`--${name}: (#[0-9a-f]{6})`, 'i'))[1];
+    const css = readFileSync(resolve(ROOT, 'src/styles/base.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
+    const rule = (sel) => css.match(new RegExp(`${sel.replace(/\./g, '\\.')} \\{([^}]*)\\}`))[1];
+    const colors = { '.num-square': ['red', '#ffffff'], '.num-square.teal': ['teal', token('ink')], '.num-square.amber': ['amber', token('ink')] };
+    expect(rule('.num-square.teal')).toMatch(/color: var\(--ink\)/);
+    expect(rule('.num-square.amber')).toMatch(/color: var\(--ink\)/);
+    for (const [sel, [bg, fg]] of Object.entries(colors)) expect(ratio(token(bg), fg), sel).toBeGreaterThanOrEqual(4.5);
   });
 });
 

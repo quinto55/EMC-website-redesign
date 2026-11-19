@@ -58,7 +58,7 @@ h3 { font: 700 24px/1.15 var(--font-head); letter-spacing: -.015em; }
   color: #fff;
   font: 500 14px var(--font-mono);
 }
-.num-square.teal { background: var(--teal); }
+.num-square.teal { background: var(--teal); color: var(--ink); }
 .num-square.amber { background: var(--amber); color: var(--ink); }
 .pill-live {
   display: inline-flex;
