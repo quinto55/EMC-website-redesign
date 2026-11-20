@@ -16,10 +16,12 @@
 .mark.count { --mark: rgba(242, 169, 0, .5); }
 .plat-intro .lede { max-width: 600px; margin-top: 16px; font-size: 21px; }
 
-/* Jump links: one pill per block, its dot in the block's group color. On computers they
-   wrap onto a second line when they do not fit (phones: they scroll, below). */
+/* Jump links: one pill per block, its dot in the block's group color. On the platform page the
+   six tools are one list and what follows them a second, so on computers they sit on two lines
+   (phones: all of them scroll in one row, below). */
 .jump { margin-top: 30px; }
 .jump ul { display: flex; flex-wrap: wrap; gap: 6px; }
+.jump ul + ul { margin-top: 6px; }
 .jump a {
   --dot: var(--red);
   display: inline-flex;
@@ -174,15 +176,18 @@
   .plat-intro .lede { font-size: 18px; }
 
   /* The jump links scroll sideways inside their own row, edge to edge, never the page. */
-  .jump { margin: 22px calc(-1 * var(--gutter)) 0; }
-  .jump ul {
-    flex-wrap: nowrap;
+  .jump {
+    display: flex;
+    gap: 6px;
+    margin: 22px calc(-1 * var(--gutter)) 0;
     overflow-x: auto;
     padding: 8px var(--gutter) 10px;
     scroll-padding: 0 var(--gutter);
     scrollbar-width: none;
   }
-  .jump ul::-webkit-scrollbar { display: none; }
+  .jump::-webkit-scrollbar { display: none; }
+  .jump ul { flex: none; flex-wrap: nowrap; }
+  .jump ul + ul { margin-top: 0; }
   .jump li { flex: none; }
 
   .group { margin-top: 44px; }
