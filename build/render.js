@@ -60,6 +60,12 @@ export function buildVars(page) {
   vars.LOGO_SRC = logo.src;
   vars.LOGO_WIDTH = String(logo.width);
   vars.LOGO_HEIGHT = String(logo.height);
+  // On the photo the logo's word is white; once the header floats on its cream card (src/pin.js) the navy one takes
+  // its place. It is the footer's logo file, so it costs no extra download. Its name is already said by the first.
+  const pinned = HEADER_LOGOS.cream;
+  vars.LOGO_PINNED = page.tone === 'photo'
+    ? `<img class="logo logo-pinned" src="${pinned.src}" width="${pinned.width}" height="${pinned.height}" alt="">`
+    : '';
   return vars;
 }
 

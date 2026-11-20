@@ -764,3 +764,11 @@ disagree with this one, this one is current.
   the matching thing.
 - **IAFE page (changes 5.10).** The three booth demos that have a video link
   to it.
+- **The header stays at the top of the window while the page scrolls**
+  (asked for the same day: "keep it pinned and floating at the top while
+  people scroll"; changes 5.1, 5.2). Once the page has scrolled, the bar
+  floats on a cream card; on the home page it then shows the navy logo and
+  ink text. It needs the page's script (`src/pin.js`): with JavaScript off
+  the header scrolls away as before. The page keeps the room the header had,
+  so nothing moves when it pins; a jump to a place on a page lands below the
+  bar. In a window under 481px tall (a phone held sideways) it is not fixed.

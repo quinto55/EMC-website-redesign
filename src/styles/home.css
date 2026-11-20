@@ -11,6 +11,8 @@
   grid-template-rows: auto 1fr auto;
 }
 .stage > .top { grid-row: 1; grid-column: 1; }
+/* A pinned header (src/pin.js, chrome.css) is fixed to the window and leaves the grid: the first row keeps its height. */
+html.pinned .stage { grid-template-rows: var(--top-h) 1fr auto; }
 .stage > main {
   grid-row: 2 / 4;
   grid-column: 1;
@@ -257,6 +259,7 @@
 /* Shorter computer screens (the mockup's two rules). */
 @media (min-width: 1001px) and (max-height: 860px) {
   .stage .top-bar { padding-top: 8px; padding-bottom: 8px; }
+  .stage .top-bar::before { top: 3px; bottom: 3px; } /* the floating card keeps a little room around the tabs */
   .stage .top .logo { height: 50px; }
   .hero { padding-bottom: 36px; }
   .hero h1 { font-size: 54px; }

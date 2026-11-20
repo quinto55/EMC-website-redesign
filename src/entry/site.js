@@ -1,6 +1,7 @@
-// Every page's script. The pages work without it; it only adds the phone menu,
-// the cookie banner and settings, and analytics once a visitor allows it.
+// Every page's script. The pages work without it; it only adds the phone menu, the header that stays
+// at the top of the window, the cookie banner and settings, and analytics once a visitor allows it.
 import { initNav } from '../nav.js';
+import { initPin } from '../pin.js';
 import { initConsentBanner, openCookieSettings } from '../consent.js';
 import { initAnalytics } from '../analytics.js';
 import { captureUtm } from '../form/utm.js';
@@ -18,6 +19,7 @@ function attempt(step) {
 function start() {
   attempt(captureUtm);
   attempt(initNav);
+  attempt(() => initPin()); // after initNav: it pins only a header whose menu works
   attempt(initConsentBanner);
   attempt(initAnalytics);
   attempt(initAskForms);

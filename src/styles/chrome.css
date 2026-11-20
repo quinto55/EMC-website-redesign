@@ -3,9 +3,56 @@
 
 /* ---------- header ---------- */
 .top { position: relative; z-index: 30; }
-.top-bar { display: flex; align-items: center; gap: 30px; padding-top: 14px; padding-bottom: 14px; }
+.top-bar { position: relative; isolation: isolate; display: flex; align-items: center; gap: 30px; padding-top: 14px; padding-bottom: 14px; }
 .top-logo { flex: none; border-radius: 8px; }
-.top .logo { height: 60px; width: auto; }
+.top .logo { height: 60px; width: auto; transform-origin: left center; transition: transform .2s ease; }
+.logo-pinned { display: none; } /* the home page's second logo, for the floating card (below) */
+
+/* The header stays at the top of the window. Once the script has run, src/pin.js puts `pinned` on <html> and the
+   header's height in --top-h: the header leaves the page's flow and the page keeps the room it had (every page's
+   <main> starts that far down; the home page's stage keeps its first row, in home.css), so nothing moves when it
+   pins. With JavaScript off the header simply scrolls away with the page. Only the bar and the open phone menu take
+   clicks: the strip beside and around them lets clicks through to the page. */
+html.pinned .top { position: absolute; top: 0; left: 0; right: 0; pointer-events: none; }
+html.pinned .top-bar,
+html.pinned .menu-panel { pointer-events: auto; }
+html.pinned body > .top + main { margin-top: var(--top-h); }
+/* Behind the bar: the cream card it floats on once the page has scrolled (shown below). The card is painted and the
+   logo scaled, never resized: the header's height must not change, because the page's room is measured from it. */
+.top-bar::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 6px calc(var(--gutter) - 18px);
+  border-radius: 28px;
+  background: var(--cream);
+  box-shadow: var(--float-shadow);
+  opacity: 0;
+  transition: opacity .2s ease;
+  pointer-events: none;
+}
+/* Fixed to the window, unless the window is too short to spare the room (a phone held sideways): there the header
+   stays at the top of the page and scrolls away as before. */
+@media (min-height: 481px) {
+  /* A jump to a place on the page lands below the bar. This is set as soon as scripts are known to run (the `js`
+     mark, put on <html> in the head), not when the header pins: an address that ends in #somewhere is scrolled to
+     before the script has measured the header, so until then the bar's usual height stands in. */
+  html.js { scroll-padding-top: var(--top-h, 88px); }
+  html.pinned .top { position: fixed; }
+  html.scrolled .top-bar::before { opacity: 1; }
+  html.scrolled .top .logo { transform: scale(.84); }
+  /* Floating on its cream card, the home page's header reads like every other page's: ink text and the navy logo. */
+  html.scrolled .top[data-tone="photo"] { color: var(--ink); --focus: var(--ink); }
+  html.scrolled .top[data-tone="photo"] .logo:not(.logo-pinned) { display: none; }
+  html.scrolled .top[data-tone="photo"] .logo-pinned { display: block; }
+  html.scrolled .top[data-tone="photo"] .top-nav { box-shadow: 0 0 0 1px var(--line), 0 8px 20px rgba(120, 80, 20, .1); }
+  html.scrolled .top[data-tone="photo"] .util { color: var(--mut); }
+  html.scrolled .top[data-tone="photo"] .util a:not(.btn):hover { color: var(--ink); }
+  html.scrolled .top[data-tone="photo"] .menu { background: #fff; border-color: var(--line); color: var(--ink); }
+}
+@media (max-width: 1000px) and (min-height: 481px) {
+  html.js { scroll-padding-top: var(--top-h, 70px); } /* the phone bar's usual height */
+}
 /* The pages sit together in one white rail, so they read as places to go, not as a line of text. The page being
    viewed is filled in. */
 .top-nav {
@@ -264,9 +311,15 @@ html:not(.js) [data-cookie-settings] { display: none; }
   .top .btn { padding: 12px 16px; font-size: 15px; }
 }
 
+/* On paper the header belongs at the top of the first page only. */
+@media print {
+  html.pinned .top { position: absolute; }
+}
+
 /* ---------- phones and tablets ---------- */
 @media (max-width: 1000px) {
   .top-bar { gap: 10px; padding-top: 12px; padding-bottom: 12px; }
+  .top-bar::before { inset: 5px calc(var(--gutter) - 12px); border-radius: 20px; }
   .top .logo { height: 46px; }
   .top-nav,
   .util a:not(.btn) { display: none; }
