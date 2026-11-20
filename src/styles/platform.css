@@ -1,6 +1,7 @@
 /* The platform page (spec 5.5): one page that walks through every product in the order the
-   home page tells it (01 Sell, 02 Scan, 03 Count, then the guest tools), in the mockup's
-   .d2 section language: cream page, white cards, numbered squares, DM Mono labels. */
+   home page tells it (01 Sell, 02 Scan, 03 Count, then retail stores and the fair map, then the
+   Fair services band), in the mockup's .d2 section language: cream page, white cards, numbered
+   squares, DM Mono labels. The fair services page uses the intro, video and booth-note rules too. */
 
 /* ---------- intro ---------- */
 .plat-intro { padding: 58px 0 8px; }
@@ -15,8 +16,8 @@
 .mark.count { --mark: rgba(242, 169, 0, .5); }
 .plat-intro .lede { max-width: 600px; margin-top: 16px; font-size: 21px; }
 
-/* Jump links: one pill per block, its dot in the block's group color. On full-width
-   computers the eight fit on one line; narrower, they wrap (phones: they scroll, below). */
+/* Jump links: one pill per block, its dot in the block's group color. On computers they
+   wrap onto a second line when they do not fit (phones: they scroll, below). */
 .jump { margin-top: 30px; }
 .jump ul { display: flex; flex-wrap: wrap; gap: 6px; }
 .jump a {
@@ -40,7 +41,7 @@
 .jump .count { --dot: var(--amber); }
 .jump .guest { --dot: var(--live); }
 
-/* ---------- groups: 01 Sell, 02 Scan, 03 Count ---------- */
+/* ---------- groups: 01 Sell, 02 Scan, 03 Count, then + In stores and on the grounds ---------- */
 .group { margin-top: 64px; }
 .group-label {
   display: flex;
@@ -51,6 +52,7 @@
   letter-spacing: -.02em;
 }
 .group-label::after { content: ""; flex: 1; margin-left: 8px; border-top: 1.5px dashed var(--ghost-shadow); }
+.num-square.plus { background: var(--live); color: var(--ink); font-size: 20px; }
 
 /* ---------- blocks ---------- */
 .block { scroll-margin-top: 24px; padding: 32px; border-radius: 24px; }
@@ -117,6 +119,18 @@
 }
 .stat b { font: 700 64px/1 var(--font-head); letter-spacing: -.03em; color: var(--red); }
 .strip-more .talk-link { margin-top: 4px; }
+/* The whole retail card goes to the retail partners page: its one link covers the card. */
+.retail { position: relative; transition: transform .18s ease, box-shadow .18s ease; }
+.retail:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px var(--ghost-shadow), 0 20px 40px rgba(120, 80, 20, .16); }
+.card-link::after { content: ""; position: absolute; inset: 0; border-radius: 24px; }
+
+/* The fair map: a few points under its words, beside the video (phones: after the video). */
+.watch-points { grid-template-rows: auto auto 1fr; grid-template-areas: "text media" "points media" "act media"; }
+.watch-points .block-media { align-self: center; }
+.block-points { grid-area: points; margin-top: 20px; gap: 0; }
+.block-points li { padding: 12px 0; border-top: 1px dashed var(--line); }
+.block-points b { font-size: 18px; }
+.block .block-act .booth-note { margin: 0 0 6px; }
 
 /* Daily reports: the heading and its sentence across the card, then the sample report under them. */
 .reports-head { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 8fr); align-items: center; gap: 12px 44px; }
@@ -135,7 +149,7 @@
 
 /* Shown by the page's script before and during the trade show. */
 .block .booth-note,
-.guest .booth-note {
+.svc .booth-note {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -149,46 +163,9 @@
 }
 .booth-note::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
 
-/* ---------- New for your guests: a sunny panel of three cards ---------- */
-.guests {
-  scroll-margin-top: 24px;
-  margin: 72px 0 84px;
-  padding: 44px 40px 40px;
-  border-radius: 28px;
-  background: var(--tint-amber);
-}
-.guests h2 { font-size: 44px; }
-/* Every card reads the same way: heading, line, video, then (Pip only) one more sentence, then the booth note.
-   One card under another until three columns give each video at least 300px (below). */
-.guest-grid { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 20px; margin-top: 26px; }
-.guest { scroll-margin-top: 24px; padding: 24px 24px 26px; }
-.guest h3 { font-size: 26px; }
-.guest > p:not(.booth-note) { margin-top: 6px; color: var(--mut); }
-.guest > .guest-more { margin-top: 14px; }
-.guest .video { margin-top: 18px; }
-.guest .video video { border-radius: 16px; }
-
-/* Three columns only once the wrap is at its full 1140px: (1140 - 2 x 32 - 2 x 16) / 3 - 2 x 20 = 308px of video
-   (302px where a desktop scrollbar takes 17px). Each card spans the same five rows, so the three videos line up
-   and the booth notes sit together at the foot. */
-@media (min-width: 1220px) {
-  .guests { padding-right: 32px; padding-left: 32px; }
-  .guest-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(5, auto); row-gap: 0; column-gap: 16px; }
-  .guest {
-    display: grid;
-    grid-row: span 5;
-    grid-template-rows: subgrid;
-    align-content: start;
-    padding-right: 20px;
-    padding-left: 20px;
-  }
-  .guest > .guest-more { grid-row: 4; }
-  .guest > .booth-note { grid-row: 5; }
-  @supports not (grid-template-rows: subgrid) {
-    .guest-grid { grid-template-rows: none; }
-    .guest { display: block; }
-  }
-}
+/* ---------- after the three groups: retail and the map, then the Fair services band ---------- */
+#guests { scroll-margin-top: 24px; }
+#guests > .svc-band { margin: 72px 0 84px; }
 
 /* ---------- phones and tablets ---------- */
 @media (max-width: 1000px) {
@@ -230,11 +207,7 @@
   .live > .db { margin: 20px 0; }
   .live-recorded .media-lead { font-size: 22px; }
 
-  .guests { margin: 54px calc(-1 * var(--gutter)) 40px; padding: 34px var(--gutter) var(--gutter); border-radius: 28px; }
-  .guests h2 { font-size: 34px; }
-  .guest-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; row-gap: 16px; margin-top: 20px; }
-  .guest { display: block; padding: 22px 20px 22px; }
-  .guest h3 { font-size: 24px; }
+  #guests > .svc-band { margin-top: 54px; margin-bottom: 40px; }
 }
 @media (max-width: 370px) {
   .plat-intro h1 { font-size: 46px; }

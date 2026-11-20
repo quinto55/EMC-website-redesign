@@ -1,10 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { renderAll } from './helpers/pages.js';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { renderAll, ROOT } from './helpers/pages.js';
 
 const rendered = renderAll();
 
 const PAGE_LINKS = [
   ['Platform', '/platform/'],
+  ['Fair services', '/fair-services/'],
   ['Retail partners', '/retail-partners/'],
   ['Marketing', '/marketing/'],
   ['About', '/about/'],
@@ -26,7 +29,7 @@ function headerBar(doc) {
 }
 
 describe('header', () => {
-  it('header carries the four pages, the two utilities and the talk button on every page', () => {
+  it('header carries the five pages, the two utilities and the talk button on every page', () => {
     for (const { page, doc } of rendered) {
       const bar = headerBar(doc);
       const primary = bar.querySelector('nav[aria-label="Primary"]');
@@ -41,12 +44,16 @@ describe('header', () => {
     }
   });
 
-  it('the menu button controls #site-menu, which holds the four pages and both utilities', () => {
+  it('the menu button controls #site-menu, which holds the five pages and both utilities', () => {
     for (const { page, doc } of rendered) {
       const toggle = doc.querySelector('header.top button[data-menu-toggle]');
       expect(toggle, page.file).not.toBeNull();
       expect(toggle.getAttribute('type')).toBe('button');
       expect(toggle.getAttribute('aria-label')).toBe('Menu');
+      // The word shows beside the three bars, so the button reads as a menu of pages; the label already says it aloud.
+      const word = toggle.querySelector('.menu-word');
+      expect(text(word), page.file).toBe('Menu');
+      expect(word.getAttribute('aria-hidden'), page.file).toBe('true');
       expect(toggle.getAttribute('aria-expanded')).toBe('false');
       expect(toggle.getAttribute('aria-controls')).toBe('site-menu');
       const menu = doc.getElementById('site-menu');
@@ -208,5 +215,24 @@ describe('contact page', () => {
   it('the retail ask heading keeps "in-store" on one line', () => {
     const retail = rendered.find((r) => r.page.key === 'retail');
     expect(retail.doc.querySelector('[data-ask-heading] .nowrap').textContent).toBe('in-store');
+  });
+});
+
+describe('the page menu in the header bar', () => {
+  const css = readFileSync(resolve(ROOT, 'src/styles/chrome.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
+
+  it('is a white rail with the page being viewed filled in, on the photo too', () => {
+    expect(css).toMatch(/\.top-nav \{[^}]*background: #fff;[^}]*font-weight: 700;/);
+    expect(css).toMatch(/\.top-nav a\[aria-current="page"\] \{ background: var\(--ink\); color: #fff; \}/);
+    // On the home page's photo the header's text is white; inside the white rail it must be ink, focus ring included.
+    expect(css).toMatch(/\.top\[data-tone="photo"\] \.top-nav \{ --focus: var\(--ink\); color: var\(--ink\);/);
+  });
+
+  it('every page but the home page, Contact, IAFE, the legal pages and not-found marks its own link as current', () => {
+    for (const { page, doc } of rendered) {
+      const current = [...doc.querySelectorAll('header.top nav[aria-label="Primary"] a[aria-current="page"]')];
+      expect(current.length, page.file).toBe(page.nav ? 1 : 0);
+      if (page.nav) expect(current[0].getAttribute('href'), page.file).toBe(page.path);
+    }
   });
 });

@@ -19,7 +19,7 @@ if [ -n "$LISTING" ]; then
 fi
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-EXPECTED="about contact emc-site index.html iafe marketing platform privacy retail-partners robots.txt sitemap.xml terms"
+EXPECTED="about contact emc-site fair-services index.html iafe marketing platform privacy retail-partners robots.txt sitemap.xml terms"
 
 # Check the listing first, so a bad one stops before anything is built. A check that builds nothing
 # deletes nothing; before a build, a failed check also removes the old zip so it cannot be uploaded by mistake.
@@ -46,7 +46,7 @@ WANT="$(echo "$EXPECTED" | tr ' ' '\n' | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $
 if [ "$ACTUAL" != "$WANT" ]; then
   echo "Expected top level: $WANT" >&2
   echo "Found top level:    $ACTUAL" >&2
-  fail "the top-level entries are not exactly the twelve expected"
+  fail "the top-level entries are not exactly the thirteen expected"
 fi
 [ -f dist-host/emc-site/.htaccess ] || fail "dist-host/emc-site/.htaccess is missing"
 

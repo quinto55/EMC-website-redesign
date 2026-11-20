@@ -732,3 +732,35 @@ following as updates.
   on the live domain after go-live.
 - After go-live, the checks listed in section 5.13 are run and the results
   reported, including all 18 event sites.
+
+## 12. Changes after approval
+
+**2026-11-20, asked for by Anthony after seeing the staging site.** He wanted
+more attention on the fair map, a lot more on Pip and the call line, the
+"brick and mortar" (retail) pieces linked to the retail page, and a top menu
+that shows the site is more than one long page. Where the sections above
+disagree with this one, this one is current.
+
+- **A sixth menu page: Fair services, at `/fair-services/`** (changes 5.1,
+  5.11). It holds Pip and the ticket-buyer call line, each with its video
+  across the page and its points under it, in the videos' own words. It is
+  public, in the sitemap (now nine pages) and in the top menu, phone menu and
+  footer between Platform and Retail partners. The go-live package gains one
+  folder (thirteen names; the live check after go-live makes 51 checks).
+- **The top menu is a white rail of five tabs** with the current page filled
+  in, on the photo too (changes 5.1, 5.2). On phones the menu button shows the
+  word "Menu" beside its three bars.
+- **Home page (changes 5.3 item 4).** "New for your guests" is replaced by
+  two sections after Sell. Scan. Count.: a Fair services band (Pip and the
+  call line as picture tiles that go to the new page), then "In stores. On
+  the grounds." (Retail stores, to `/retail-partners/`, and the Interactive
+  fair map, to its video on `/platform/`). The store logos in the proof strip
+  link to `/retail-partners/`.
+- **Platform page (changes 5.5).** Retail stores moves out of 01 Sell into a
+  fourth group, "In stores and on the grounds", with the fair map as a full
+  block (video, three points). The whole retail card links to
+  `/retail-partners/`. The Fair services band follows. The old addresses
+  `#guests`, `#guest-map`, `#guest-pip` and `#guest-call-line` still land on
+  the matching thing.
+- **IAFE page (changes 5.10).** The three booth demos that have a video link
+  to it.

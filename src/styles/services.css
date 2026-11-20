@@ -1,0 +1,70 @@
+/* The fair services page: Pip and the call line, each in its own tinted panel with its video across the panel
+   and its points in a row under it. Built on the platform page's intro, video and booth-note rules. */
+.svc { scroll-margin-top: 24px; margin-top: 56px; padding: 44px 40px 36px; border-radius: 28px; }
+.svc + .svc { margin-top: 32px; }
+.svc-pip { background: var(--tint-amber); }
+.svc-line { background: var(--tint-teal); }
+.svc-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 6px 13px 6px 11px;
+  border-radius: 999px;
+  background: #fff;
+  font: 500 13px var(--font-mono);
+}
+.svc-kicker::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--amber); }
+.svc-line .svc-kicker::before { background: var(--teal); }
+.svc h2 { margin-top: 18px; font-size: 60px; letter-spacing: -.03em; text-wrap: balance; }
+.svc .say { max-width: 720px; margin-top: 16px; font-size: 22px; font-weight: 600; line-height: 1.4; }
+.svc .video { max-width: none; margin-top: 30px; }
+.svc .points { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 26px; }
+.svc-line .points { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.svc .points li { padding: 20px 22px 22px; border-radius: 20px; background: #fff; box-shadow: 0 0 0 1px rgba(27, 31, 42, .06); }
+.svc-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 24px; margin-top: 22px; }
+.svc .svc-foot .booth-note { margin-top: 0; }
+
+/* The map lives on the platform page; one card points to it. */
+.also { margin: 56px 0 84px; }
+.also-label { font: 500 13px/1.55 var(--font-mono); letter-spacing: 0; color: var(--mut); }
+.also-card {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 28px;
+  margin-top: 14px;
+  padding: 14px 30px 14px 14px;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.also-card:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px var(--ghost-shadow), 0 20px 40px rgba(120, 80, 20, .16); }
+.also-card .shot::before { right: 10px; bottom: 10px; width: 40px; height: 40px; box-shadow: 0 4px 0 var(--red-shadow); }
+.also-card .shot::after { right: 23px; bottom: 22px; border-width: 8px 0 8px 13px; }
+.also-text b { display: block; font: 700 30px/1.15 var(--font-head); letter-spacing: -.02em; }
+.also-text span { display: block; margin-top: 4px; font-size: 18px; color: var(--mut); }
+.also-card .tile-go { margin: 0; }
+
+@media (max-width: 1100px) {
+  .svc .points,
+  .svc-line .points { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 1000px) {
+  .svc { margin: 40px calc(-1 * var(--gutter)) 0; padding: 32px var(--gutter) 26px; }
+  .svc + .svc { margin-top: 20px; }
+  .svc h2 { font-size: 38px; }
+  .svc .say { font-size: 19px; }
+  .svc .video { margin-top: 22px; }
+  .svc .points { margin-top: 20px; }
+  .also { margin: 40px 0 40px; }
+  .also-card { grid-template-columns: 132px minmax(0, 1fr); gap: 6px 16px; padding: 12px 16px 12px 12px; }
+  .also-card .shot { grid-row: span 2; align-self: center; }
+  .also-card .shot::before,
+  .also-card .shot::after { display: none; }
+  .also-text b { font-size: 22px; }
+  .also-text span { font-size: 16px; }
+}
+@media (max-width: 600px) {
+  .svc .points,
+  .svc-line .points { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .svc .points li { padding: 16px 18px 18px; }
+}

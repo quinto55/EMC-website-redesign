@@ -15,7 +15,7 @@ For whoever has the web host login. You do not need to know how the site was bui
 
 **What must keep working the whole time:** the 18 event sites (`/flstatefair/` and the other 17), the four old pages (`/event-intake-form/`, `/event-list/`, `/circle-k-video/`, `/greater-jacksonville-fair/`), the email (Microsoft 365) and the ticketing app at `app.emctickets.com`. The check script in sections 2 and 5 tests all of them.
 
-**Two kinds of names you will see.** The new site's own files live in a folder called `emc-site/`. The new pages live in eight folders: `platform/`, `retail-partners/`, `marketing/`, `about/`, `contact/`, `iafe/`, `privacy/`, `terms/`. Everything uploaded is listed in the twelve names in section 4. Nothing else is uploaded.
+**Two kinds of names you will see.** The new site's own files live in a folder called `emc-site/`. The new pages live in nine folders: `platform/`, `fair-services/`, `retail-partners/`, `marketing/`, `about/`, `contact/`, `iafe/`, `privacy/`, `terms/`. Everything uploaded is listed in the thirteen names in section 4. Nothing else is uploaded.
 
 **How this page counts.** The numbered headings are sections (section 4 is Upload). The numbered lines inside a section are items, so "section 4, item 5" is the rules block.
 
@@ -41,7 +41,7 @@ Work on a computer that has this repository, Node 22, bash and python3 (the buil
 
    It first prints how many names it read and which package names it compared, then builds. It stops, builds nothing and leaves no zip if the listing is empty, in long format, does not look like a WordPress web root, or has a name clash (case does not matter). The check sees only real files and folders in the web root. It cannot see WordPress's own pages, such as a WordPress page called About: a new page folder replaces a WordPress page of the same address the moment it is uploaded (intended for `/about/`).
 
-   Good: it ends with `Package ready: dist-host/ (68 files, 28M) and dist-host.zip (27M)` (the numbers can differ a little) and a top-level line naming exactly twelve entries. **If it prints `CLASH` for any name, stop.** That name already exists on the host and uploading would overwrite it. Download a copy of every file or folder reported as a clash before anything is overwritten, and keep the copies with your backups. Do not go on until the controller has decided what to do.
+   Good: it ends with `Package ready: dist-host/ (68 files, 28M) and dist-host.zip (27M)` (the numbers can differ a little) and a top-level line naming exactly thirteen entries. **If it prints `CLASH` for any name, stop.** That name already exists on the host and uploading would overwrite it. Download a copy of every file or folder reported as a clash before anything is overwritten, and keep the copies with your backups. Do not go on until the controller has decided what to do.
 
 4. **Read the real `.htaccess`.** Open the file you downloaded and look for two things.
 
@@ -49,7 +49,7 @@ Work on a computer that has this repository, Node 22, bash and python3 (the buil
 
      ```
      RewriteRule ^$ /index.html [L]
-     RewriteRule ^(platform|retail-partners|marketing|about|contact|iafe|privacy|terms)/$ - [L]
+     RewriteRule ^(platform|fair-services|retail-partners|marketing|about|contact|iafe|privacy|terms)/$ - [L]
      ```
 
      They must come after the `RewriteRule ^$ /index.php [L]` line, never before it, so WordPress still gets its own addresses at `/`. Note in your records that you added them. Without a page-cache plugin, do not add them.
@@ -90,7 +90,7 @@ Order:
 1. The folder `emc-site/` (it includes a hidden file `emc-site/.htaccess`; make sure your upload program shows and sends hidden files).
 
    **Then open https://emctickets.com/emc-site/og-image.png.** Good: the EMC sharing picture (the logo and "One system from first ticket to final report."). If it shows a server error (500), the host has refused that folder's settings file: delete `emc-site/.htaccess` (that one file only) and stop. Do not touch the root `.htaccess`; ask before going on. This is an early warning, not a guarantee: the root file is still checked straight after item 5.
-2. The eight page folders: `platform/`, `retail-partners/`, `marketing/`, `about/`, `contact/`, `iafe/`, `privacy/`, `terms/`.
+2. The nine page folders: `platform/`, `fair-services/`, `retail-partners/`, `marketing/`, `about/`, `contact/`, `iafe/`, `privacy/`, `terms/`.
 3. `sitemap.xml`, then `robots.txt`.
 4. `index.html`.
 5. **The rules block.** Open the root `.htaccess` on the host. Paste the whole contents of `deploy/htaccess-block.conf` at the very top, above everything already there (including WordPress's own block), with any lines you added in section 2, items 4 and 5. Change nothing below it. Save.
@@ -109,7 +109,7 @@ Good: opening https://emctickets.com/ in a private browser window shows the new 
    node scripts/check-live.mjs https://emctickets.com --post
    ```
 
-   Good: every line starts with `OK` and the last line says `50 OK, 0 FAIL`. This repeats the section 2 checks (event sites, old pages, app links; an event site also fails here if its page is the new site's, which means a stray front page was promoted) and adds: each new page answers 200 and carries the new site's marker, each of the eight old addresses answers with a permanent redirect to the right place, the three QR links answer, `robots.txt` and `sitemap.xml` answer, the home page's stylesheet and one video answer, and the opening picture of the home page's curtain (`fair-poster.jpg`) answers. A redirect that first answers over http with the right address is shown as `OK` with a note. If you see that note, open that old address in a browser and check that the address ends on https. If any line says `FAIL`, read what it expected and what came back; the line says what to check. If an event site or old page fails, **undo first** (section 6), then investigate.
+   Good: every line starts with `OK` and the last line says `51 OK, 0 FAIL`. This repeats the section 2 checks (event sites, old pages, app links; an event site also fails here if its page is the new site's, which means a stray front page was promoted) and adds: each new page answers 200 and carries the new site's marker, each of the eight old addresses answers with a permanent redirect to the right place, the three QR links answer, `robots.txt` and `sitemap.xml` answer, the home page's stylesheet and one video answer, and the opening picture of the home page's curtain (`fair-poster.jpg`) answers. A redirect that first answers over http with the right address is shown as `OK` with a note. If you see that note, open that old address in a browser and check that the address ends on https. If any line says `FAIL`, read what it expected and what came back; the line says what to check. If an event site or old page fails, **undo first** (section 6), then investigate.
 
 2. **WordPress still gets its own addresses at `/`.** Run:
 
@@ -133,7 +133,7 @@ Keep the `--post` output with the `--pre` output from section 2.
 **Only delete the things named here. They are exactly what this procedure uploaded. Never delete anything else from the web root.** After items 1 and 2 the old site is fully back.
 
 1. **Remove the block.** Open the root `.htaccess` on the host and delete every line from `# BEGIN EMC static site` to `# END EMC static site`, inclusive. Change nothing else. To confirm the file is back to the original, compare it with your backup (`.htaccess.before-emc-static`), for example `cmp .htaccess .htaccess.before-emc-static` on SSH, which prints nothing when they are identical. If it says `EOF on` one of the two files instead, run `diff .htaccess .htaccess.before-emc-static`: when all it shows is one empty line at the end of one file, that difference is harmless. Only if nothing else changed `.htaccess` since the backup (no plugin or person saved it in between), you may instead copy `.htaccess.before-emc-static` over `.htaccess`.
-2. **Delete these eleven things from the web root, by name:** `index.html`, `robots.txt`, `sitemap.xml`, and the eight folders `platform`, `retail-partners`, `marketing`, `about`, `contact`, `iafe`, `privacy`, `terms`. The folders must go too: a real folder keeps shadowing the WordPress page of the same address (for example `/about/`), and the new `robots.txt` and `sitemap.xml` would keep naming pages that no longer exist. (WordPress creates its own `robots.txt` and `sitemap.xml` again when no real file exists.)
+2. **Delete these twelve things from the web root, by name:** `index.html`, `robots.txt`, `sitemap.xml`, and the nine folders `platform`, `fair-services`, `retail-partners`, `marketing`, `about`, `contact`, `iafe`, `privacy`, `terms`. The folders must go too: a real folder keeps shadowing the WordPress page of the same address (for example `/about/`), and the new `robots.txt` and `sitemap.xml` would keep naming pages that no longer exist. (WordPress creates its own `robots.txt` and `sitemap.xml` again when no real file exists.)
 3. **Optional:** delete the folder `emc-site/`. Nothing links to it once item 2 is done, so it can stay.
 
 **Confirm the old site is back:** run `node scripts/check-live.mjs https://emctickets.com --pre` (good: `0 FAIL`, the same as before you started), then open `/`, `/about/` and one event site in a private window and check they look as they did before.
@@ -145,7 +145,7 @@ When the site changes after go-live:
 1. `bash scripts/build-host.sh` (no listing needed this time).
 2. Upload the same set as section 4, items 1 to 4, replacing what is there.
 3. Do not touch `.htaccess`: the block stays as it is.
-4. Run `node scripts/check-live.mjs https://emctickets.com --post`. Good: `50 OK, 0 FAIL`.
+4. Run `node scripts/check-live.mjs https://emctickets.com --post`. Good: `51 OK, 0 FAIL`.
 
 The videos are cached for one hour only, so a replaced video shows up within the hour. Hashed files under `emc-site/assets/` get new names each build; the old ones may be left in place.
 

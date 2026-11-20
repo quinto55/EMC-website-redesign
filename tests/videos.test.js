@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { readdirSync, readFileSync, openSync, readSync, fstatSync, closeSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
-  VIDEOS, NEVER_COPY, VIDEO_SOURCE_DIR, VIDEO_PUBLIC_DIR, videoById, copyPlan, renderVideoHTML, publishedMeta,
+  VIDEOS, NEVER_COPY, VIDEO_SOURCE_DIR, VIDEO_PUBLIC_DIR, videoById, copyPlan, renderVideoHTML, renderPosterHTML, publishedMeta,
 } from '../build/videos.js';
 import { GENERATORS } from '../build/render.js';
 import { initVideos } from '../src/video.js';
@@ -122,6 +122,36 @@ describe('the video player markup', () => {
       const html = GENERATORS[`video-${v.id}`]();
       if (v.cleared) expect(html, v.id).toContain(`data-video="${v.id}"`);
       else expect(html, v.id).toBe('');
+    }
+  });
+});
+
+describe("a video's still, for a tile that links to the page where it plays", () => {
+  it('a cleared video renders its still as a picture that loads only when scrolled near, with no player', () => {
+    const video = videoById('pip');
+    const d = parse(renderPosterHTML(video, { width: 1920, height: 1080 }));
+    const img = d.querySelector('span.shot > img');
+    expect(img.getAttribute('src')).toBe(`/emc-site/video/${video.poster}`);
+    expect(img.getAttribute('alt')).toBe(''); // the tile's own words name it
+    expect(img.getAttribute('loading')).toBe('lazy');
+    expect([img.getAttribute('width'), img.getAttribute('height')]).toEqual(['960', '540']);
+    expect(d.querySelectorAll('video, source, a')).toHaveLength(0);
+  });
+
+  it('a video that is not cleared renders nothing: its still is not in the repo either', () => {
+    expect(renderPosterHTML({ ...videoById('pip'), cleared: false }, { width: 1920, height: 1080 })).toBe('');
+    expect(renderPosterHTML(null, {})).toBe('');
+  });
+
+  it('a cleared video without its size cannot render a still', () => {
+    expect(() => renderPosterHTML(videoById('pip'), {})).toThrow(/npm run videos/);
+  });
+
+  it('each video has a still generator beside its player generator', () => {
+    for (const video of VIDEOS) {
+      const out = GENERATORS[`poster-${video.id}`]();
+      if (video.cleared) expect(out).toContain(`/emc-site/video/${video.poster}`);
+      else expect(out).toBe('');
     }
   });
 });

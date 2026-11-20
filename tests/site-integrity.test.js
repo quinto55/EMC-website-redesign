@@ -6,7 +6,7 @@ import { renderAll, ROOT } from './helpers/pages.js';
 
 const read = (f) => readFileSync(resolve(ROOT, f), 'utf8');
 const rendered = renderAll();
-const PUBLIC_PATHS = ['/', '/platform/', '/retail-partners/', '/marketing/', '/about/', '/contact/', '/privacy/', '/terms/'];
+const PUBLIC_PATHS = ['/', '/platform/', '/fair-services/', '/retail-partners/', '/marketing/', '/about/', '/contact/', '/privacy/', '/terms/'];
 
 describe('site integrity', () => {
   it('every registry page has a source file', () => {
@@ -16,11 +16,11 @@ describe('site integrity', () => {
     }
   });
 
-  it('sitemap lists exactly the eight public pages', () => {
+  it('sitemap lists exactly the nine public pages', () => {
     const locs = [...read('public/sitemap.xml').matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
     expect(locs).toEqual(PUBLIC_PATHS.map((p) => `${SITE_URL}${p}`));
     const lastmods = [...read('public/sitemap.xml').matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((m) => m[1]);
-    expect(lastmods).toHaveLength(8);
+    expect(lastmods).toHaveLength(9);
     for (const d of lastmods) expect(d).toMatch(/^\d{4}-\d{2}-\d{2}$/); // a real date, whichever day the sitemap was last touched
   });
 

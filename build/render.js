@@ -10,7 +10,7 @@ import { renderDashboardHTML } from '../src/demo/dashboard-markup.js';
 import { createDashState, dashSnapshot } from '../src/demo/dashboard-engine.js';
 import { renderGateScanHTML } from '../src/demo/gate-scan.js';
 import { renderDayReportHTML } from '../src/demo/day-report.js';
-import { VIDEOS, renderVideoHTML, publishedMeta } from './videos.js';
+import { VIDEOS, renderVideoHTML, renderPosterHTML, publishedMeta } from './videos.js';
 import { CURTAIN_SEEN_KEY, shouldShowCurtain, curtainInputs } from '../src/curtain/should-show.js';
 
 const PARTIALS_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'partials');
@@ -32,8 +32,10 @@ export const GENERATORS = {
 };
 // One player per product video (<!--site:video-box-office--> and so on). A video that is not
 // cleared renders nothing; a cleared one whose files were never copied stops the build.
+// One still per video too (<!--site:poster-pip-->), for the tiles that link to the page where the video plays.
 for (const video of VIDEOS) {
   GENERATORS[`video-${video.id}`] = () => renderVideoHTML(video, video.cleared ? publishedMeta(video) : {});
+  GENERATORS[`poster-${video.id}`] = () => renderPosterHTML(video, video.cleared ? publishedMeta(video) : {});
 }
 
 const defaultRead = (name) => {

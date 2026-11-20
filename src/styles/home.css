@@ -177,7 +177,8 @@
 }
 .proof-line { max-width: 360px; font-size: 15px; line-height: 1.45; color: var(--mut); text-wrap: pretty; }
 .proof-line b { font-weight: 600; color: var(--ink); }
-.logos { display: flex; align-items: center; gap: 24px; }
+.logos { display: flex; align-items: center; gap: 24px; border-radius: 10px; transition: opacity .15s ease; } /* a link to the retail partners page */
+.logos:hover { opacity: .7; }
 .logos img { width: auto; height: 26px; }
 /* Narrower computers: the years block keeps its room, and the logos drop under the fairs line rather than squeeze it. */
 @media (min-width: 1001px) and (max-width: 1199px) {
@@ -244,22 +245,10 @@
   white-space: nowrap;
 }
 
-/* ---------- New for your guests ---------- */
-.guests { margin-top: 32px; }
-.guests-label { font: 500 13px/1.55 var(--font-mono); letter-spacing: 0; color: var(--mut); }
-.guest-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 20px; }
-.guest-cards a {
-  display: block;
-  height: 100%;
-  padding: 18px 22px;
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 0 0 1px var(--line);
-  transition: box-shadow .15s ease;
-}
-.guest-cards a:hover { box-shadow: 0 0 0 1px var(--ghost-shadow), 0 12px 28px rgba(120, 80, 20, .08); }
-.guest-cards b { display: block; font: 700 22px/1.2 var(--font-head); letter-spacing: -.01em; }
-.guest-cards span { font-size: 15px; color: var(--mut); }
+/* ---------- after Sell. Scan. Count.: the Fair services band, then retail stores and the fair map ----------
+   Each starts a section's distance after the one before it (the section above already ends in that much room). */
+.feature-sec { padding-bottom: 80px; }
+.reach .pair { margin-top: 34px; }
 
 /* ---------- computers: the photo fills the window ---------- */
 @media (min-width: 1001px) {
@@ -307,8 +296,9 @@
 
   .live-board > .db { margin: 24px 0 14px; }
 
-  .mods,
-  .guest-cards { grid-template-columns: minmax(0, 1fr); }
+  .mods { grid-template-columns: minmax(0, 1fr); }
+  .feature-sec { padding-bottom: 54px; }
+  .reach .pair { margin-top: 24px; }
 }
 /* Tablets: the proof strip keeps its 72px years block on the left, with the fairs line over the logos beside it, so its
    right half is not left empty. Phones (600px and under) stay stacked. */

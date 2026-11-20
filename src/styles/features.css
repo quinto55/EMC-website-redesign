@@ -1,0 +1,83 @@
+/* Shared by the home, platform and fair services pages: picture tiles that link to another page, the sunny
+   Fair services band built from two of them, and lists of short points. */
+
+/* ---------- tiles: a picture, a heading, one line and where it goes ---------- */
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.tile {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto; /* the picture, the heading, the line, then the action at the foot */
+  height: 100%;
+  padding: 14px 14px 20px;
+  border-radius: 26px;
+  background: #fff;
+  box-shadow: var(--card-shadow);
+  scroll-margin-top: 24px;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.tile:hover { transform: translateY(-4px); box-shadow: 0 0 0 1px var(--ghost-shadow), 0 20px 40px rgba(120, 80, 20, .16); }
+.tile h3 { margin: 20px 12px 0; font-size: 32px; letter-spacing: -.02em; }
+.tile p { margin: 6px 12px 0; font-size: 18px; color: var(--mut); }
+.tile-go { display: inline-flex; align-items: center; min-height: 44px; margin: 8px 12px 0; font-weight: 700; color: var(--red); }
+
+/* A video's still, with a play mark: the tile goes to the page where the video plays. */
+.shot { position: relative; display: block; }
+.shot img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 16px; border: 1px solid var(--line); background: var(--cream); }
+.shot::before,
+.shot::after { content: ""; position: absolute; right: 16px; bottom: 16px; transition: transform .18s ease; }
+.shot::before { width: 58px; height: 58px; border-radius: 50%; background: var(--red); box-shadow: 0 5px 0 var(--red-shadow); }
+.shot::after { /* the triangle, drawn with borders */
+  right: 35px;
+  bottom: 34px;
+  border: 11px solid transparent;
+  border-left: 18px solid #fff;
+  border-right: 0;
+}
+a:hover .shot::before,
+a:hover .shot::after { transform: scale(1.08); }
+
+/* The retail tile's picture: the three store logos over the number of locations. */
+.logo-wall {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 22px;
+  aspect-ratio: 16 / 9;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--cream);
+}
+.logo-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px 28px; }
+.logo-row img { width: auto; height: 28px; }
+.logo-stat { display: grid; justify-items: center; font: 500 13px var(--font-mono); color: var(--mut); }
+.logo-stat b { font: 700 72px/1 var(--font-head); letter-spacing: -.03em; color: var(--red); }
+
+/* ---------- the Fair services band ---------- */
+.svc-band { scroll-margin-top: 24px; padding: 44px 40px 40px; border-radius: 28px; background: var(--tint-amber); }
+.svc-band-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 20px 40px; margin-bottom: 30px; }
+.svc-band h2 { font-size: 56px; }
+.svc-band .lede { max-width: none; font-size: 20px; }
+
+/* ---------- points: a short heading and one sentence each ---------- */
+.points { display: grid; gap: 14px; }
+.points b { display: block; font: 700 20px/1.2 var(--font-head); letter-spacing: -.01em; color: var(--ink); }
+.points span { display: block; margin-top: 4px; font-size: 16px; line-height: 1.5; color: var(--mut); }
+
+@media (max-width: 1000px) {
+  .tile { padding: 12px 12px 14px; border-radius: 22px; }
+  .tile h3 { margin: 16px 8px 0; font-size: 26px; }
+  .tile p { margin: 4px 8px 0; font-size: 17px; }
+  .tile-go { margin: 4px 8px 0; }
+  .shot::before { right: 12px; bottom: 12px; width: 48px; height: 48px; }
+  .shot::after { right: 28px; bottom: 27px; border-width: 9px 0 9px 15px; }
+  .logo-row img { height: 22px; }
+  .logo-stat b { font-size: 56px; }
+  .svc-band { margin-right: calc(-1 * var(--gutter)); margin-left: calc(-1 * var(--gutter)); padding: 34px var(--gutter) var(--gutter); }
+  .svc-band-head { margin-bottom: 22px; }
+  .svc-band h2 { font-size: 38px; }
+  .svc-band .lede { font-size: 18px; }
+}
+/* One tile under another on phones; tablets keep two across. */
+@media (max-width: 700px) {
+  .pair { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+}

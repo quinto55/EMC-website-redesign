@@ -46,7 +46,7 @@ describe('the lists in the check script', () => {
 
   it('takes the new page paths from the registry', () => {
     expect(NEW_PAGES).toEqual(PAGES.map((p) => p.path).filter((p) => p !== '/404.html'));
-    expect(NEW_PAGES).toHaveLength(9);
+    expect(NEW_PAGES).toHaveLength(10);
   });
 
   it('lists the three QR links and the app links', () => {
@@ -308,7 +308,7 @@ describe('scripts and settings', () => {
     expect(gi).toContain('dist-host/');
     expect(gi).toContain('dist-host.zip');
   });
-  it('the host build script builds only into dist-host and checks the twelve entries', () => {
+  it('the host build script builds only into dist-host and checks the thirteen entries', () => {
     const s = read('scripts/build-host.sh');
     expect(s).toContain('--outDir dist-host');
     expect(s).toContain('--emptyOutDir');
@@ -364,7 +364,7 @@ describe('the staging robots.txt', () => {
 });
 
 // ---- the listing check ----
-const ENTRIES = ['about', 'contact', 'emc-site', 'index.html', 'iafe', 'marketing', 'platform', 'privacy', 'retail-partners', 'robots.txt', 'sitemap.xml', 'terms'];
+const ENTRIES = ['about', 'contact', 'emc-site', 'fair-services', 'index.html', 'iafe', 'marketing', 'platform', 'privacy', 'retail-partners', 'robots.txt', 'sitemap.xml', 'terms'];
 const GOOD = ['wp-admin', 'wp-content', 'wp-includes', 'wp-config.php', 'index.php', 'flstatefair', 'event-sites'].join('\n') + '\n';
 
 describe('the listing check', () => {
@@ -484,7 +484,7 @@ describe('runChecks', () => {
   it('post: new pages need 200 and the marker; redirects need 301 and the exact Location', async () => {
     const rs = await runChecks(base, { phase: 'post', pauseMs: 0 });
     const pages = rs.filter((r) => NEW_PAGES.some((p) => r.url === base + p) && r.name.includes('new page'));
-    expect(pages).toHaveLength(9);
+    expect(pages).toHaveLength(10);
     expect(pages.find((r) => r.url === base + '/platform/').ok).toBe(false);
     expect(pages.find((r) => r.url === base + '/platform/').detail).toMatch(/emc-site/);
     expect(pages.filter((r) => !r.ok)).toHaveLength(1);
@@ -524,12 +524,12 @@ describe('runChecks: files, stray index pages and http-first redirects', () => {
   };
   const failures = (rs) => rs.filter((r) => !r.ok);
 
-  it('a healthy host passes every check: 25 before go-live, 50 after', async () => {
+  it('a healthy host passes every check: 25 before go-live, 51 after', async () => {
     const pre = await run({}, 'pre');
     expect(pre.rs).toHaveLength(25);
     expect(failures(pre.rs)).toEqual([]);
     const post = await run({}, 'post');
-    expect(post.rs).toHaveLength(50);
+    expect(post.rs).toHaveLength(51);
     expect(failures(post.rs)).toEqual([]);
   });
 
@@ -611,7 +611,7 @@ describe('runChecks: files, stray index pages and http-first redirects', () => {
   it('the runbook states the real number of checks, and the script\'s last line prints it', () => {
     const guide = read('deploy/GO-LIVE.md');
     expect(guide).toContain('`25 OK, 0 FAIL`');
-    expect(guide).toContain('`50 OK, 0 FAIL`');
+    expect(guide).toContain('`51 OK, 0 FAIL`');
     expect(guide).not.toMatch(/\b45 OK\b/);
     for (const f of ['robots.txt', 'sitemap.xml', 'stylesheet', 'video', 'fair-poster.jpg']) expect(guide, f).toContain(f);
     expect(read('scripts/check-live.mjs')).toContain('${results.length} checks (${phase})');

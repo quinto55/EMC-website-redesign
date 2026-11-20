@@ -51,6 +51,9 @@
   box-shadow: 0 0 0 1px var(--line);
   font-weight: 600;
 }
+/* A demo with a page of its own: the whole card is its link. */
+.iafe-demos a { text-decoration: underline; text-decoration-color: var(--ghost-shadow); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.iafe-demos a::after { content: ""; position: absolute; inset: 0; border-radius: 16px; }
 .iafe-demos li::before { content: ""; position: absolute; left: 18px; top: 22px; width: 9px; height: 9px; border-radius: 50%; background: var(--red); }
 
 .iafe-closing {

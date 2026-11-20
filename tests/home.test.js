@@ -3,6 +3,7 @@ import { existsSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { renderAll, visibleText, ROOT } from './helpers/pages.js';
 import { pageByKey, PAGES } from '../build/pages.js';
+import { videoById } from '../build/videos.js';
 
 const { doc, html } = renderAll().find((r) => r.page.key === 'home');
 const main = doc.querySelector('main');
@@ -190,20 +191,67 @@ describe('home page', () => {
     expect(byText(rfid, '*', 'Later in 2027')).not.toBeNull();
   });
 
-  it('guest cards link to their blocks', () => {
-    const label = byText(main, 'h3', 'New for your guests');
-    expect(label).not.toBeNull();
-    const GUESTS = [
-      ['Interactive fair map', 'Your grounds on every phone.', '/platform/#guest-map'],
-      ['Pip', 'A talking AI clown for the front gate.', '/platform/#guest-pip'],
-      ['Ticket-buyer call line', 'Every call answered, in English y en español.', '/platform/#guest-call-line'],
+  it('the Fair services band follows Sell. Scan. Count. and sends Pip and the call line to their page', () => {
+    const band = doc.getElementById('fair-services');
+    expect(band).not.toBeNull();
+    const follows = (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(follows(main.querySelector('.mods'), band)).toBe(true);
+    expect(byText(band, '.kicker', 'Fair services')).not.toBeNull();
+    expect(text(band.querySelector('h2'))).toBe('Every guest, answered.');
+    expect(byText(band, 'p', "At the gate and on the phone, from your fair's own facts.")).not.toBeNull();
+    expect(byText(band, 'a[href="/fair-services/"]', 'See fair services')).not.toBeNull();
+    const TILES = [
+      ['/fair-services/#pip', 'Pip', 'A talking AI clown for the front gate.', 'Meet Pip', 'pip'],
+      ['/fair-services/#call-line', 'Ticket-buyer call line', 'Every call answered, in English y en español.', 'Hear a call', 'phone-line'],
     ];
-    for (const [name, line, href] of GUESTS) {
-      const a = main.querySelector(`a[href="${href}"]`);
+    for (const [href, name, line, go, video] of TILES) {
+      const a = band.querySelector(`a.tile[href="${href}"]`);
       expect(a, name).not.toBeNull();
-      expect(byText(a, '*', name), name).not.toBeNull();
-      expect(byText(a, '*', line), name).not.toBeNull();
+      expect(text(a.querySelector('h3')), name).toBe(name);
+      expect(byText(a, 'p', line), name).not.toBeNull();
+      expect(text(a.querySelector('.arrow')), name).toBe(go);
+      const still = a.querySelector('img');
+      if (videoById(video).cleared) {
+        expect(still.getAttribute('src'), name).toBe(`/emc-site/video/${videoById(video).poster}`);
+        expect(still.getAttribute('loading'), name).toBe('lazy'); // far down the page: never part of the first load
+      } else {
+        expect(still, name).toBeNull();
+      }
     }
+    expect(main.querySelectorAll('video')).toHaveLength(0); // the home page shows stills only
+  });
+
+  it('retail stores and the fair map follow as a pair: retail goes to the retail page, the map to its video', () => {
+    const sec = main.querySelector('section.reach');
+    expect(sec).not.toBeNull();
+    const follows = (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(follows(doc.getElementById('fair-services'), sec)).toBe(true);
+    expect(byText(sec, '.kicker', 'Retail stores and fair map')).not.toBeNull();
+    expect(text(sec.querySelector('h2'))).toBe('In stores. On the grounds.');
+    expect(byText(sec, 'p', 'Your tickets on sale in retail stores, and your grounds on every phone.')).not.toBeNull();
+    const tiles = [...sec.querySelectorAll('a.tile')];
+    expect(tiles.map((a) => a.getAttribute('href'))).toEqual(['/retail-partners/', '/platform/#guest-map']);
+
+    const [retail, map] = tiles;
+    expect(text(retail.querySelector('h3'))).toBe('Retail stores');
+    expect(byText(retail, 'p', 'EMC is the exclusive event ticket partner of Walgreens.')).not.toBeNull();
+    expect(byText(retail, '*', '8,000+ retail locations')).not.toBeNull();
+    expect([...retail.querySelectorAll('img')].map((img) => img.getAttribute('alt'))).toEqual(['Walgreens', 'Circle K', 'Menards']);
+    expect(text(retail.querySelector('.arrow'))).toBe('See how retail works');
+
+    expect(text(map.querySelector('h3'))).toBe('Interactive fair map');
+    expect(byText(map, 'p', 'Your grounds on every phone.')).not.toBeNull();
+    expect(text(map.querySelector('.arrow'))).toBe('Watch it');
+    if (videoById('fair-map').cleared) expect(map.querySelector('img').getAttribute('src')).toBe(`/emc-site/video/${videoById('fair-map').poster}`);
+    else expect(map.querySelector('img')).toBeNull();
+    for (const img of sec.querySelectorAll('img')) expect(img.getAttribute('loading')).toBe('lazy');
+  });
+
+  it("the proof strip's store logos are one link to the retail partners page", () => {
+    const logos = main.querySelector('.proof .logos');
+    expect(logos.tagName).toBe('A');
+    expect(logos.getAttribute('href')).toBe('/retail-partners/');
+    expect(text(logos)).toBe('Tickets on sale at'); // with the three logos' names, that is the link's name
   });
 
   it('carries Organization JSON-LD with the toll-free number and address, and no email', () => {
@@ -230,6 +278,6 @@ describe('home page', () => {
 
   it('draws its arrows instead of typing them (the self-hosted fonts have no arrow glyph)', () => {
     expect(visibleText(doc)).not.toMatch(/[←-⇿⟰-⟿⤀-⥿]/);
-    expect(main.querySelectorAll('.arrow').length).toBe(7); // the six card rows and the live dashboard's link
+    expect(main.querySelectorAll('.arrow').length).toBe(12); // the six card rows, the live dashboard's link, and five in the two feature sections
   });
 });

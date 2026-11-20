@@ -100,3 +100,15 @@ export function renderVideoHTML(video, meta) {
     '</figure>',
   ].join('\n');
 }
+
+/**
+ * The video's still, as a picture for a tile that links to the page where the video plays. It loads only when the
+ * visitor scrolls near it. '' when the video is not cleared (its still is not in the repo either).
+ */
+export function renderPosterHTML(video, meta) {
+  if (!video?.cleared) return '';
+  const { width, height } = meta ?? {};
+  if (!(width > 0 && height > 0)) throw new Error(`Video "${video.id}" has no size in videos.json: run npm run videos`);
+  // The still has the video's shape; the picture is drawn at most 640px wide, so half the video's size is declared.
+  return `<span class="shot"><img src="${VIDEO_URL}/${esc(video.poster)}" width="${Math.round(width / 2)}" height="${Math.round(height / 2)}" alt="" loading="lazy" decoding="async"></span>`;
+}

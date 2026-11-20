@@ -106,7 +106,7 @@ describe('with JavaScript off', () => {
 
   it('the header and footer links are plain links in the HTML', () => {
     for (const { page, doc } of rendered) {
-      expect(doc.querySelectorAll('header.top nav[aria-label="Primary"] a[href]').length, page.file).toBe(4);
+      expect(doc.querySelectorAll('header.top nav[aria-label="Primary"] a[href]').length, page.file).toBe(5);
       expect(doc.querySelectorAll('footer a[href]').length, page.file).toBeGreaterThanOrEqual(10);
     }
   });

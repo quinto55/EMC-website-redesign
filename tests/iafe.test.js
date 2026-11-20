@@ -98,6 +98,15 @@ describe('the page body', () => {
     expect(items).toEqual(['RFID wristbands', 'Box office POS', 'Interactive fair map', 'Our ticket-buyer call line', 'Pip, our talking AI clown for the front gate']);
   });
 
+  it('the three demos with a video link to it: the map on the platform page, the call line and Pip on fair services', () => {
+    const links = [...document.querySelectorAll('[data-booth-demos] li a')].map((a) => [norm(a), a.getAttribute('href')]);
+    expect(links).toEqual([
+      ['Interactive fair map', '/platform/#guest-map'],
+      ['Our ticket-buyer call line', '/fair-services/#call-line'],
+      ['Pip, our talking AI clown for the front gate', '/fair-services/#pip'],
+    ]);
+  });
+
   it('the booth heading follows the show', () => {
     const heading = () => norm(document.querySelector('[data-booth-heading]'));
     expect(heading()).toBe('See it live at Booth #410');

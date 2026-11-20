@@ -12,7 +12,7 @@ const text = (el) => el.textContent.replace(/\s+/g, ' ').trim();
 const byText = (root, selector, wanted) => [...root.querySelectorAll(selector)].find((el) => text(el) === wanted) ?? null;
 const block = (id) => doc.getElementById(id);
 
-const BLOCK_IDS = ['online-sales', 'box-office', 'retail', 'gate-scanning', 'rfid', 'live-dashboard', 'daily-reports', 'guests', 'guest-map', 'guest-pip', 'guest-call-line'];
+const BLOCK_IDS = ['online-sales', 'box-office', 'gate-scanning', 'rfid', 'live-dashboard', 'daily-reports', 'retail', 'guest-map', 'fair-services'];
 
 /** [block id, heading selector, heading, [sentence, ...]] in page order. */
 const COPY = [
@@ -21,7 +21,6 @@ const COPY = [
     'Ring up a sale at the window. The register runs in a web browser on an iPad, so there is nothing to install. Tickets and the receipt print automatically.',
     'Opens the real register with sample data, so you can try it yourself.',
   ]],
-  ['retail', 'h2', 'Retail stores', ['EMC is the exclusive event ticket partner of Walgreens.', '8,000+ retail locations', 'Same benefits at Circle K and Menards.']],
   ['gate-scanning', 'h2', 'Gate scanning', ['Any gate, duplicates blocked. Barcode or QR.', 'A ticket gets in once. Scan it again and the gate sees it has already been used.']],
   ['rfid', 'h2', 'RFID wristbands', ['RFID wristbands later in 2027.']],
   ['live-dashboard', 'h2', 'Live dashboard', [
@@ -29,22 +28,16 @@ const COPY = [
     'Or watch the real board, recorded:',
   ]],
   ['daily-reports', 'h2', 'Daily reports', ["Sales by ticket type and by channel, scans by gate, and the day's totals."]],
-  ['guests', 'h2', 'New for your guests', []],
-  ['guest-map', 'h3', 'Interactive fair map', ['Your grounds on every phone.', "Search, walking directions, tonight's shows and find your car."]],
-  ['guest-pip', 'h3', 'Pip', [
-    'A talking AI clown for the front gate.',
-    "Fully customizable: Pip is one face. Yours can be a real person (with their permission), a made-up person or a character: anything that isn't trademarked.",
-  ]],
-  ['guest-call-line', 'h3', 'Ticket-buyer call line', [
-    'Every call answered, in English y en español.',
-    "An AI phone line that answers from your fair's own facts, at any hour.",
-  ]],
+  ['retail', 'h2', 'Retail stores', ['EMC is the exclusive event ticket partner of Walgreens.', '8,000+ retail locations', 'Same benefits at Circle K and Menards.']],
+  ['guest-map', 'h2', 'Interactive fair map', ['Your grounds on every phone, with nothing to download.', "Search, walking directions, tonight's shows and find your car."]],
+  ['fair-services', 'h2', 'Every guest, answered.', ["At the gate and on the phone, from your fair's own facts."]],
 ];
 
 describe('platform page', () => {
   it('loads its own styles and script', () => {
     const page = pageByKey('platform');
     expect(page.styles).toContain('/src/styles/platform.css');
+    expect(page.styles).toContain('/src/styles/features.css'); // the Fair services band and its tiles
     expect(page.entry).toBe('/src/entry/platform.js');
   });
 
@@ -64,7 +57,7 @@ describe('platform page', () => {
     expect(byText(intro, 'p', 'One system from first ticket to final report. Pick any tool and see it work. No sign-up.')).not.toBeNull();
 
     const jumps = [...intro.querySelectorAll('nav a[href^="#"]')].map((a) => a.getAttribute('href').slice(1));
-    expect(jumps).toEqual(['online-sales', 'box-office', 'retail', 'gate-scanning', 'rfid', 'live-dashboard', 'daily-reports', 'guests']);
+    expect(jumps).toEqual(BLOCK_IDS);
     expect(intro.querySelector('nav').getAttribute('aria-label')).toBeTruthy();
   });
 
@@ -77,11 +70,13 @@ describe('platform page', () => {
     });
     const order = [...main.querySelectorAll('section[id]')].map((s) => s.id).filter((id) => BLOCK_IDS.includes(id));
     expect(order).toEqual(BLOCK_IDS);
-    for (const id of ['guest-map', 'guest-pip', 'guest-call-line']) expect(block('guests').contains(block(id)), id).toBe(true);
+    // Links made before the fair services page existed still land on something: #guests holds retail, the map and
+    // the Fair services band, and the band's two tiles keep the ids of the cards they replaced.
+    for (const id of ['retail', 'guest-map', 'fair-services', 'guest-pip', 'guest-call-line']) expect(block('guests').contains(block(id)), id).toBe(true);
   });
 
-  it('the blocks sit under the numbered group labels 01 Sell, 02 Scan, 03 Count', () => {
-    const GROUPS = [['01', 'Sell', ''], ['02', 'Scan', 'teal'], ['03', 'Count', 'amber']];
+  it('the blocks sit under the group labels 01 Sell, 02 Scan, 03 Count, then "In stores and on the grounds"', () => {
+    const GROUPS = [['01', 'Sell', ''], ['02', 'Scan', 'teal'], ['03', 'Count', 'amber'], ['+', 'In stores and on the grounds', 'plus']];
     const labels = [...main.querySelectorAll('.group-label')];
     expect(labels.map((l) => text(l))).toEqual(GROUPS.map(([n, name]) => `${n} ${name}`));
     labels.forEach((label, i) => {
@@ -89,35 +84,67 @@ describe('platform page', () => {
       expect(text(square)).toBe(GROUPS[i][0]);
       if (GROUPS[i][2]) expect(square.classList.contains(GROUPS[i][2])).toBe(true);
     });
+    expect(labels[3].querySelector('.num-square').getAttribute('aria-hidden')).toBe('true'); // the plus sign is decoration
     const groupOf = (id) => block(id).closest('.group');
     expect(groupOf('online-sales')).toBe(labels[0].closest('.group'));
     expect(groupOf('box-office')).toBe(labels[0].closest('.group'));
-    expect(groupOf('retail')).toBe(labels[0].closest('.group'));
     expect(groupOf('gate-scanning')).toBe(labels[1].closest('.group'));
     expect(groupOf('rfid')).toBe(labels[1].closest('.group'));
     expect(groupOf('live-dashboard')).toBe(labels[2].closest('.group'));
     expect(groupOf('daily-reports')).toBe(labels[2].closest('.group'));
+    expect(groupOf('retail')).toBe(labels[3].closest('.group'));
+    expect(groupOf('guest-map')).toBe(labels[3].closest('.group'));
+    expect(groupOf('fair-services')).toBeNull(); // the band stands on its own after the groups
   });
 
-  it('every guest card reads the same way: heading, line, video, one more sentence, booth note', () => {
-    const CARDS = [
-      ['guest-map', 'fair-map', 'Your grounds on every phone.', ["Search, walking directions, tonight's shows and find your car."]],
-      ['guest-pip', 'pip', 'A talking AI clown for the front gate.',
-        ["Fully customizable: Pip is one face. Yours can be a real person (with their permission), a made-up person or a character: anything that isn't trademarked."]],
-      ['guest-call-line', 'phone-line', 'Every call answered, in English y en español.',
-        ["An AI phone line that answers from your fair's own facts, at any hour."]],
-    ];
-    const kind = (el) => {
-      if (el.matches('h3')) return 'heading';
-      if (el.matches('[data-video]')) return `video ${el.getAttribute('data-video')}`;
-      if (el.matches('[data-booth-note]')) return 'booth note';
-      if (el.matches('p')) return text(el);
-      return el.tagName;
+  it('the fair map block reads: its words, the video, three points, then the booth note and the link to the ask', () => {
+    const el = block('guest-map');
+    const kind = (child) => {
+      if (child.matches('.block-text')) return 'words';
+      if (child.matches('.block-media')) return child.querySelector('[data-video="fair-map"]') ? 'video fair-map' : 'no video';
+      if (child.matches('ul.points')) return 'points';
+      if (child.matches('.block-act')) return 'act';
+      return child.tagName;
     };
-    for (const [id, video, line, more] of CARDS) {
-      const expected = ['heading', line, ...(videoById(video).cleared ? [`video ${video}`] : []), ...more, 'booth note'];
-      expect([...block(id).children].map(kind), id).toEqual(expected);
+    expect([...el.children].map(kind)).toEqual(['words', videoById('fair-map').cleared ? 'video fair-map' : 'no video', 'points', 'act']);
+    const points = [...el.querySelectorAll('ul.points li')].map((li) => [text(li.querySelector('b')), text(li.querySelector('span'))]);
+    expect(points).toEqual([
+      ['Search for the food', "People type funnel cake, not a vendor's name. The map finds it and walks them there."],
+      ['Find the car at closing', 'They save the spot when they park. The map walks them back.'],
+      ['A report for you', "Map opens, top searches and sponsor views, ready for next year's sponsors."],
+    ]);
+    const act = el.querySelector('.block-act');
+    expect(act.querySelectorAll('[data-booth-note]')).toHaveLength(1);
+    expect(byText(act, 'a[href="#talk"]', "Let's talk about your fair")).not.toBeNull();
+  });
+
+  it('the Fair services band sends Pip and the call line to their own page', () => {
+    const band = block('fair-services');
+    expect(byText(band, '.kicker', 'Fair services')).not.toBeNull();
+    expect(byText(band, 'a[href="/fair-services/"]', 'See fair services')).not.toBeNull();
+    const TILES = [
+      ['guest-pip', '/fair-services/#pip', 'Pip', 'A talking AI clown for the front gate.', 'Meet Pip', 'pip'],
+      ['guest-call-line', '/fair-services/#call-line', 'Ticket-buyer call line', 'Every call answered, in English y en español.', 'Hear a call', 'phone-line'],
+    ];
+    for (const [id, href, name, line, go, video] of TILES) {
+      const a = block(id);
+      expect(a.tagName, id).toBe('A');
+      expect(a.getAttribute('href'), id).toBe(href);
+      expect(text(a.querySelector('h3')), id).toBe(name);
+      expect(byText(a, 'p', line), id).not.toBeNull();
+      expect(text(a.querySelector('.arrow')), id).toBe(go);
+      // The tile shows the video's still, never a player: the video plays on the fair services page.
+      expect(a.querySelectorAll('video, [data-video]'), id).toHaveLength(0);
+      const still = a.querySelector('img');
+      if (videoById(video).cleared) {
+        expect(still.getAttribute('src'), id).toBe(`/emc-site/video/${videoById(video).poster}`);
+        expect(still.getAttribute('alt'), id).toBe('');
+        expect(still.getAttribute('loading'), id).toBe('lazy');
+      } else {
+        expect(still, id).toBeNull();
+      }
     }
+    expect(band.querySelectorAll('a.tile')).toHaveLength(2);
   });
 
   it('the copy is the approved copy, exactly', () => {
@@ -131,10 +158,11 @@ describe('platform page', () => {
 
   it('each block holds its video exactly when the manifest clears it (build/videos.js)', () => {
     const VIDEO_OF = {
-      'online-sales': 'online-ordering', 'box-office': 'box-office', 'live-dashboard': 'live-board',
-      'guest-map': 'fair-map', 'guest-call-line': 'phone-line', 'guest-pip': 'pip',
+      'online-sales': 'online-ordering', 'box-office': 'box-office', 'live-dashboard': 'live-board', 'guest-map': 'fair-map',
     };
-    expect(Object.values(VIDEO_OF).sort()).toEqual(VIDEOS.map((v) => v.id).sort()); // every video in the manifest has its block
+    // Pip's and the call line's videos play on the fair services page (tests/services.test.js); every other video in
+    // the manifest has its block here.
+    expect(Object.values(VIDEO_OF).sort()).toEqual(VIDEOS.map((v) => v.id).filter((id) => !['pip', 'phone-line'].includes(id)).sort());
     for (const [id, video] of Object.entries(VIDEO_OF)) {
       const figures = block(id).querySelectorAll('[data-video]');
       if (!videoById(video).cleared) {
@@ -145,7 +173,7 @@ describe('platform page', () => {
       expect(figures[0].getAttribute('data-video'), id).toBe(video);
       expect(figures[0].querySelector('video[controls]'), id).not.toBeNull();
     }
-    const cleared = VIDEOS.filter((v) => v.cleared).length;
+    const cleared = Object.values(VIDEO_OF).filter((id) => videoById(id).cleared).length;
     expect(main.querySelectorAll('[data-video]')).toHaveLength(cleared);
     expect(doc.querySelectorAll('video')).toHaveLength(cleared);
     expect(main.querySelectorAll('video[autoplay], video[muted]')).toHaveLength(0);
@@ -223,8 +251,15 @@ describe('platform page', () => {
     expect(a.querySelector('[aria-hidden="true"]')?.textContent.trim() ?? '').toBe(''); // any icon is silent
   });
 
-  it('retail links to the retail partners page', () => {
-    expect(byText(block('retail'), 'a[href="/retail-partners/"]', 'See how retail works')).not.toBeNull();
+  it('the whole retail card goes to the retail partners page, through its one link', () => {
+    const links = [...block('retail').querySelectorAll('a')];
+    expect(links).toHaveLength(1);
+    expect(links[0].getAttribute('href')).toBe('/retail-partners/');
+    expect(text(links[0])).toBe('See how retail works');
+    expect(links[0].classList.contains('card-link')).toBe(true); // platform.css stretches this link over the card
+    const css = readFileSync(resolve(ROOT, 'src/styles/platform.css'), 'utf8').replace(/\s+/g, ' ');
+    expect(css).toMatch(/\.retail \{ position: relative;/);
+    expect(css).toMatch(/\.card-link::after \{ content: ""; position: absolute; inset: 0;/);
   });
 
   it('RFID wristbands has no link and says "Later in 2027"', () => {
@@ -233,14 +268,14 @@ describe('platform page', () => {
     expect(byText(el, '.tag', 'Later in 2027')).not.toBeNull();
   });
 
-  it('the four booth notes are hidden in the HTML and read "See it at Booth #410"', () => {
+  it('the two booth notes are hidden in the HTML and read "See it at Booth #410"', () => {
     const notes = [...main.querySelectorAll('[data-booth-note]')];
-    expect(notes).toHaveLength(4);
+    expect(notes).toHaveLength(2);
     for (const note of notes) {
       expect(note.hasAttribute('hidden')).toBe(true);
       expect(text(note)).toBe('See it at Booth #410');
     }
-    for (const id of ['rfid', 'guest-map', 'guest-pip', 'guest-call-line']) {
+    for (const id of ['rfid', 'guest-map']) {
       expect(block(id).querySelectorAll('[data-booth-note]').length, id).toBe(1);
     }
   });

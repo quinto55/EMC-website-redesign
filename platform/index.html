@@ -16,12 +16,13 @@
         <ul>
           <li><a class="sell" href="#online-sales">Online sales</a></li>
           <li><a class="sell" href="#box-office">Box office POS</a></li>
-          <li><a class="sell" href="#retail">Retail stores</a></li>
           <li><a class="scan" href="#gate-scanning">Gate scanning</a></li>
           <li><a class="scan" href="#rfid">RFID wristbands</a></li>
           <li><a class="count" href="#live-dashboard">Live dashboard</a></li>
           <li><a class="count" href="#daily-reports">Daily reports</a></li>
-          <li><a class="guest" href="#guests">New for your guests</a></li>
+          <li><a class="guest" href="#retail">Retail stores</a></li>
+          <li><a class="guest" href="#guest-map">Interactive fair map</a></li>
+          <li><a class="guest" href="#fair-services">Fair services</a></li>
         </ul>
       </nav>
     </div>
@@ -54,18 +55,6 @@
           <a class="btn tour-link" href="{{POS_TOUR_URL}}" target="_blank" rel="noopener" aria-describedby="tour-note">Take the full box office tour<span class="visually-hidden"> (opens in a new tab)</span><svg class="tour-icon" aria-hidden="true" focusable="false" viewBox="0 0 16 16" width="15" height="15"><path d="M9.5 2.5h4v4M13.5 2.5 7.5 8.5M11.5 9.5v3a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
           <p class="tour-note" id="tour-note">Opens the real register with sample data, so you can try it yourself.</p>
           <a class="talk-link" href="#talk"><span class="arrow">Let's talk about your fair</span></a>
-        </div>
-      </section>
-
-      <section class="block card strip retail" id="retail">
-        <div class="strip-lead">
-          <h2>Retail stores</h2>
-          <p>EMC is the exclusive event ticket partner of Walgreens.</p>
-        </div>
-        <p class="stat"><b>8,000+</b> retail locations</p>
-        <div class="strip-more">
-          <p>Same benefits at Circle K and Menards.</p>
-          <a class="talk-link" href="/retail-partners/"><span class="arrow">See how retail works</span></a>
         </div>
       </section>
     </div>
@@ -130,34 +119,45 @@
       </section>
     </div>
 
-    <section class="guests" id="guests">
-      <h2>New for your guests</h2>
-      <div class="guest-grid">
-        <section class="guest card" id="guest-map">
-          <h3>Interactive fair map</h3>
-          <p>Your grounds on every phone.</p>
+    <div id="guests">
+      <div class="group">
+        <p class="group-label"><span class="num-square plus" aria-hidden="true">+</span> In stores and on the grounds</p>
+
+        <section class="block card strip retail" id="retail">
+          <div class="strip-lead">
+            <h2>Retail stores</h2>
+            <p>EMC is the exclusive event ticket partner of Walgreens.</p>
+          </div>
+          <p class="stat"><b>8,000+</b> retail locations</p>
+          <div class="strip-more">
+            <p>Same benefits at Circle K and Menards.</p>
+            <a class="talk-link card-link" href="/retail-partners/"><span class="arrow">See how retail works</span></a>
+          </div>
+        </section>
+
+        <section class="block card watch watch-points" id="guest-map">
+          <div class="block-text">
+            <h2>Interactive fair map</h2>
+            <p class="say">Your grounds on every phone, with nothing to download.</p>
+            <p>Search, walking directions, tonight's shows and find your car.</p>
+          </div>
+          <div class="block-media">
 <!--site:video-fair-map-->
-          <p class="guest-more">Search, walking directions, tonight's shows and find your car.</p>
-          <p class="booth-note" data-booth-note hidden>See it at Booth #410</p>
-        </section>
-
-        <section class="guest card" id="guest-pip">
-          <h3>Pip</h3>
-          <p>A talking AI clown for the front gate.</p>
-<!--site:video-pip-->
-          <p class="guest-more">Fully customizable: Pip is one face. Yours can be a real person (with their permission), a made-up person or a character: anything that isn't trademarked.</p>
-          <p class="booth-note" data-booth-note hidden>See it at Booth #410</p>
-        </section>
-
-        <section class="guest card" id="guest-call-line">
-          <h3>Ticket-buyer call line</h3>
-          <p>Every call answered, in English y en español.</p>
-<!--site:video-phone-line-->
-          <p class="guest-more">An AI phone line that answers from your fair's own facts, at any hour.</p>
-          <p class="booth-note" data-booth-note hidden>See it at Booth #410</p>
+          </div>
+          <ul class="points block-points">
+            <li><b>Search for the food</b> <span>People type funnel cake, not a vendor's name. The map finds it and walks them there.</span></li>
+            <li><b>Find the car at closing</b> <span>They save the spot when they park. The map walks them back.</span></li>
+            <li><b>A report for you</b> <span>Map opens, top searches and sponsor views, ready for next year's sponsors.</span></li>
+          </ul>
+          <div class="block-act">
+            <p class="booth-note" data-booth-note hidden>See it at Booth #410</p>
+            <a class="talk-link" href="#talk"><span class="arrow">Let's talk about your fair</span></a>
+          </div>
         </section>
       </div>
-    </section>
+
+<!--site:services-band-->
+    </div>
   </div>
 </main>
 <!--site:ask-->
