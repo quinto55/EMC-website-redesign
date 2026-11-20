@@ -30,12 +30,15 @@ const COPY = [
   ]],
   ['daily-reports', 'h2', 'Daily reports', ["Sales by ticket type and by channel, scans by gate, and the day's totals."]],
   ['guests', 'h2', 'New for your guests', []],
-  ['guest-map', 'h3', 'Interactive fair map', ['Your grounds on every phone.']],
+  ['guest-map', 'h3', 'Interactive fair map', ['Your grounds on every phone.', "Search, walking directions, tonight's shows and find your car."]],
   ['guest-pip', 'h3', 'Pip', [
     'A talking AI clown for the front gate.',
     "Fully customizable: Pip is one face. Yours can be a real person (with their permission), a made-up person or a character: anything that isn't trademarked.",
   ]],
-  ['guest-call-line', 'h3', 'Ticket-buyer call line', ['Ticket answers by phone.']],
+  ['guest-call-line', 'h3', 'Ticket-buyer call line', [
+    'Every call answered, in English y en español.',
+    "An AI phone line that answers from your fair's own facts, at any hour.",
+  ]],
 ];
 
 describe('platform page', () => {
@@ -96,12 +99,13 @@ describe('platform page', () => {
     expect(groupOf('daily-reports')).toBe(labels[2].closest('.group'));
   });
 
-  it('every guest card reads the same way: heading, line, video, (Pip only) one more sentence, booth note', () => {
+  it('every guest card reads the same way: heading, line, video, one more sentence, booth note', () => {
     const CARDS = [
-      ['guest-map', 'fair-map', 'Your grounds on every phone.', []],
+      ['guest-map', 'fair-map', 'Your grounds on every phone.', ["Search, walking directions, tonight's shows and find your car."]],
       ['guest-pip', 'pip', 'A talking AI clown for the front gate.',
         ["Fully customizable: Pip is one face. Yours can be a real person (with their permission), a made-up person or a character: anything that isn't trademarked."]],
-      ['guest-call-line', 'phone-line', 'Ticket answers by phone.', []],
+      ['guest-call-line', 'phone-line', 'Every call answered, in English y en español.',
+        ["An AI phone line that answers from your fair's own facts, at any hour."]],
     ];
     const kind = (el) => {
       if (el.matches('h3')) return 'heading';

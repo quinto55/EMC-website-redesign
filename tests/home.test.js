@@ -196,7 +196,7 @@ describe('home page', () => {
     const GUESTS = [
       ['Interactive fair map', 'Your grounds on every phone.', '/platform/#guest-map'],
       ['Pip', 'A talking AI clown for the front gate.', '/platform/#guest-pip'],
-      ['Ticket-buyer call line', 'Ticket answers by phone.', '/platform/#guest-call-line'],
+      ['Ticket-buyer call line', 'Every call answered, in English y en español.', '/platform/#guest-call-line'],
     ];
     for (const [name, line, href] of GUESTS) {
       const a = main.querySelector(`a[href="${href}"]`);
