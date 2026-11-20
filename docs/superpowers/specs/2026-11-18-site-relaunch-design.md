@@ -741,7 +741,7 @@ more attention on the fair map, a lot more on Pip and the call line, the
 that shows the site is more than one long page. Where the sections above
 disagree with this one, this one is current.
 
-- **A sixth menu page: Fair services, at `/fair-services/`** (changes 5.1,
+- **A fifth menu page: Fair services, at `/fair-services/`** (changes 5.1,
   5.11). It holds Pip and the ticket-buyer call line, each with its video
   across the page and its points under it, in the videos' own words. It is
   public, in the sitemap (now nine pages) and in the top menu, phone menu and
