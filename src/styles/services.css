@@ -28,9 +28,11 @@
 /* The map lives on the platform page; one card points to it. */
 .also { margin: 56px 0 84px; }
 .also-label { font: 500 13px/1.55 var(--font-mono); letter-spacing: 0; color: var(--mut); }
+/* Named places, so the words and the link stay put if the map's video (and with it this still) is ever taken down. */
 .also-card {
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "pic text go";
   align-items: center;
   gap: 28px;
   margin-top: 14px;
@@ -38,11 +40,13 @@
   transition: transform .18s ease, box-shadow .18s ease;
 }
 .also-card:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px var(--ghost-shadow), 0 20px 40px rgba(120, 80, 20, .16); }
+.also-card .shot { grid-area: pic; width: 240px; }
+.also-text { grid-area: text; }
+.also-card .tile-go { grid-area: go; align-self: center; margin: 0; padding-top: 0; }
 .also-card .shot::before { right: 10px; bottom: 10px; width: 40px; height: 40px; box-shadow: 0 4px 0 var(--red-shadow); }
 .also-card .shot::after { right: 23px; bottom: 22px; border-width: 8px 0 8px 13px; }
 .also-text b { display: block; font: 700 30px/1.15 var(--font-head); letter-spacing: -.02em; }
 .also-text span { display: block; margin-top: 4px; font-size: 18px; color: var(--mut); }
-.also-card .tile-go { margin: 0; }
 
 @media (max-width: 1100px) {
   .svc .points,
@@ -56,8 +60,9 @@
   .svc .video { margin-top: 22px; }
   .svc .points { margin-top: 20px; }
   .also { margin: 40px 0 40px; }
-  .also-card { grid-template-columns: 132px minmax(0, 1fr); gap: 6px 16px; padding: 12px 16px 12px 12px; }
-  .also-card .shot { grid-row: span 2; align-self: center; }
+  .also-card { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "pic text" "pic go"; gap: 6px 16px; padding: 12px 16px 12px 12px; }
+  .also-card .shot { width: 132px; align-self: center; }
+  .also-card .tile-go { align-self: start; }
   .also-card .shot::before,
   .also-card .shot::after { display: none; }
   .also-text b { font-size: 22px; }

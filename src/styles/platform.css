@@ -129,9 +129,10 @@
 /* The fair map: a few points under its words, beside the video (phones: after the video). */
 .watch-points { grid-template-rows: auto auto 1fr; grid-template-areas: "text media" "points media" "act media"; }
 .watch-points .block-media { align-self: center; }
-.block-points { grid-area: points; margin-top: 20px; gap: 0; }
-.block-points li { padding: 12px 0; border-top: 1px dashed var(--line); }
-.block-points b { font-size: 18px; }
+/* .block in front: these must win over .points in features.css, which loads after this sheet. */
+.block .block-points { grid-area: points; margin-top: 20px; gap: 0; }
+.block .block-points li { padding: 12px 0; border-top: 1px dashed var(--line); }
+.block .block-points b { font-size: 18px; }
 .block .block-act .booth-note { margin: 0 0 6px; }
 
 /* Daily reports: the heading and its sentence across the card, then the sample report under them. */
@@ -167,7 +168,7 @@
 
 /* ---------- after the three groups: retail and the map, then the Fair services band ---------- */
 #guests { scroll-margin-top: 24px; }
-#guests > .svc-band { margin: 72px 0 84px; }
+#guests > .svc-band { margin-top: 72px; margin-bottom: 84px; } /* not the shorthand: on phones the band keeps its edge-to-edge side margins */
 
 /* ---------- phones and tablets ---------- */
 @media (max-width: 1000px) {

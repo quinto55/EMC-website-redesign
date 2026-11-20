@@ -1,4 +1,5 @@
-// The product walkthrough videos on the platform page. They are made in the Demo Video terminal,
+// The product walkthrough videos: four play on the platform page and two (Pip, the call line) on the fair services
+// page; the home and platform pages also show stills that link to them. They are made in the Demo Video terminal,
 // never in this repo; `npm run videos` copies the finished files listed here into
 // public/emc-site/video. The repo is public: only videos marked `cleared` are ever copied.
 import { existsSync, readFileSync } from 'node:fs';

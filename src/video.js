@@ -1,4 +1,4 @@
-// The platform page's videos are native players that work with JavaScript off. This only adds
+// The videos (platform and fair services pages) are native players that work with JavaScript off. This only adds
 // two things: starting one video pauses the others, and each video's first play is reported once.
 import { trackEvent } from './analytics.js';
 

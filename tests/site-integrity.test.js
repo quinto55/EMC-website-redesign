@@ -24,6 +24,26 @@ describe('site integrity', () => {
     for (const d of lastmods) expect(d).toMatch(/^\d{4}-\d{2}-\d{2}$/); // a real date, whichever day the sitemap was last touched
   });
 
+  it('no page uses an id twice (partials shared by two pages bring their ids with them)', () => {
+    for (const { page, doc } of rendered) {
+      const ids = [...doc.querySelectorAll('[id]')].map((el) => el.id);
+      const twice = ids.filter((id, i) => ids.indexOf(id) !== i);
+      expect(twice, page.file).toEqual([]);
+    }
+  });
+
+  it('every link to a place on another page of the site points at an id that page has', () => {
+    const byPath = new Map(rendered.map((r) => [r.page.path, r.doc]));
+    for (const { page, doc } of rendered) {
+      for (const a of doc.querySelectorAll('a[href^="/"][href*="#"]')) {
+        const [path, id] = a.getAttribute('href').split('#');
+        const target = byPath.get(path);
+        expect(target, `${page.file}: ${path} is not a page`).toBeTruthy();
+        expect(target.getElementById(id), `${page.file}: ${path}#${id}`).not.toBeNull();
+      }
+    }
+  });
+
   it('iafe and the not-found page are noindexed and out of the sitemap', () => {
     const sitemap = read('public/sitemap.xml');
     for (const key of ['iafe', 'notFound']) {

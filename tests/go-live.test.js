@@ -308,12 +308,47 @@ describe('scripts and settings', () => {
     expect(gi).toContain('dist-host/');
     expect(gi).toContain('dist-host.zip');
   });
-  it('the host build script builds only into dist-host and checks the thirteen entries', () => {
+  it('the host build script builds only into dist-host', () => {
     const s = read('scripts/build-host.sh');
     expect(s).toContain('--outDir dist-host');
     expect(s).toContain('--emptyOutDir');
     expect(s).not.toMatch(/outDir dist\b(?!-)/);
     expect(s).toContain('set -euo pipefail');
+  });
+});
+
+// A page added to or taken out of build/pages.js changes what is uploaded, what the runbook's rewrite rule protects
+// and what its undo deletes. Each of those lists is written by hand, so each is held to the registry here.
+describe('the page folders, wherever they are written by hand', () => {
+  const FOLDERS = PAGES.filter((p) => p.file.includes('/')).map((p) => p.file.split('/')[0]); // in menu order
+  const TOP_LEVEL = [...FOLDERS, 'emc-site', 'index.html', 'robots.txt', 'sitemap.xml'].sort();
+  const guide = read('deploy/GO-LIVE.md');
+  const NUMBER_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen'];
+
+  it('the registry gives nine page folders, fair-services among them', () => {
+    expect(FOLDERS).toEqual(['platform', 'fair-services', 'retail-partners', 'marketing', 'about', 'contact', 'iafe', 'privacy', 'terms']);
+  });
+
+  it('the host build script expects exactly the registry\'s folders and the four web-root entries', () => {
+    const expected = read('scripts/build-host.sh').match(/^EXPECTED="([^"]+)"$/m)[1].split(' ');
+    expect([...expected].sort()).toEqual(TOP_LEVEL);
+    expect(read('scripts/build-host.sh')).toContain(`not exactly the ${NUMBER_WORDS[TOP_LEVEL.length]} expected`);
+  });
+
+  it('the runbook names the same folders everywhere: the intro, the rewrite rule, the upload list and the undo list', () => {
+    const ticks = FOLDERS.map((f) => `\`${f}/\``).join(', ');
+    const n = NUMBER_WORDS[FOLDERS.length];
+    expect(guide).toContain(`The new pages live in ${n} folders: ${ticks}.`);
+    expect(guide).toContain(`The ${n} page folders: ${ticks}.`);
+    expect(guide).toContain(`RewriteRule ^(${FOLDERS.join('|')})/$ - [L]`);
+    const undo = `\`index.html\`, \`robots.txt\`, \`sitemap.xml\`, and the ${n} folders ${FOLDERS.map((f) => `\`${f}\``).join(', ')}.`;
+    expect(guide).toContain(`Delete these ${NUMBER_WORDS[FOLDERS.length + 3]} things from the web root, by name:** ${undo}`);
+    expect(guide).toContain(`Everything uploaded is listed in the ${NUMBER_WORDS[TOP_LEVEL.length]} names in section 4.`);
+    expect(guide).toContain(`a top-level line naming exactly ${NUMBER_WORDS[TOP_LEVEL.length]} entries.`);
+  });
+
+  it('the listing check below is tried with the same names', () => {
+    expect([...ENTRIES].sort()).toEqual(TOP_LEVEL);
   });
 });
 
