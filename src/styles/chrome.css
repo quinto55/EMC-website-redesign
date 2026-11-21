@@ -8,17 +8,12 @@
 .top .logo { height: 60px; width: auto; transform-origin: left center; transition: transform .2s ease; }
 .logo-pinned { display: none; } /* the home page's second logo, for the floating card (below) */
 
-/* The header stays at the top of the window. Once the script has run, src/pin.js puts `pinned` on <html> and the
-   header's height in --top-h: the header leaves the page's flow and the page keeps the room it had (every page's
-   <main> starts that far down; the home page's stage keeps its first row, in home.css), so nothing moves when it
-   pins. With JavaScript off the header simply scrolls away with the page. Only the bar and the open phone menu take
-   clicks: the strip beside and around them lets clicks through to the page. */
-html.pinned .top { position: absolute; top: 0; left: 0; right: 0; pointer-events: none; }
-html.pinned .top-bar,
-html.pinned .menu-panel { pointer-events: auto; }
-html.pinned body > .top + main { margin-top: var(--top-h); }
+/* The header's bar stays at the top of the window. Once the script has run, src/pin.js puts `pinned` on <html> and
+   the bar's height in --top-h. The header itself never leaves the page: it keeps that height and its place, as the
+   room the bar had, and only the bar inside it (and the phone menu under the bar) is fixed to the window. So no other
+   box on the page changes when it pins, and nothing moves. With JavaScript off the bar scrolls away with the page. */
 /* Behind the bar: the cream card it floats on once the page has scrolled (shown below). The card is painted and the
-   logo scaled, never resized: the header's height must not change, because the page's room is measured from it. */
+   logo scaled, never resized: the bar's height must not change, because the page's room is measured from it. */
 .top-bar::before {
   content: "";
   position: absolute;
@@ -31,14 +26,16 @@ html.pinned body > .top + main { margin-top: var(--top-h); }
   transition: opacity .2s ease;
   pointer-events: none;
 }
-/* Fixed to the window, unless the window is too short to spare the room (a phone held sideways): there the header
-   stays at the top of the page and scrolls away as before. */
+/* Fixed to the window, unless the window is too short to spare the room (a phone held sideways): there nothing is
+   taken out of the page and the bar scrolls away as before. */
 @media (min-height: 481px) {
   /* A jump to a place on the page lands below the bar. This is set as soon as scripts are known to run (the `js`
-     mark, put on <html> in the head), not when the header pins: an address that ends in #somewhere is scrolled to
-     before the script has measured the header, so until then the bar's usual height stands in. */
+     mark, put on <html> in the head), not when the bar pins: an address that ends in #somewhere is scrolled to
+     before the script has measured the bar, so until then the bar's usual height stands in. */
   html.js { scroll-padding-top: var(--top-h, 88px); }
-  html.pinned .top { position: fixed; }
+  html.pinned .top { height: var(--top-h); }
+  html.pinned .top-bar { position: fixed; top: 0; left: 0; right: 0; }
+  html.pinned .menu-panel { position: fixed; top: var(--top-h); }
   html.scrolled .top-bar::before { opacity: 1; }
   html.scrolled .top .logo { transform: scale(.84); }
   /* Floating on its cream card, the home page's header reads like every other page's: ink text and the navy logo. */
@@ -311,9 +308,9 @@ html:not(.js) [data-cookie-settings] { display: none; }
   .top .btn { padding: 12px 16px; font-size: 15px; }
 }
 
-/* On paper the header belongs at the top of the first page only. */
+/* On paper the bar belongs at the top of the first page only. */
 @media print {
-  html.pinned .top { position: absolute; }
+  html.pinned .top-bar { position: absolute; }
 }
 
 /* ---------- phones and tablets ---------- */

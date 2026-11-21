@@ -25,9 +25,9 @@ function fakeWindow({ resizeObserver = false } = {}) {
   return win;
 }
 
-/** happy-dom lays nothing out: give the header a height, as a browser would. */
+/** happy-dom lays nothing out: give the header's bar a height, as a browser would. */
 function setHeaderHeight(px) {
-  Object.defineProperty(document.querySelector('header.top'), 'offsetHeight', { configurable: true, get: () => px });
+  Object.defineProperty(document.querySelector('header.top .top-bar'), 'offsetHeight', { configurable: true, get: () => px });
 }
 
 beforeEach(() => {
@@ -37,14 +37,14 @@ beforeEach(() => {
 });
 
 describe('initPin', () => {
-  it("pins the header: `pinned` on <html> and the header's height in --top-h, for the page to keep its room", () => {
+  it("pins the bar: `pinned` on <html> and the bar's height in --top-h, for the header to keep as its room", () => {
     setHeaderHeight(88);
     expect(initPin(document, fakeWindow())).toBe(true);
     expect(root.classList.contains('pinned')).toBe(true);
     expect(root.style.getPropertyValue('--top-h')).toBe('88px');
   });
 
-  it('leaves a header with no height alone, so no page slides up under a fixed bar', () => {
+  it('leaves a bar with no height alone, so no header collapses and lets the page slide up under a fixed bar', () => {
     setHeaderHeight(0);
     const win = fakeWindow();
     expect(initPin(document, win)).toBe(false);
@@ -98,11 +98,11 @@ describe('initPin', () => {
     expect(win.listeners.scroll[0].opts).toEqual({ passive: true });
   });
 
-  it("follows the header's height when the window changes: by watching the header where the browser can", () => {
+  it("follows the bar's height when the window changes: by watching the bar where the browser can", () => {
     setHeaderHeight(88);
     const win = fakeWindow({ resizeObserver: true });
     initPin(document, win);
-    expect(win.observed).toEqual([document.querySelector('header.top')]);
+    expect(win.observed).toEqual([document.querySelector('header.top .top-bar')]);
     expect(win.listeners.resize).toBeUndefined();
     setHeaderHeight(70); // the window narrowed to a phone's width
     win.resized();
@@ -118,7 +118,7 @@ describe('initPin', () => {
     expect(root.style.getPropertyValue('--top-h')).toBe('70px');
   });
 
-  it('a moment with no height (the header briefly not laid out) keeps the last good height', () => {
+  it('a moment with no height (the bar briefly not laid out) keeps the last good height', () => {
     setHeaderHeight(88);
     const win = fakeWindow();
     initPin(document, win);
@@ -141,32 +141,36 @@ describe('the pinned header on the pages', () => {
     expect(src.indexOf('initPin()')).toBeGreaterThan(src.indexOf('attempt(initNav)'));
   });
 
-  it('the page keeps the room the header had: <main> follows the header on every page but the home page, whose stage keeps its first row', () => {
+  it('the header stays in the page as the room its bar had; only the bar and the phone menu are fixed to the window', () => {
     for (const { page, doc } of rendered) {
       const top = doc.querySelector('header.top');
-      if (page.key === 'home') {
-        expect(top.parentElement.classList.contains('stage'), page.file).toBe(true);
-      } else {
-        expect(top.parentElement, page.file).toBe(doc.body);
-        expect(top.nextElementSibling?.tagName, page.file).toBe('MAIN');
+      expect([...top.children].map((el) => el.className), page.file).toEqual(['wrap top-bar', 'menu-panel']);
+    }
+    const pinned = chrome.match(/@media \(min-height: 481px\) \{((?:[^{}]*\{[^{}]*\})*)\s*\}/)[1];
+    expect(pinned).toContain('html.pinned .top { height: var(--top-h); }');
+    expect(pinned).toContain('html.pinned .top-bar { position: fixed; top: 0; left: 0; right: 0; }');
+    expect(pinned).toContain('html.pinned .menu-panel { position: fixed; top: var(--top-h); }');
+  });
+
+  it('pinning changes no other box: no rule under `pinned` touches the page, <main> or the home page\'s stage', () => {
+    // Moving <main> or the body when the bar pins shows up as a layout shift in page-quality measurements even
+    // when nothing visibly moves. The header keeps its own room instead.
+    for (const sheet of [chrome, home]) {
+      for (const m of sheet.matchAll(/([^{}]*html\.pinned[^{}]*)\{/g)) {
+        expect(m[1]).not.toMatch(/\bbody\b|\bmain\b|\.stage\b/);
       }
     }
-    expect(chrome).toContain('html.pinned body > .top + main { margin-top: var(--top-h); }');
-    expect(home).toContain('html.pinned .stage { grid-template-rows: var(--top-h) 1fr auto; }');
   });
 
   it('is fixed only where the script has pinned it and the window is tall enough; nothing is fixed with JavaScript off', () => {
     expect(chrome).toContain('.top { position: relative; z-index: 30; }');
-    expect(chrome).toContain('html.pinned .top { position: absolute; top: 0; left: 0; right: 0; pointer-events: none; }');
-    expect(chrome).toMatch(/@media \(min-height: 481px\) \{[^@]*html\.pinned \.top \{ position: fixed; \}/);
-    // every rule that fixes or floats the header needs one of the script's marks
+    // every rule that fixes part of the header needs the script's mark, inside the tall-enough window rule
+    const outside = chrome.replace(/@media \(min-height: 481px\) \{(?:[^{}]*\{[^{}]*\})*\s*\}/, '');
+    expect(outside).not.toMatch(/\.(top|top-bar|menu-panel)[^{}]*\{[^{}]*position: fixed/);
     for (const m of chrome.matchAll(/([^{}]+)\{[^{}]*position: fixed[^{}]*\}/g)) {
-      if (m[1].includes('.top')) expect(m[1]).toContain('html.pinned');
+      if (/\.(top|top-bar|menu-panel)\b/.test(m[1])) expect(m[1]).toContain('html.pinned');
     }
-  });
-
-  it('only the bar and the open phone menu take clicks; the strip around them lets clicks through to the page', () => {
-    expect(chrome).toContain('html.pinned .top-bar, html.pinned .menu-panel { pointer-events: auto; }');
+    expect(chrome).toContain('@media print { html.pinned .top-bar { position: absolute; } }');
   });
 
   it('a jump to a place on the page lands below the bar, even before the script has measured it', () => {

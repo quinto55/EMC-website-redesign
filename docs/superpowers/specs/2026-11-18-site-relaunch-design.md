@@ -769,6 +769,8 @@ disagree with this one, this one is current.
   people scroll"; changes 5.1, 5.2). Once the page has scrolled, the bar
   floats on a cream card; on the home page it then shows the navy logo and
   ink text. It needs the page's script (`src/pin.js`): with JavaScript off
-  the header scrolls away as before. The page keeps the room the header had,
-  so nothing moves when it pins; a jump to a place on a page lands below the
-  bar. In a window under 481px tall (a phone held sideways) it is not fixed.
+  the header scrolls away as before. The header stays in the page as the room
+  its bar had and only the bar is fixed, so no other box changes when it pins
+  (moving the body or `<main>` counted as a layout shift in measurements); a
+  jump to a place on a page lands below the bar. In a window under 481px tall
+  (a phone held sideways) it is not fixed.

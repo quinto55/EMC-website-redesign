@@ -11,8 +11,6 @@
   grid-template-rows: auto 1fr auto;
 }
 .stage > .top { grid-row: 1; grid-column: 1; }
-/* A pinned header (src/pin.js, chrome.css) is fixed to the window and leaves the grid: the first row keeps its height. */
-html.pinned .stage { grid-template-rows: var(--top-h) 1fr auto; }
 .stage > main {
   grid-row: 2 / 4;
   grid-column: 1;
