@@ -122,7 +122,7 @@ Good: opening https://emctickets.com/ in a private browser window shows the new 
 
 3. Look at the site by eye in a private window, on a phone and on a computer: the home page (on a computer, watch the curtain pull back once), Platform, Contact.
 
-4. **One real form submission.** Send it from the live domain, or from localhost with `?formtest=1` added to the page address. Do not send the first test from a free preview sub-domain: the form service may block those. Good: the message arrives at the receiving email address. (This only works once the form key is in place; see the open items.)
+4. **One real form submission.** Send it from the live domain, in an ordinary browser, by hand. Good: the page thanks you and the message arrives at the receiving email address. (The key is in place since 2026-11-20 and one test from a local copy was accepted that day. The form service turns away automated test browsers and command-line tools before anything is sent, so a failed send from one of those says nothing about real visitors. From a local copy, add `?formtest=1` to the page address; do not send a test from a free preview sub-domain: the form service may block those.)
 
 5. **One intake form submission.** With the owner's OK, submit the form on `/event-intake-form/` once, marked as a test wherever the form allows it. Or ask whoever receives those forms to confirm that the next one arrives. Good: it arrives, as it did before.
 
@@ -152,7 +152,7 @@ The videos are cached for one hour only, so a replaced video shows up within the
 ## 8. Open items
 
 - **robots.txt and sitemap.xml.** A real `robots.txt` and `sitemap.xml` now take over from the ones WordPress generates today. This is intended. The new `robots.txt` keeps the WordPress rules and names the new sitemap.
-- **The form key (spec question Q2).** Until the form service's access key is put in `src/site-config.js` and the site is rebuilt, the contact form on the live domain shows only the email fallback (an "Email Anthony" button and the toll-free number). After the key is in, rebuild and upload again (section 7).
+- **The form key (spec question Q2): done 2026-11-20.** The form service's access key is in `src/site-config.js`, so on the live domain the contact form shows and sends. If the key is ever emptied, the live domain shows only the email fallback (an "Email Anthony" button and the toll-free number). The key is not a secret (every visitor's browser sends it with a message), which also means anyone can send to the inbox with it: if junk arrives, turn on the service's own spam controls for the key rather than hiding it.
 - **The first real form test** should be sent from the live domain or from localhost with `?formtest=1`, because the form service may block free preview sub-domains.
 - **The old Google Tag Manager container (Q3).** The old WordPress home page loads container GTM-WXP79P4D. The new pages do not carry it until someone says the data is used.
 - **How the files get uploaded (Q1)** depends on the access Anthony can give: SFTP, SSH, or someone uploading by hand. The steps above work the same way with any of them.

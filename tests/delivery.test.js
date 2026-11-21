@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { deliveryMode, sendLead } from '../src/form/delivery.js';
+import { FORM_ACCESS_KEY } from '../src/site-config.js';
 
 const lead = { subject: 'Website inquiry: Demo County Fair', name: 'Pat', email: 'pat@example.org' };
 const okFetch = () => vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ success: true }) }));
@@ -12,8 +13,21 @@ describe('deliveryMode', () => {
     expect(deliveryMode({ hostname: 'quinto55.github.io', search: '?formtest=1', key: 'k' })).toBe('test');
     expect(deliveryMode({ hostname: 'localhost', search: '?formtest=1', key: '' })).toBe('simulate');
   });
-  it('the real config has no key, so the live domain is off', () => {
-    expect(deliveryMode({ hostname: 'emctickets.com', search: '' })).toBe('off');
+  it('the real config carries the form key, so the form sends on the live domain and nowhere else by itself', () => {
+    expect(FORM_ACCESS_KEY).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    expect(deliveryMode({ hostname: 'emctickets.com', search: '' })).toBe('live');
+    expect(deliveryMode({ hostname: 'www.emctickets.com', search: '' })).toBe('live');
+    // A preview or a developer's machine sends nothing unless the test switch is in the address.
+    expect(deliveryMode({ hostname: 'quinto55.github.io', search: '' })).toBe('simulate');
+    expect(deliveryMode({ hostname: 'localhost', search: '' })).toBe('simulate');
+    expect(deliveryMode({ hostname: 'localhost', search: '?formtest=1' })).toBe('test');
+  });
+  it('the key goes out with each message, to the form service only', async () => {
+    const f = okFetch();
+    await sendLead(lead, { mode: 'live', fetchImpl: f });
+    const [url, init] = f.mock.calls[0];
+    expect(url).toBe('https://api.web3forms.com/submit');
+    expect(JSON.parse(init.body).access_key).toBe(FORM_ACCESS_KEY);
   });
 });
 

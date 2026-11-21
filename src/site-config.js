@@ -27,8 +27,10 @@ export const APP_RECOVER_URL = 'https://app.emctickets.com/recover';
 export const APP_LOGIN_URL = 'https://app.emctickets.com/portal/login';
 export const POS_TOUR_URL = 'https://app.emctickets.com/pos/tour';
 
-/* The contact form's delivery service. The key stays empty until the site owner approves the
-   service: with no key the live site shows the email and phone fallback instead of the form. */
+/* The contact form's delivery service. The access key was supplied by the site owner on 2026-11-20. It is not a
+   secret: the service identifies the inbox by it, and it is sent from every visitor's browser with each message, so
+   it is readable in the published pages. With an empty key the live site shows the email and phone fallback
+   instead of the form. */
 export const FORM_SERVICE_NAME = 'Web3Forms';
 export const FORM_ENDPOINT = 'https://api.web3forms.com/submit';
-export const FORM_ACCESS_KEY = '';
+export const FORM_ACCESS_KEY = '2ce55f3b-2294-4f02-99bb-8f4f43569f18';
