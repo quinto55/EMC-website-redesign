@@ -55,6 +55,32 @@
 .service p { color: var(--mut); }
 .closing { margin-top: 36px; font: 700 32px/1.15 var(--font-head); letter-spacing: -.02em; }
 
+/* ---------- work samples: real ads and ticket sale sites EMC made (build/work.js) ---------- */
+.work { scroll-margin-top: 24px; padding: 8px 0 64px; }
+.work h2 { font-size: 44px; }
+.work .lede { max-width: 640px; }
+.work .work-label { margin: 34px 0 14px; font: 500 13px/1.55 var(--font-mono); letter-spacing: 0; color: var(--red); } /* .work in front: it must win over .work h2 */
+.work-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.work .lede + .work-grid { margin-top: 28px; }
+.work-grid img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: var(--card-shadow);
+}
+.work-sites { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.work-sites img { aspect-ratio: 8 / 5; }
+.work .closing { margin-top: 44px; }
+/* On the About page: one row of six, under a small label, with a link to the rest. */
+.work-strip { padding: 0 0 44px; }
+.work.work-strip .work-label { margin-top: 0; }
+.work-about { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.work-about img { border-radius: 14px; }
+.work-strip .talk-link { display: inline-flex; align-items: center; min-height: 44px; margin-top: 12px; font-weight: 700; color: var(--red); }
+
 /* ---------- about ---------- */
 .page-intro h1 .big { font-weight: 700; color: var(--red); }
 .prose { max-width: 680px; padding: 28px 0 44px; }
@@ -88,6 +114,11 @@
   .step { gap: 16px; padding: 18px 20px; }
   .step h3 { font-size: 22px; }
   .services { grid-template-columns: minmax(0, 1fr); }
+  .work { padding-bottom: 44px; }
+  .work h2 { font-size: 34px; }
+  .work-grid { gap: 12px; }
+  .work-grid img { border-radius: 14px; }
+  .work .closing { margin-top: 32px; }
   .service h2 { font-size: 28px; }
   .closing { font-size: 26px; }
   .prose p { font-size: 19px; }
@@ -97,6 +128,14 @@
   .legal h2 { font-size: 23px; }
   .lost { padding: 44px 0 60px; }
   .lost-links .btn { flex: 1 1 100%; }
+}
+
+/* Phones: the samples two across (the About row three across), the sites one under another. Tablets keep the
+   computer's columns. */
+@media (max-width: 700px) {
+  .work-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .work-sites { grid-template-columns: minmax(0, 1fr); }
+  .work-about { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 }
 
 @media (max-width: 600px) {

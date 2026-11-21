@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "icons": "node scripts/build-icons.mjs",
     "images": "node scripts/build-images.mjs",
+    "work": "node scripts/build-work.mjs",
     "videos": "node scripts/sync-videos.mjs",
     "build:host": "bash scripts/build-host.sh",
     "check:live": "node scripts/check-live.mjs",

@@ -11,6 +11,7 @@ import { createDashState, dashSnapshot } from '../src/demo/dashboard-engine.js';
 import { renderGateScanHTML } from '../src/demo/gate-scan.js';
 import { renderDayReportHTML } from '../src/demo/day-report.js';
 import { VIDEOS, renderVideoHTML, renderPosterHTML, publishedMeta } from './videos.js';
+import { WORK_SETS, renderWorkHTML } from './work.js';
 import { CURTAIN_SEEN_KEY, shouldShowCurtain, curtainInputs } from '../src/curtain/should-show.js';
 
 const PARTIALS_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'partials');
@@ -36,6 +37,11 @@ export const GENERATORS = {
 for (const video of VIDEOS) {
   GENERATORS[`video-${video.id}`] = () => renderVideoHTML(video, video.cleared ? publishedMeta(video) : {});
   GENERATORS[`poster-${video.id}`] = () => renderPosterHTML(video, video.cleared ? publishedMeta(video) : {});
+}
+
+// One grid of work samples per set (<!--site:work-ads--> and so on; build/work.js).
+for (const setName of Object.keys(WORK_SETS)) {
+  GENERATORS[`work-${setName}`] = () => renderWorkHTML(setName);
 }
 
 const defaultRead = (name) => {

@@ -774,3 +774,14 @@ disagree with this one, this one is current.
   (moving the body or `<main>` counted as a layout shift in measurements); a
   jump to a place on a page lands below the bar. In a window under 481px tall
   (a phone held sideways) it is not fixed.
+- **Work samples on three pages** (asked for the same day: "add some more
+  photos like you did on the other website redesign"; changes 5.6 to 5.8).
+  Twenty-one real pieces of EMC's own work, all already public on the old
+  emctickets.com "What we do" page: on Marketing, eight ad graphics and
+  three ticket sale sites under "Work we have made"; on Retail partners, four
+  store promotions (English and Spanish, Walgreens and Circle K) under "What
+  the promotion looks like"; on About, a row of six ads. The list and its
+  rules are in `build/work.js` (no performer's face, no child as the main
+  subject); originals in `assets-src/work`; `npm run work` builds the web
+  sizes. They name fairs beyond the three in the proof line, as the old page
+  did. The home and IAFE pages carry none, to stay light.
