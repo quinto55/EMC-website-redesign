@@ -249,6 +249,21 @@
    Each starts a section's distance after the one before it (the section above already ends in that much room). */
 .feature-sec { padding-bottom: 80px; }
 .reach .pair { margin-top: 34px; }
+/* The retail page's offer, under the pair: one card that goes to that page's form. */
+.offer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+  margin-top: 20px;
+  padding: 24px 30px;
+  border-radius: 26px;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.offer:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px var(--ghost-shadow), 0 20px 40px rgba(120, 80, 20, .16); }
+.offer-text b { display: block; font: 700 30px/1.15 var(--font-head); letter-spacing: -.02em; }
+.offer-text span { display: block; margin-top: 4px; font-size: 18px; color: var(--mut); }
 
 /* ---------- computers: the photo fills the window ---------- */
 @media (min-width: 1001px) {
@@ -300,6 +315,10 @@
   .mods { grid-template-columns: minmax(0, 1fr); }
   .feature-sec { padding-bottom: 54px; }
   .reach .pair { margin-top: 24px; }
+  .offer { margin-top: 16px; padding: 20px; border-radius: 22px; }
+  .offer-text b { font-size: 24px; }
+  .offer-text span { font-size: 17px; }
+  .offer .btn { flex: 1 1 100%; }
 }
 /* Tablets: the proof strip keeps its 72px years block on the left, with the fairs line over the logos beside it, so its
    right half is not left empty. Phones (600px and under) stay stacked. */

@@ -5,7 +5,8 @@ import { renderAll, visibleText, ROOT } from './helpers/pages.js';
 import { pageByKey, PAGES } from '../build/pages.js';
 import { videoById } from '../build/videos.js';
 
-const { doc, html } = renderAll().find((r) => r.page.key === 'home');
+const rendered = renderAll();
+const { doc, html } = rendered.find((r) => r.page.key === 'home');
 const main = doc.querySelector('main');
 
 const text = (el) => el.textContent.replace(/\s+/g, ' ').trim();
@@ -245,6 +246,22 @@ describe('home page', () => {
     if (videoById('fair-map').cleared) expect(map.querySelector('img').getAttribute('src')).toBe(`/emc-site/video/${videoById('fair-map').poster}`);
     else expect(map.querySelector('img')).toBeNull();
     for (const img of sec.querySelectorAll('img')) expect(img.getAttribute('loading')).toBe('lazy');
+  });
+
+  it("the retail page's offer sits under the pair and goes to that page's form", () => {
+    const offer = main.querySelector('section.reach a.offer');
+    expect(offer).not.toBeNull();
+    expect(offer.getAttribute('href')).toBe('/retail-partners/#talk');
+    expect(byText(offer, 'b', 'Get a free in-store mockup of your event.')).not.toBeNull();
+    expect(byText(offer, 'span', 'See what your event looks like on a Walgreens counter.')).not.toBeNull();
+    expect(text(offer.querySelector('.btn'))).toBe('Request my mockup');
+    const follows = (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(follows(main.querySelector('section.reach .pair'), offer)).toBe(true);
+    // The same words as the retail page's own ask, which is where the link lands.
+    const retail = rendered.find((r) => r.page.key === 'retail').doc;
+    const ask = retail.getElementById('talk');
+    expect(text(ask.querySelector('[data-ask-heading]'))).toBe('Get a free in-store mockup of your event.');
+    expect(text(ask.querySelector('[data-ask-submit]'))).toBe('Request my mockup');
   });
 
   it("the proof strip's store logos are one link to the retail partners page", () => {

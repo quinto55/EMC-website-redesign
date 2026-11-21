@@ -785,3 +785,9 @@ disagree with this one, this one is current.
   subject); originals in `assets-src/work`; `npm run work` builds the web
   sizes. They name fairs beyond the three in the proof line, as the old page
   did. The home and IAFE pages carry none, to stay light.
+- **The form key is in (2026-11-20).** The form sends on the live domain;
+  previews send nothing unless `?formtest=1` is in the address (answers
+  question Q2 in section 8).
+- **The retail page's offer is on the home page too:** under "In stores. On
+  the grounds.", a card "Get a free in-store mockup of your event." with the
+  button "Request my mockup", to the retail page's form.
