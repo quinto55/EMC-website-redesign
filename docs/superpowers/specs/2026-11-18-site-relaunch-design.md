@@ -791,3 +791,12 @@ disagree with this one, this one is current.
 - **The retail page's offer is on the home page too:** under "In stores. On
   the grounds.", a card "Get a free in-store mockup of your event." with the
   button "Request my mockup", to the retail page's form.
+- **Go-live through Cloudflare (2026-11-24).** Anthony has the GoDaddy login
+  but not the web host's, and asked for the Cloudflare way. Cloudflare (free
+  plan) takes over the domain's DNS and a Worker stands in front of the old
+  host on the route `emctickets.com/*`: the new site's files are served from
+  Cloudflare, `/` runs the Worker first so WordPress keeps `?s=`, `?p=` and
+  POST, the eight old addresses move, everything else passes to the old host.
+  Runbook `deploy/GO-LIVE-CLOUDFLARE.md`; the host upload in `GO-LIVE.md`
+  stays as the other way. The Worker passed all 51 post-checks run locally
+  against the real old host.

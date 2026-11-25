@@ -6,3 +6,5 @@ dist/
 assets-src/
 dist-host/
 dist-host.zip
+dist-cf/
+.wrangler/
