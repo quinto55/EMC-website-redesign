@@ -11,6 +11,8 @@ export default defineConfig(({ mode }) => ({
       // so Vite's watcher never invalidates edited modules. Poll instead.
       usePolling: true,
       interval: 300,
+      // Polling every build copy and tool folder (about 3,000 files) took half a CPU and 3 s per file served.
+      ignored: ['**/dist/**', '**/dist-host/**', '**/dist-cf/**', '**/.superpowers/**', '**/.impeccable/**', '**/assets-src/**', '**/docs/**'],
     },
   },
   plugins: [sitePlugin({ staging: mode === 'staging' })],
