@@ -3,7 +3,7 @@ import { createDashState, advance, dashSnapshot } from './dashboard-engine.js';
 import { createBoardView } from './board-view.js';
 import { createDashboardView } from './dashboard-view.js';
 import { runWhileVisible } from './lifecycle.js';
-import { createPause } from './pause.js';
+import { createPause, reducedMotion } from './pause.js';
 
 /**
  * The compact board's two channel percents, taken from the dashboard's Money panel rather than rounded again: Online
@@ -31,11 +31,12 @@ function attempt(step) {
  * on ticks it missed. Each board has a Pause button; the two share one day, so one press on either pauses both (the
  * timer stops, no sale lands and no count-up runs) and both read "Resume"; a paused day stays paused whatever the tab
  * or the scroll position does. An off-screen dashboard takes its new figures at once, so no animation frame runs for a board
- * nobody sees. Either element may be missing; the other still works. After destroy() nothing runs.
+ * nobody sees. Either element may be missing; the other still works. After destroy() nothing runs. A visitor who asks
+ * for less motion gets the boards paused (`paused`), showing their figures, until they press Resume.
  */
-export function mountHomeLive({ boardEl = null, dashEl = null, intervalMs = 1700, rng = Math.random } = {}) {
+export function mountHomeLive({ boardEl = null, dashEl = null, intervalMs = 1700, rng = Math.random, paused = reducedMotion() } = {}) {
   let state = createDashState();
-  const pause = createPause();
+  const pause = createPause(paused);
   const board = boardEl ? createBoardView(boardEl, { pause }) : null;
   let dash = null;
   try {

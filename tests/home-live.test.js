@@ -113,7 +113,7 @@ describe('the home page boards on one sample day', () => {
     const { boardEl, dashEl } = loadHome();
     expect(boardEl).not.toBeNull();
     expect(dashEl).not.toBeNull();
-    const live = mountHomeLive({ boardEl, dashEl, rng: mulberry32(5) });
+    const live = mountHomeLive({ paused: false, boardEl, dashEl, rng: mulberry32(5) });
     const before = { c: compact(boardEl), d: dashboard(dashEl) };
     expect(before.c.sold).toBe(before.d.tickets);
 
@@ -144,7 +144,7 @@ describe('the home page boards on one sample day', () => {
   it('the compact board\'s two shares are the Money panel\'s, on every tick of 3,000', () => {
     reduced = true;
     const { boardEl, dashEl } = loadHome();
-    const live = mountHomeLive({ boardEl, dashEl, rng: mulberry32(1) });
+    const live = mountHomeLive({ paused: false, boardEl, dashEl, rng: mulberry32(1) });
     const widths = () => [...boardEl.querySelectorAll('.ch i')].map((i) => i.style.getPropertyValue('--w'));
     for (let tick = 1; tick <= 3000; tick++) {
       live.tick();
@@ -160,7 +160,7 @@ describe('the home page boards on one sample day', () => {
   it('the hero board and the dashboard still agree on every figure after 3,000 ticks', () => {
     reduced = true;
     const { boardEl, dashEl } = loadHome();
-    const live = mountHomeLive({ boardEl, dashEl, rng: mulberry32(13) });
+    const live = mountHomeLive({ paused: false, boardEl, dashEl, rng: mulberry32(13) });
     // The same day kept alongside, to count Admission tickets and add-ons independently of the boards.
     const rng = mulberry32(13);
     let state = createDashState();
@@ -194,7 +194,7 @@ describe('the home page boards on one sample day', () => {
   it('there is one timer: a tick interval produces exactly one sale on both boards', () => {
     reduced = true;
     const { boardEl, dashEl } = loadHome();
-    const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1700, rng: mulberry32(4) });
+    const live = mountHomeLive({ paused: false, boardEl, dashEl, intervalMs: 1700, rng: mulberry32(4) });
     expect(vi.getTimerCount()).toBe(1);
     const rows = feedRows(boardEl);
     const stubs = [...dashEl.querySelectorAll('[data-panel="feed"] li')];
@@ -216,7 +216,7 @@ describe('the home page boards on one sample day', () => {
     reduced = true;
     globalThis.IntersectionObserver = FakeIO;
     const { boardEl, dashEl } = loadHome();
-    const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(8) });
+    const live = mountHomeLive({ paused: false, boardEl, dashEl, intervalMs: 1000, rng: mulberry32(8) });
 
     fire(boardEl, true);
     fire(dashEl, false);
@@ -242,7 +242,7 @@ describe('the home page boards on one sample day', () => {
   it('an off-screen dashboard takes each sale at once: no count-up, no animation frames', () => {
     globalThis.IntersectionObserver = FakeIO;
     const { boardEl, dashEl } = loadHome();
-    const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(3) });
+    const live = mountHomeLive({ paused: false, boardEl, dashEl, intervalMs: 1000, rng: mulberry32(3) });
     fire(boardEl, true);
     fire(dashEl, false);
     vi.advanceTimersByTime(1000);
@@ -267,7 +267,7 @@ describe('the home page boards on one sample day', () => {
   it('stops while the tab is hidden and does not catch up afterwards', () => {
     reduced = true;
     const { boardEl, dashEl } = loadHome();
-    const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
+    const live = mountHomeLive({ paused: false, boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
     setHidden(true);
     vi.advanceTimersByTime(60000);
     expect(dashboard(dashEl).orders).toBe(1512);
@@ -285,14 +285,14 @@ describe('the home page boards on one sample day', () => {
   it('a missing dashboard element still leaves a working compact board, and the reverse', () => {
     reduced = true;
     let { boardEl, dashEl } = loadHome();
-    const boardOnly = mountHomeLive({ boardEl, dashEl: null, intervalMs: 1000, rng: mulberry32(3) });
+    const boardOnly = mountHomeLive({ paused: false, boardEl, dashEl: null, intervalMs: 1000, rng: mulberry32(3) });
     vi.advanceTimersByTime(1000);
     expect(compact(boardEl).sales).not.toBe(61284); // every sale moves the money
     expect(dashboard(dashEl).orders).toBe(1512); // left as served
     boardOnly.destroy();
 
     ({ boardEl, dashEl } = loadHome());
-    const dashOnly = mountHomeLive({ boardEl: null, dashEl, intervalMs: 1000, rng: mulberry32(3) });
+    const dashOnly = mountHomeLive({ paused: false, boardEl: null, dashEl, intervalMs: 1000, rng: mulberry32(3) });
     vi.advanceTimersByTime(1000);
     expect(dashboard(dashEl).orders).toBe(1513);
     expect(compact(boardEl).sold).toBe(2880); // left as served
@@ -301,7 +301,7 @@ describe('the home page boards on one sample day', () => {
 
   it('destroy() stops everything; a later tick() does nothing', () => {
     const { boardEl, dashEl } = loadHome();
-    const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(2) });
+    const live = mountHomeLive({ paused: false, boardEl, dashEl, intervalMs: 1000, rng: mulberry32(2) });
     vi.advanceTimersByTime(1000);
     live.destroy();
     expect(frames.size).toBe(0);
@@ -321,7 +321,7 @@ describe('the home page boards on one sample day', () => {
     reduced = true;
     const { boardEl, dashEl } = loadHome();
     // Always the same draw: three ride wristbands online, until wristbands sell out and nothing else is drawn.
-    const live = mountHomeLive({ boardEl, dashEl, rng: () => 0.5 });
+    const live = mountHomeLive({ paused: false, boardEl, dashEl, rng: () => 0.5 });
     let quiet = 0;
     for (let i = 0; i < 200; i++) {
       const rows = feedRows(boardEl);
@@ -343,7 +343,7 @@ describe('the home page boards on one sample day', () => {
     const { boardEl, dashEl } = loadHome();
     const served = { rows: feedRows(boardEl).map((li) => li.outerHTML), stubs: dashEl.querySelector('.db-feed__list').innerHTML };
     // An hour a tick: 7:42, 8:42, 9:42 and 10:42 PM sell; the next would pass 11 PM, so the day starts again.
-    const live = mountHomeLive({ boardEl, dashEl, intervalMs: 3600 * 1000, rng: mulberry32(7) });
+    const live = mountHomeLive({ paused: false, boardEl, dashEl, intervalMs: 3600 * 1000, rng: mulberry32(7) });
     vi.advanceTimersByTime(3600 * 1000 * 4);
     expect(dashboard(dashEl).orders).toBe(1516);
     expect(compact(boardEl).sales).not.toBe(61284);
@@ -364,7 +364,7 @@ describe('the home page boards on one sample day', () => {
     const screen = dashEl.querySelector('.db-screen');
     screen.requestFullscreen = vi.fn(() => Promise.resolve());
     try {
-      const live = mountHomeLive({ boardEl, dashEl });
+      const live = mountHomeLive({ paused: false, boardEl, dashEl });
       const button = dashEl.querySelector('[data-fullscreen]');
       expect(button.hasAttribute('hidden')).toBe(false);
       button.click();
@@ -384,7 +384,7 @@ describe('the home page boards on one sample day', () => {
     it('a compact board that throws on a tick still lets the dashboard take the sale', () => {
       reduced = true;
       const { boardEl, dashEl } = loadHome();
-      const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
+      const live = mountHomeLive({ paused: false, boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
       boardEl.querySelector = () => { throw new Error('board failed'); };
       expect(() => vi.advanceTimersByTime(1000)).not.toThrow();
       expect(dashboard(dashEl).orders).toBe(1513);
@@ -397,7 +397,7 @@ describe('the home page boards on one sample day', () => {
     it('a dashboard that throws on a tick still lets the compact board take the sale', () => {
       reduced = true;
       const { boardEl, dashEl } = loadHome();
-      const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
+      const live = mountHomeLive({ paused: false, boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
       const sales = compact(boardEl).sales;
       dashEl.querySelector = () => { throw new Error('dashboard failed'); };
       expect(() => vi.advanceTimersByTime(1000)).not.toThrow();
@@ -413,7 +413,7 @@ describe('the home page boards on one sample day', () => {
       dashEl.querySelector('.db-screen').requestFullscreen = vi.fn(() => Promise.resolve());
       dashEl.querySelector('.db-chart svg').querySelector = () => { throw new Error('chart failed'); };
       try {
-        const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
+        const live = mountHomeLive({ paused: false, boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
         expect(errors).toHaveBeenCalled();
         expect(dashEl.querySelector('[data-fullscreen]').hasAttribute('hidden')).toBe(true);
         const sales = compact(boardEl).sales;
@@ -431,7 +431,7 @@ describe('the home page boards on one sample day', () => {
       reduced = true;
       const { boardEl, dashEl } = loadHome();
       dashEl.querySelector('.db-chart').remove(); // the dashboard view cannot be built without its chart
-      const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
+      const live = mountHomeLive({ paused: false, boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
       expect(errors).toHaveBeenCalled();
       expect(dashEl.querySelector('button[data-pause]').hasAttribute('hidden')).toBe(true); // left as served
       const sales = compact(boardEl).sales;
@@ -473,7 +473,7 @@ describe('the home page boards on one sample day', () => {
       }
       expect(boardEl.querySelectorAll('button')).toHaveLength(1);
       expect(a.textContent).not.toBe(b.textContent); // each says which board it pauses
-      const live = mountHomeLive({ boardEl, dashEl });
+      const live = mountHomeLive({ paused: false, boardEl, dashEl });
       expect(a.hasAttribute('hidden')).toBe(false);
       expect(b.hasAttribute('hidden')).toBe(false);
       live.destroy();
@@ -484,7 +484,7 @@ describe('the home page boards on one sample day', () => {
     it('one press on either button pauses both boards: nothing ticks, no figure changes, both buttons read Resume', () => {
       for (const which of [0, 1]) {
         const { boardEl, dashEl } = loadHome();
-        const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1700, rng: mulberry32(9) });
+        const live = mountHomeLive({ paused: false, boardEl, dashEl, intervalMs: 1700, rng: mulberry32(9) });
         vi.advanceTimersByTime(1700 * 3);
         const btns = buttons(boardEl, dashEl);
         btns[which].click();
@@ -502,7 +502,7 @@ describe('the home page boards on one sample day', () => {
 
     it('a press mid count-up settles the dashboard on the figures it was heading to, and nothing runs after', () => {
       const { boardEl, dashEl } = loadHome();
-      const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(3) });
+      const live = mountHomeLive({ paused: false, boardEl, dashEl, intervalMs: 1000, rng: mulberry32(3) });
       vi.advanceTimersByTime(1000);
       expect(frames.size).toBe(1); // counting up
       buttons(boardEl, dashEl)[0].click();
@@ -516,7 +516,7 @@ describe('the home page boards on one sample day', () => {
       reduced = true;
       globalThis.IntersectionObserver = FakeIO;
       const { boardEl, dashEl } = loadHome();
-      const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
+      const live = mountHomeLive({ paused: false, boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
       fire(boardEl, true);
       fire(dashEl, true);
       buttons(boardEl, dashEl)[1].click();
@@ -534,10 +534,29 @@ describe('the home page boards on one sample day', () => {
       live.destroy();
     });
 
+    it('both boards start paused for a visitor who asks for less motion, and their dots stop', () => {
+      reduced = true;
+      globalThis.IntersectionObserver = FakeIO;
+      const { boardEl, dashEl } = loadHome();
+      const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
+      fire(boardEl, true);
+      fire(dashEl, true);
+      const frozen = figures(boardEl, dashEl);
+      vi.advanceTimersByTime(60000);
+      expect(figures(boardEl, dashEl)).toEqual(frozen);
+      expect(buttons(boardEl, dashEl).map(word)).toEqual(['Resume', 'Resume']);
+      expect([boardEl, dashEl].map((el) => el.hasAttribute('data-paused'))).toEqual([true, true]);
+      buttons(boardEl, dashEl)[0].click();
+      expect([boardEl, dashEl].map((el) => el.hasAttribute('data-paused'))).toEqual([false, false]);
+      vi.advanceTimersByTime(5000);
+      expect(figures(boardEl, dashEl)).not.toEqual(frozen);
+      live.destroy();
+    });
+
     it('Resume continues from the same figures: the next sale lands on both boards and they agree', () => {
       reduced = true;
       const { boardEl, dashEl } = loadHome();
-      const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
+      const live = mountHomeLive({ paused: false, boardEl, dashEl, intervalMs: 1000, rng: mulberry32(6) });
       vi.advanceTimersByTime(2000);
       const btns = buttons(boardEl, dashEl);
       btns[0].click();
@@ -557,7 +576,7 @@ describe('the home page boards on one sample day', () => {
 
     it('destroy() removes both listeners', () => {
       const { boardEl, dashEl } = loadHome();
-      const live = mountHomeLive({ boardEl, dashEl, intervalMs: 1000 });
+      const live = mountHomeLive({ paused: false, boardEl, dashEl, intervalMs: 1000 });
       const btns = buttons(boardEl, dashEl);
       live.destroy();
       btns.forEach((btn) => btn.click());
@@ -568,7 +587,7 @@ describe('the home page boards on one sample day', () => {
     it('a missing dashboard still leaves a compact board whose button pauses it', () => {
       reduced = true;
       const { boardEl } = loadHome();
-      const live = mountHomeLive({ boardEl, dashEl: null, intervalMs: 1000, rng: mulberry32(3) });
+      const live = mountHomeLive({ paused: false, boardEl, dashEl: null, intervalMs: 1000, rng: mulberry32(3) });
       boardEl.querySelector('button[data-pause]').click();
       const frozen = boardEl.innerHTML;
       vi.advanceTimersByTime(10000);

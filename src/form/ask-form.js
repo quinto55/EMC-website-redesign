@@ -32,6 +32,25 @@ export function setAskVariant(askEl, variant) {
   if (button) button.textContent = v.button;
 }
 
+/**
+ * A link to the page's own form (#talk) with `data-ask-switch` sets what the form asks for, so an offer further up the
+ * page leads to its own request without leaving the page. After one has, a plain link to #talk puts the form back.
+ */
+export function initAskSwitches(doc = document) {
+  const ask = doc.getElementById('talk');
+  if (!ask || !doc.querySelector('a[href="#talk"][data-ask-switch]')) return;
+  let own = null; // what the form asked for before a switch link changed it
+  doc.addEventListener('click', (ev) => {
+    const a = ev.target.closest?.('a[href="#talk"]');
+    if (!a) return;
+    const to = a.getAttribute('data-ask-switch');
+    if (to) {
+      own ??= ask.getAttribute('data-ask-variant') || 'talk';
+      setAskVariant(ask, to);
+    } else if (own) setAskVariant(ask, own);
+  });
+}
+
 function wire(askEl, doc, { mode, send, track }) {
   const form = askEl.querySelector('form[data-ask-form]');
   const fallback = askEl.querySelector('[data-ask-fallback]');
@@ -65,7 +84,7 @@ function wire(askEl, doc, { mode, send, track }) {
       msg.id = `${uid}-${name}-error`;
       msg.className = 'ask-error';
       msg.textContent = errors[name];
-      el.closest('label').appendChild(msg);
+      el.closest('label').after(msg); // outside the label, so it is read once, as the field's description
       el.setAttribute('aria-invalid', 'true');
       el.setAttribute('aria-describedby', msg.id);
       first = first || el;

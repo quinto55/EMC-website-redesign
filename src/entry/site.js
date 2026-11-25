@@ -5,7 +5,7 @@ import { initPin } from '../pin.js';
 import { initConsentBanner, openCookieSettings } from '../consent.js';
 import { initAnalytics } from '../analytics.js';
 import { captureUtm } from '../form/utm.js';
-import { initAskForms } from '../form/ask-form.js';
+import { initAskForms, initAskSwitches } from '../form/ask-form.js';
 
 // Each step runs on its own, so one failing cannot stop the menu or the form from starting.
 function attempt(step) {
@@ -23,6 +23,7 @@ function start() {
   attempt(initConsentBanner);
   attempt(initAnalytics);
   attempt(initAskForms);
+  attempt(() => initAskSwitches());
   attempt(() => {
     for (const button of document.querySelectorAll('[data-cookie-settings]')) {
       button.addEventListener('click', () => openCookieSettings());

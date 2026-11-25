@@ -37,9 +37,11 @@
   gap: 28px;
   margin-top: 14px;
   padding: 14px 30px 14px 14px;
-  transition: transform .18s ease, box-shadow .18s ease;
+  transition: transform .18s var(--ease-out), box-shadow .18s var(--ease-out);
 }
-.also-card:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px var(--ghost-shadow), 0 20px 40px rgba(120, 80, 20, .16); }
+@media (hover: hover) {
+  .also-card:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px var(--ghost-shadow), 0 20px 40px rgba(120, 80, 20, .16); }
+}
 .also-card .shot { grid-area: pic; width: 240px; }
 .also-text { grid-area: text; }
 .also-card .tile-go { grid-area: go; align-self: center; margin: 0; padding-top: 0; }

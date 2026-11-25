@@ -8,9 +8,10 @@ export function pauseButtonHTML(cls, what) {
   return `<button type="button" class="${cls}" data-pause hidden><span data-pause-label>Pause</span><span class="visually-hidden"> ${what}</span></button>`;
 }
 
+export const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches === true;
+
 /** One pause state: `paused`, set(), toggle(), and subscribe(fn) (fn(paused) on every change; returns an unsubscribe). */
-export function createPause() {
-  let paused = false;
+export function createPause(paused = false) {
   const listeners = new Set();
   const set = (value) => {
     value = Boolean(value);
@@ -31,14 +32,16 @@ export function createPause() {
 
 /**
  * Shows the board's pause button (when it has one), makes it toggle `pause` and keeps its word in step: "Pause", and
- * "Resume" while paused. Returns a function that undoes all of it: the listener goes and the button is hidden again.
+ * "Resume" while paused. `root`, the board, carries `data-paused` while paused, so its live dots stop pulsing too
+ * (base.css). Returns a function that undoes all of it: the listener goes and the button is hidden again.
  */
-export function bindPauseButton(button, pause) {
+export function bindPauseButton(button, pause, root = null) {
   if (!button) return () => {};
   const word = button.querySelector('[data-pause-label]');
   const show = (paused) => {
     const text = paused ? 'Resume' : 'Pause';
     if (word && word.textContent !== text) word.textContent = text;
+    root?.toggleAttribute('data-paused', paused);
   };
   const onClick = () => pause.toggle();
   show(pause.paused);
@@ -48,6 +51,7 @@ export function bindPauseButton(button, pause) {
   return () => {
     button.removeEventListener('click', onClick);
     unsubscribe();
+    root?.removeAttribute('data-paused');
     button.setAttribute('hidden', '');
   };
 }

@@ -43,7 +43,7 @@ describe('the board markup', () => {
 describe('the live board', () => {
   it('never shows store sales', () => {
     const el = boardEl();
-    const board = mountBoard(el, { rng: mulberry32(2) });
+    const board = mountBoard(el, { paused: false, rng: mulberry32(2) });
     for (let i = 0; i < 200; i++) board.tick();
     for (const w of ['Retail', 'Walgreens', 'Circle K', 'Menards']) expect(el.textContent).not.toContain(w);
     board.destroy();
@@ -51,7 +51,7 @@ describe('the live board', () => {
 
   it('tick() updates the figures and puts the new sale first in the feed', () => {
     const el = boardEl();
-    const board = mountBoard(el, { rng: mulberry32(9) });
+    const board = mountBoard(el, { paused: false, rng: mulberry32(9) });
     // Every sale moves the money (an add-on sale leaves Tickets sold today as it was).
     const before = kpi(el, 'money');
     const firstBefore = el.querySelector('.feed li').textContent;
@@ -65,7 +65,7 @@ describe('the live board', () => {
 
   it('tick() changes the text in place: the same figures and bars, one new row at the top, the oldest gone', () => {
     const el = boardEl();
-    const board = mountBoard(el, { rng: mulberry32(9) });
+    const board = mountBoard(el, { paused: false, rng: mulberry32(9) });
     const figures = [...el.querySelectorAll('[data-k]')];
     const bars = [...el.querySelectorAll('.ch')];
     const rows = [...el.querySelectorAll('.feed li')];
@@ -84,7 +84,7 @@ describe('the live board', () => {
 
   it('after many sales the board reads exactly as a fresh drawing of the same sales', () => {
     const el = boardEl();
-    const board = mountBoard(el, { rng: mulberry32(11) });
+    const board = mountBoard(el, { paused: false, rng: mulberry32(11) });
     let state = createBoardState();
     const rng = mulberry32(11);
     for (let i = 0; i < 40; i++) {
@@ -107,7 +107,7 @@ describe('the live board', () => {
   it('leaves the served markup alone when it mounts', () => {
     const el = boardEl();
     const first = el.querySelector('.feed li');
-    const board = mountBoard(el);
+    const board = mountBoard(el, { paused: false });
     expect(el.querySelector('.feed li')).toBe(first);
     expect(kpi(el, 'sold')).toBe('2,880');
     board.destroy();
@@ -115,7 +115,7 @@ describe('the live board', () => {
 
   it('ticks once per interval while visible', () => {
     const el = boardEl();
-    const board = mountBoard(el, { intervalMs: 1700, rng: mulberry32(4) });
+    const board = mountBoard(el, { paused: false, intervalMs: 1700, rng: mulberry32(4) });
     expect(kpi(el, 'sold')).toBe('2,880');
     // Every sale moves the money (an add-on sale leaves Tickets sold today as it was).
     vi.advanceTimersByTime(1700 * 5);
@@ -128,7 +128,7 @@ describe('the live board', () => {
 
   it('stops while the tab is hidden and does not catch up afterwards', () => {
     const el = boardEl();
-    const board = mountBoard(el, { intervalMs: 1000, rng: mulberry32(6) });
+    const board = mountBoard(el, { paused: false, intervalMs: 1000, rng: mulberry32(6) });
     setHidden(true);
     vi.advanceTimersByTime(60000);
     expect(kpi(el, 'sold')).toBe('2,880');
@@ -151,7 +151,7 @@ describe('the live board', () => {
     };
     try {
       const el = boardEl();
-      const board = mountBoard(el, { intervalMs: 1000, rng: mulberry32(8) });
+      const board = mountBoard(el, { paused: false, intervalMs: 1000, rng: mulberry32(8) });
       observers[0].fire(false);
       vi.advanceTimersByTime(10000);
       expect(kpi(el, 'money')).toBe('$61,284');
@@ -166,7 +166,7 @@ describe('the live board', () => {
 
   it('destroy() stops everything', () => {
     const el = boardEl();
-    const board = mountBoard(el, { intervalMs: 1000 });
+    const board = mountBoard(el, { paused: false, intervalMs: 1000 });
     board.destroy();
     vi.advanceTimersByTime(10000);
     setHidden(false);
@@ -194,7 +194,7 @@ describe('the board\'s pause button (WCAG 2.2.2)', () => {
 
   it('is shown when the board mounts and hidden again by destroy()', () => {
     const el = boardEl();
-    const board = mountBoard(el);
+    const board = mountBoard(el, { paused: false });
     expect(pauseButton(el).hasAttribute('hidden')).toBe(false);
     board.destroy();
     expect(pauseButton(el).hasAttribute('hidden')).toBe(true);
@@ -202,7 +202,7 @@ describe('the board\'s pause button (WCAG 2.2.2)', () => {
 
   it('stops the ticking itself and keeps the figures; Resume makes the next sale land', () => {
     const el = boardEl();
-    const board = mountBoard(el, { intervalMs: 1000, rng: mulberry32(6) });
+    const board = mountBoard(el, { paused: false, intervalMs: 1000, rng: mulberry32(6) });
     vi.advanceTimersByTime(3000);
     const btn = pauseButton(el);
     btn.click();
@@ -235,7 +235,7 @@ describe('the board\'s pause button (WCAG 2.2.2)', () => {
     };
     try {
       const el = boardEl();
-      const board = mountBoard(el, { intervalMs: 1000, rng: mulberry32(8) });
+      const board = mountBoard(el, { paused: false, intervalMs: 1000, rng: mulberry32(8) });
       observers[0].fire(true);
       pauseButton(el).click();
       const frozen = kpi(el, 'money');
@@ -261,7 +261,7 @@ describe('the board\'s pause button (WCAG 2.2.2)', () => {
     globalThis.matchMedia = (q) => ({ matches: q.includes('prefers-reduced-motion'), media: q, addEventListener() {}, removeEventListener() {} });
     try {
       const el = boardEl();
-      const board = mountBoard(el, { intervalMs: 1000, rng: mulberry32(6) });
+      const board = mountBoard(el, { paused: false, intervalMs: 1000, rng: mulberry32(6) });
       pauseButton(el).click();
       const frozen = kpi(el, 'money');
       setHidden(true);
@@ -274,9 +274,30 @@ describe('the board\'s pause button (WCAG 2.2.2)', () => {
     }
   });
 
+  it('starts paused for a visitor who asks for less motion; Resume starts the day', () => {
+    const realMatch = globalThis.matchMedia;
+    globalThis.matchMedia = (q) => ({ matches: q.includes('prefers-reduced-motion'), media: q, addEventListener() {}, removeEventListener() {} });
+    try {
+      const el = boardEl();
+      const board = mountBoard(el, { intervalMs: 1000, rng: mulberry32(6) });
+      const frozen = kpi(el, 'money');
+      expect(label(pauseButton(el))).toBe('Resume');
+      expect(el.hasAttribute('data-paused')).toBe(true); // its live dots stop too (base.css)
+      vi.advanceTimersByTime(60000);
+      expect(kpi(el, 'money')).toBe(frozen);
+      pauseButton(el).click();
+      expect(el.hasAttribute('data-paused')).toBe(false);
+      vi.advanceTimersByTime(5000);
+      expect(kpi(el, 'money')).not.toBe(frozen);
+      board.destroy();
+    } finally {
+      globalThis.matchMedia = realMatch;
+    }
+  });
+
   it('destroy() removes the button\'s listener', () => {
     const el = boardEl();
-    const board = mountBoard(el, { intervalMs: 1000 });
+    const board = mountBoard(el, { paused: false, intervalMs: 1000 });
     const btn = pauseButton(el);
     board.destroy();
     btn.click();

@@ -22,7 +22,7 @@ const COPY = [
     'Opens the real register with sample data, so you can try it yourself.',
   ]],
   ['gate-scanning', 'h2', 'Gate scanning', ['Any gate, duplicates blocked. Barcode or QR.', 'A ticket gets in once. Scan it again and the gate sees it has already been used.']],
-  ['rfid', 'h2', 'RFID wristbands', ['RFID wristbands later in 2027.']],
+  ['rfid', 'h2', 'RFID wristbands', []], // the tag says "Later in 2027"; the line that repeated it is gone
   ['live-dashboard', 'h2', 'Live dashboard', [
     'Real-time validation. 24/7 dashboard. Watch tickets sold, scanned in and sales as they happen.',
     'Or watch the real board, recorded:',
@@ -268,12 +268,12 @@ describe('platform page', () => {
     expect(byText(el, '.tag', 'Later in 2027')).not.toBeNull();
   });
 
-  it('the two booth notes are hidden in the HTML and read "See it at Booth #410"', () => {
+  it('the two booth notes are hidden in the HTML and name the show, the place and the dates', () => {
     const notes = [...main.querySelectorAll('[data-booth-note]')];
     expect(notes).toHaveLength(2);
     for (const note of notes) {
       expect(note.hasAttribute('hidden')).toBe(true);
-      expect(text(note)).toBe('See it at Booth #410');
+      expect(text(note)).toBe('See it at IAFE Booth #410, Louisville, Nov 30 to Dec 1');
     }
     for (const id of ['rfid', 'guest-map']) {
       expect(block(id).querySelectorAll('[data-booth-note]').length, id).toBe(1);

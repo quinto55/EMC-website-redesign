@@ -4,10 +4,10 @@
     <p class="ask-or">or call toll free, 24/7: <a href="tel:{{TOLL_FREE_TEL}}">{{TOLL_FREE}}</a></p>
   </div>
   <form class="ask-card ask-form" data-ask-form hidden>
-    <label>Your name<input type="text" name="name" autocomplete="name" required></label>
-    <label>Fair or event<input type="text" name="event" autocomplete="organization" required></label>
-    <label>Email<input type="email" name="email" autocomplete="email" required></label>
-    <label>Anything we should know? <span class="opt">(optional)</span><textarea name="message" rows="3"></textarea></label>
+    <label>Your name<input type="text" name="name" autocomplete="name" maxlength="120" required></label>
+    <label>Fair or event<input type="text" name="event" autocomplete="organization" maxlength="160" required></label>
+    <label>Email<input type="email" name="email" autocomplete="email" maxlength="254" required></label>
+    <label>Anything we should know? <span class="opt">(optional)</span><textarea name="message" rows="3" maxlength="2000"></textarea></label>
     <div class="visually-hidden" aria-hidden="true">
       <label>Leave this box unchecked<input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true"></label>
     </div>

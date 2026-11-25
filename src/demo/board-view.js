@@ -2,7 +2,7 @@
 import { createBoardState, nextSale, snapshot } from './board-engine.js';
 import { renderBoardInner, boardFigures, feedRowHTML } from './board-markup.js';
 import { runWhileVisible } from './lifecycle.js';
-import { createPause, bindPauseButton } from './pause.js';
+import { createPause, bindPauseButton, reducedMotion } from './pause.js';
 
 const setText = (node, text) => {
   if (node && node.textContent !== text) node.textContent = text;
@@ -22,7 +22,7 @@ const setText = (node, text) => {
  * keeps its word in step. destroy() hides the button again and removes its listener.
  */
 export function createBoardView(el, { feedSize = 3, pause = createPause() } = {}) {
-  const unbindPause = bindPauseButton(el.querySelector('[data-pause]'), pause);
+  const unbindPause = bindPauseButton(el.querySelector('[data-pause]'), pause, el);
   function render(state, { shares } = {}) {
     const snap = snapshot(state, { feedSize });
     for (const [k, text] of Object.entries(boardFigures(snap))) setText(el.querySelector(`[data-k="${k}"]`), text);
@@ -50,10 +50,10 @@ export function createBoardView(el, { feedSize = 3, pause = createPause() } = {}
  * Takes over the board element the page was served with. The served markup already shows
  * the opening figures, so nothing changes until the first sale. Ticks only while visible and not paused.
  */
-export function mountBoard(el, { feedSize = 3, intervalMs = 1700, rng = Math.random } = {}) {
+export function mountBoard(el, { feedSize = 3, intervalMs = 1700, rng = Math.random, paused = reducedMotion() } = {}) {
   let state = createBoardState();
   if (!el.querySelector('[data-k]')) el.innerHTML = renderBoardInner(snapshot(state, { feedSize }));
-  const pause = createPause();
+  const pause = createPause(paused); // paused from the start for a visitor who asks for less motion
   const view = createBoardView(el, { feedSize, pause });
 
   function tick() {

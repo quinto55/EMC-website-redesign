@@ -200,11 +200,15 @@ describe('ask band', () => {
 
 describe('contact page', () => {
   const contact = rendered.find((r) => r.page.key === 'contact');
-  it('shows the lead, the address, the email and the number in main', () => {
+  it('shows the lead, the address, the email and the number in main, each once', () => {
     const main = contact.doc.querySelector('main');
     const t = text(main);
     expect(text(main.querySelector('h1'))).toBe('Contact EMC Tickets');
-    expect(t).toContain('Tell us about your fair and Anthony will get back to you.');
+    expect(t).toContain('Write to Anthony below, or call toll free any time.');
+    expect(t).toContain('Your note goes straight to Anthony, and he gets back to you himself.');
+    expect(main.querySelector('#talk[data-ask]')).not.toBeNull(); // the form is part of the page's main content
+    expect(main.querySelectorAll('a[href="mailto:anthony@emctickets.com"]')).toHaveLength(1); // the band's line (its no-script button adds a subject)
+    expect(main.querySelectorAll('a[href="tel:+18002902090"]')).toHaveLength(2); // the band's number and the no-script line
     expect(t).toContain('Anthony Quintana');
     expect(t).toContain('8409 Land O Lakes Blvd');
     expect(t).toContain('Land O Lakes, FL 34638');

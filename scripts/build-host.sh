@@ -38,8 +38,10 @@ fail() { echo "BUILD FAILED: $1" >&2; rm -f dist-host.zip; exit 1; }
 rm -f dist-host.zip
 npx vite build --outDir dist-host --emptyOutDir || fail "vite build did not finish"
 
-# The package is for the web root only: no staging leftovers.
-rm -f dist-host/.nojekyll dist-host/404.html
+# The package is for the web root only: no staging leftovers. The not-found page moves under emc-site/, where the
+# Cloudflare worker serves it in place of the old host's own (deploy/cloudflare/worker.js).
+rm -f dist-host/.nojekyll
+mv dist-host/404.html dist-host/emc-site/404.html
 
 ACTUAL="$(cd dist-host && ls -A | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//')"
 WANT="$(echo "$EXPECTED" | tr ' ' '\n' | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//')"

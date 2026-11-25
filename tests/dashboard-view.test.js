@@ -155,7 +155,7 @@ describe('the live dashboard', () => {
   it('leaves the served board alone when it mounts', () => {
     const el = boardEl();
     const firstStub = el.querySelector('[data-panel="feed"] li');
-    const board = mountDashboard(el);
+    const board = mountDashboard(el, { paused: false });
     expect(el.querySelector('[data-panel="feed"] li')).toBe(firstStub);
     expect(tile(el, 'tickets')).toBe('2,880');
     board.destroy();
@@ -167,7 +167,7 @@ describe('the live dashboard', () => {
     const panels = PANELS.map((p) => el.querySelector(`[data-panel="${p}"]`));
     const tiles = [...el.querySelectorAll('[data-tile]')];
     const chart = el.querySelector('[data-panel="pace"] svg');
-    const board = mountDashboard(el, { rng: mulberry32(9) });
+    const board = mountDashboard(el, { paused: false, rng: mulberry32(9) });
     // Every sale moves the gross (an add-on sale leaves Tickets today as it was).
     const before = { gross: tile(el, 'gross'), orders: tile(el, 'orders') };
     board.tick();
@@ -184,7 +184,7 @@ describe('the live dashboard', () => {
 
   it('shows exactly what the engine says after each tick', () => {
     const el = boardEl();
-    const board = mountDashboard(el, { rng: mulberry32(12) });
+    const board = mountDashboard(el, { paused: false, rng: mulberry32(12) });
     const rng = mulberry32(12);
     let state = createDashState();
     for (let i = 0; i < 30; i++) {
@@ -207,7 +207,7 @@ describe('the live dashboard', () => {
 
   it('counts the tile figures up over about 800 ms, then stops asking for frames', () => {
     const el = boardEl();
-    const board = mountDashboard(el, { rng: mulberry32(9) });
+    const board = mountDashboard(el, { paused: false, rng: mulberry32(9) });
     expect(frames.size).toBe(0);
     board.tick();
     // Every sale moves the gross (an add-on sale leaves Tickets today as it was).
@@ -224,7 +224,7 @@ describe('the live dashboard', () => {
   it('jumps straight to the new figures under reduced motion', () => {
     reduced = true;
     const el = boardEl();
-    const board = mountDashboard(el, { rng: mulberry32(9) });
+    const board = mountDashboard(el, { paused: false, rng: mulberry32(9) });
     board.tick();
     expect(frames.size).toBe(0);
     expect(tile(el, 'orders')).toBe('1,513');
@@ -234,7 +234,7 @@ describe('the live dashboard', () => {
   it('ticks once per interval while visible', () => {
     reduced = true;
     const el = boardEl();
-    const board = mountDashboard(el, { intervalMs: 1700, rng: mulberry32(4) });
+    const board = mountDashboard(el, { paused: false, intervalMs: 1700, rng: mulberry32(4) });
     vi.advanceTimersByTime(1700 * 5);
     expect(tile(el, 'orders')).toBe('1,517');
     vi.advanceTimersByTime(1700);
@@ -245,7 +245,7 @@ describe('the live dashboard', () => {
   it('stops while the tab is hidden and does not catch up afterwards', () => {
     reduced = true;
     const el = boardEl();
-    const board = mountDashboard(el, { intervalMs: 1000, rng: mulberry32(6) });
+    const board = mountDashboard(el, { paused: false, intervalMs: 1000, rng: mulberry32(6) });
     setHidden(true);
     vi.advanceTimersByTime(60000);
     expect(tile(el, 'orders')).toBe('1,512');
@@ -269,7 +269,7 @@ describe('the live dashboard', () => {
     };
     try {
       const el = boardEl();
-      const board = mountDashboard(el, { intervalMs: 1000, rng: mulberry32(8) });
+      const board = mountDashboard(el, { paused: false, intervalMs: 1000, rng: mulberry32(8) });
       observers[0].fire(false);
       vi.advanceTimersByTime(10000);
       expect(tile(el, 'orders')).toBe('1,512');
@@ -284,7 +284,7 @@ describe('the live dashboard', () => {
 
   it('a count-up in progress is finished, not left running, when the board stops', () => {
     const el = boardEl();
-    const board = mountDashboard(el, { intervalMs: 1000, rng: mulberry32(8) });
+    const board = mountDashboard(el, { paused: false, intervalMs: 1000, rng: mulberry32(8) });
     vi.advanceTimersByTime(1000);
     expect(frames.size).toBe(1);
     setHidden(true);
@@ -296,7 +296,7 @@ describe('the live dashboard', () => {
 
   it('destroy() stops everything, and a later tick() does nothing', () => {
     const el = boardEl();
-    const board = mountDashboard(el, { intervalMs: 1000, rng: mulberry32(2) });
+    const board = mountDashboard(el, { paused: false, intervalMs: 1000, rng: mulberry32(2) });
     vi.advanceTimersByTime(1000);
     board.destroy();
     expect(frames.size).toBe(0);
@@ -313,7 +313,7 @@ describe('the live dashboard', () => {
   it('a new sale goes on top of Latest sales, which keeps four', () => {
     reduced = true;
     const el = boardEl();
-    const board = mountDashboard(el, { rng: mulberry32(9) });
+    const board = mountDashboard(el, { paused: false, rng: mulberry32(9) });
     const oldFirst = el.querySelector('[data-panel="feed"] li');
     board.tick();
     const items = [...el.querySelectorAll('[data-panel="feed"] li')];
@@ -327,7 +327,7 @@ describe('the live dashboard', () => {
   it('raises the slow-gate alert from the same numbers as the Gates panel', () => {
     reduced = true;
     const el = boardEl();
-    const board = mountDashboard(el, { rng: mulberry32(1) });
+    const board = mountDashboard(el, { paused: false, rng: mulberry32(1) });
     const alerts = el.querySelector('.db-alerts');
     const flag = el.querySelector('[data-gate="north"] .db-flag');
     expect(flag.hasAttribute('hidden')).toBe(true);
@@ -359,7 +359,7 @@ describe('the live dashboard', () => {
     const screen = el.querySelector('.db-screen');
     screen.requestFullscreen = vi.fn(() => Promise.resolve());
     try {
-      const board = mountDashboard(el);
+      const board = mountDashboard(el, { paused: false });
       const button = el.querySelector('[data-fullscreen]');
       expect(button.hasAttribute('hidden')).toBe(false);
       button.click();
@@ -380,7 +380,7 @@ describe('the live dashboard', () => {
     el.querySelector('.db-chart svg').querySelector = () => { throw new Error('chart failed'); };
     const removed = vi.spyOn(document, 'removeEventListener');
     try {
-      expect(() => mountDashboard(el)).toThrow('chart failed');
+      expect(() => mountDashboard(el, { paused: false })).toThrow('chart failed');
       const button = el.querySelector('[data-fullscreen]');
       expect(button.hasAttribute('hidden')).toBe(true);
       button.click();
@@ -413,7 +413,7 @@ describe('the live dashboard', () => {
 
     it('is shown when the dashboard mounts and hidden again by destroy()', () => {
       const el = boardEl();
-      const board = mountDashboard(el);
+      const board = mountDashboard(el, { paused: false });
       expect(pauseBtn(el).hasAttribute('hidden')).toBe(false);
       board.destroy();
       expect(pauseBtn(el).hasAttribute('hidden')).toBe(true);
@@ -422,7 +422,7 @@ describe('the live dashboard', () => {
     it('stops the ticking, the clock and the count-up, keeps every figure, and Resume makes the next sale land', () => {
       reduced = true; // the tiles jump, so the orders figure shows the new sale at once
       const el = boardEl();
-      const board = mountDashboard(el, { intervalMs: 1000, rng: mulberry32(6) });
+      const board = mountDashboard(el, { paused: false, intervalMs: 1000, rng: mulberry32(6) });
       vi.advanceTimersByTime(3000);
       const btn = pauseBtn(el);
       btn.click();
@@ -449,7 +449,7 @@ describe('the live dashboard', () => {
     it('stays paused when the tab is hidden and shown, and under reduced motion', () => {
       reduced = true;
       const el = boardEl();
-      const board = mountDashboard(el, { intervalMs: 1000, rng: mulberry32(6) });
+      const board = mountDashboard(el, { paused: false, intervalMs: 1000, rng: mulberry32(6) });
       pauseBtn(el).click();
       const frozen = shown(el);
       setHidden(true);
@@ -462,7 +462,7 @@ describe('the live dashboard', () => {
 
     it('destroy() removes its listener', () => {
       const el = boardEl();
-      const board = mountDashboard(el, { intervalMs: 1000 });
+      const board = mountDashboard(el, { paused: false, intervalMs: 1000 });
       const btn = pauseBtn(el);
       board.destroy();
       btn.click();

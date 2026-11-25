@@ -86,7 +86,7 @@ describe('fair services page', () => {
       const foot = el.querySelector('.svc-foot');
       const note = foot.querySelector('[data-booth-note]');
       expect(note.hasAttribute('hidden'), id).toBe(true);
-      expect(text(note), id).toBe('See it at Booth #410');
+      expect(text(note), id).toBe('See it at IAFE Booth #410, Louisville, Nov 30 to Dec 1');
       expect(byText(foot, 'a[href="#talk"]', "Let's talk about your fair"), id).not.toBeNull();
     }
     expect([...main.querySelectorAll('section.svc')].map((s) => s.id)).toEqual(SERVICES.map(([id]) => id));
