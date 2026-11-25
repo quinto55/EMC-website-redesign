@@ -10,6 +10,8 @@ Use this page when nobody has the login of the web host (the server at 162.144.9
 
 **What this never does:** delete or change a record at GoDaddy (they stay as the way back), or touch the old host.
 
+**Live since 2026-11-24, about 11:45 PM.** After the switch `check-live.mjs --post` on https://emctickets.com gave 51 OK, 0 FAIL; a search and a POST to `/` reached WordPress. Cloudflare account: quintanaanthony23@gmail.com's; name servers `macy` and `margo.ns.cloudflare.com`; Worker `emc-site`.
+
 **Proven before go-live (2026-11-24):** the Worker run locally against the real old host passed all 51 checks of `check-live.mjs --post`, and a search, a short link and a POST to `/` reached WordPress.
 
 ## 2. Before you start
@@ -23,7 +25,7 @@ Use this page when nobody has the login of the web host (the server at 162.144.9
 1. **Create a Cloudflare account** (free). The owner of the domain does this, with their own email and password, and turns on two-step sign-in.
 2. **Add the domain.** "Add a domain", `emctickets.com`, the **Free** plan. Cloudflare scans for records.
 3. **Import the zone file.** DNS, Records, "Import and Export", import `emctickets.com.zone.txt`. Cloudflare may report records that already exist from its scan; that is fine.
-4. **Proxy status.** Exactly two records are **Proxied** (orange cloud): the `A` record for `emctickets.com` (162.144.98.42) and the `CNAME` `www`. **Every other record is DNS only** (grey cloud): the wildcard `*`, `app`, `webmail`, `ftp`, `autodiscover`, `email`, `msoid`, `lyncdiscover`, `sip`, the two `selector._domainkey` names, `tickets` and anything else. Email and the ticketing app break if they are proxied.
+4. **Proxy status.** Cloudflare's import turns the proxy ON for every A and CNAME record; turn it off on all of them first. **Until the name servers are switched and the certificate is live (section 6), keep every record DNS only, these two included.** After that, exactly two records are **Proxied** (orange cloud): the `A` record for `emctickets.com` (162.144.98.42) and the `CNAME` `www`. **Every other record is DNS only** (grey cloud): the wildcard `*`, `app`, `webmail`, `ftp`, `autodiscover`, `email`, `msoid`, `lyncdiscover`, `sip`, the two `selector._domainkey` names, `tickets` and anything else. Email and the ticketing app break if they are proxied.
 5. **Note Cloudflare's two name servers** (shown when you add the domain, for example `xxx.ns.cloudflare.com`).
 6. **Compare every record:**
 
@@ -31,11 +33,11 @@ Use this page when nobody has the login of the web host (the server at 162.144.9
    node scripts/check-dns.mjs emctickets.com.zone.txt <cloudflare-ns-1> <cloudflare-ns-2>
    ```
 
-   Good: the last line says `N OK, 0 DIFF`. For `emctickets.com` and `www` the addresses are skipped on purpose (Cloudflare answers with its own). Fix every `DIFF` in Cloudflare's DNS page and run it again. **Do not go on with a `DIFF` on an email record** (`MX`, `TXT`, `autodiscover`, `selector1`/`selector2`, `_dmarc`, `msoid`, `sip`, `lyncdiscover`, the `SRV` records).
+   Good: the last line says `N OK, 0 DIFF`. For `emctickets.com` and `www` the addresses are skipped on purpose (Cloudflare answers with its own). Fix every `DIFF` in Cloudflare's DNS page and run it again. One `DIFF` is expected and harmless: a `TXT` at `_domainconnect`, which Cloudflare adds on its own. **Do not go on with a `DIFF` on an email record** (`MX`, `TXT`, `autodiscover`, `selector1`/`selector2`, `_dmarc`, `msoid`, `sip`, `lyncdiscover`, the `SRV` records).
 
 ## 4. Cloudflare settings
 
-1. **SSL/TLS, encryption mode: Full.** Not Flexible: the old host sends http to https, and Flexible would loop forever. Not Full (strict): if the old host ever fails to renew its certificate (Let's Encrypt, valid until 2027-01-18 on 2026-11-24), strict mode takes every event site down. Leave "Always Use HTTPS" off; the old host already does it.
+1. **SSL/TLS, encryption mode: Full.** After the certificate is live (section 6), also turn on **Always Use HTTPS** (SSL/TLS, Edge Certificates): without it `http://emctickets.com/` shows the new home page over plain http. No loop in Full mode, which reaches the old host over https. Not Flexible: the old host sends http to https, and Flexible would loop forever. Not Full (strict): if the old host ever fails to renew its certificate (Let's Encrypt, valid until 2027-01-18 on 2026-11-24), strict mode takes every event site down. Leave "Always Use HTTPS" off; the old host already does it.
 2. **Scrape Shield, Email Address Obfuscation: off.** It rewrites email links on every page, the event sites included.
 3. **Caching, Configuration, Browser Cache TTL: "Respect Existing Headers".**
 4. **Caching, Cache Rules: one rule, "All incoming requests", Cache eligibility: Bypass cache.** The old host's pages and pictures then behave exactly as today (nothing held at Cloudflare). The new site's own files are not affected: the Worker serves them with their own cache times (`deploy/cloudflare/_headers`).
@@ -49,9 +51,11 @@ Use this page when nobody has the login of the web host (the server at 162.144.9
 
 ## 6. Switch the name servers
 
-1. **GoDaddy, emctickets.com, DNS, Nameservers, Change, "I'll use my own nameservers":** enter Cloudflare's two, save. Do not delete anything else at GoDaddy. (DNSSEC is not on at the registry on 2026-11-24, so there is nothing to turn off; if GoDaddy says it is on, turn it off first and wait a day.)
-2. Wait until Cloudflare says the domain is **Active**. Minutes to a few hours. During the change some visitors see the old site and some the new; both work, and email keeps flowing because both sets of name servers give the same records.
-3. **Check, once a lookup of emctickets.com gives Cloudflare's addresses** (for example `https://dns.google/resolve?name=emctickets.com&type=A`):
+1. **GoDaddy, emctickets.com, DNS, Nameservers, Change, "I'll use my own nameservers":** enter Cloudflare's two, save, "Continue & Verify". GoDaddy texts a code to the account's phone (the one ending 2760 on 2026-11-24); its owner types it in. Do not delete anything else at GoDaddy. (DNSSEC is not on at the registry on 2026-11-24, so there is nothing to turn off; if GoDaddy says it is on, turn it off first and wait a day.)
+2. Wait until Cloudflare says the domain is **Active** (it was within minutes on 2026-11-24). With both records still DNS only, every visitor keeps reaching the old site exactly as before, and email keeps flowing because both sets of name servers give the same records.
+3. **Wait for the certificate.** SSL/TLS, Edge Certificates: the Universal certificate for `emctickets.com, *.emctickets.com` goes from "Pending Validation" to **Active** after the domain is Active. **Never proxy before this:** a proxied record without the certificate fails every https visit, event sites included (this happened for a few minutes on 2026-11-24 until the two records went back to DNS only). To check from a terminal: `echo | openssl s_client -connect 104.21.92.16:443 -servername emctickets.com 2>/dev/null | openssl x509 -noout -subject` prints the certificate once it is live.
+4. **Now proxy the two records** (`emctickets.com` and `www`, section 3, item 4). This is the moment the new site goes live.
+5. **Check, once a lookup of emctickets.com gives Cloudflare's addresses** (for example `https://dns.google/resolve?name=emctickets.com&type=A`):
    - `node scripts/check-live.mjs https://emctickets.com --post`. Good: `51 OK, 0 FAIL`.
    - WordPress still gets its own addresses: `curl -s 'https://emctickets.com/?s=test' | grep -c 'name="emc-site"'` prints `0`, and the page is WordPress's search results.
    - By eye, in a private window, on a phone and on a computer: the home page (the curtain on a computer), Platform, Contact, one event site.
@@ -72,3 +76,4 @@ Use this page when nobody has the login of the web host (the server at 162.144.9
 - **The old host sees Cloudflare's addresses, not visitors'.** WordPress security plugins and the host's visitor logs see Cloudflare. If the host starts refusing Cloudflare, every event site shows a Cloudflare error: undo fast (section 7), then ask the host.
 - **The daily Worker limit.** Watch the Worker's request count in Cloudflare the first few days, more so while a fair is selling. If it nears 100,000 a day, Workers Paid ($5 a month, 10 million requests) removes the limit. Another option: routes with no Worker for the 18 event folders, so their traffic skips the Worker.
 - **Visitor counts for `/iafe/`** come from Cloudflare's analytics, not the host's logs.
+- **Klaviyo's `info` and `send` subdomains** are handed to Klaviyo's name servers, which refused to answer for them on 2026-11-24, before and after the switch alike. Not caused by this change; Klaviyo's sending-domain setup is unfinished or abandoned.
