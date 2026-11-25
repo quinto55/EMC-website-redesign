@@ -82,9 +82,9 @@ describe('the DNS check', () => {
       '@\t600\t IN \tA\t162.144.98.42', '\t600\t IN \tMX\t0\temctickets-com.mail.protection.outlook.com.',
       '*\t3600\t IN \tA\t159.65.38.62', 'www\t3600\t IN \tCNAME\t@',
       '_dmarc\t3600\t IN \tTXT\t"v=DMARC1; p=none"', 'Selector1._domainkey\t3600\t IN \tCNAME\tx.onmicrosoft.com.',
-      'other.emctickets.com.\t600\t IN \tA\t1.2.3.4',
+      'other.emctickets.com.\t600\t IN \tA\t1.2.3.4', '_sip._tls.@\t3600\t IN \tSRV\t100\t1\t443\tsipdir.online.lync.com.',
     ].join('\n');
-    expect(namesFromZone(zone)).toEqual(['*.emctickets.com', '_dmarc.emctickets.com', 'emctickets.com', 'other.emctickets.com',
+    expect(namesFromZone(zone)).toEqual(['*.emctickets.com', '_dmarc.emctickets.com', '_sip._tls.emctickets.com', 'emctickets.com', 'other.emctickets.com',
       'selector1._domainkey.emctickets.com', 'www.emctickets.com']);
   });
 

@@ -20,7 +20,8 @@ export function namesFromZone(text, origin = ZONE) {
   for (const line of text.split(/\r?\n/)) {
     // Blank, comment, $ORIGIN/$TTL and indented lines (same owner as the line before, or a wrapped record) name no one new.
     if (!line.trim() || /^[;$\s(]/.test(line)) continue;
-    const owner = line.split(/\s+/)[0].toLowerCase();
+    // GoDaddy writes some names relative to @ ("_sip._tls.@").
+    const owner = line.split(/\s+/)[0].toLowerCase().replace(/\.@$/, '');
     names.add(owner === '@' ? origin : owner.endsWith('.') ? owner.slice(0, -1) : `${owner}.${origin}`);
   }
   return [...names].sort();
@@ -38,7 +39,9 @@ async function resolverFor(hosts) {
 
 async function ask(resolver, name, type) {
   try {
-    return await resolver.resolve(name, type);
+    const records = await resolver.resolve(name, type);
+    // A long TXT record comes in pieces, and each server may cut it in different places.
+    return type === 'TXT' ? records.map((pieces) => pieces.join('')) : records;
   } catch (e) {
     if (e.code === 'ENODATA' || e.code === 'ENOTFOUND') return [];
     return { error: e.code || String(e) };
