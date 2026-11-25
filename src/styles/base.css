@@ -18,6 +18,8 @@ input, textarea, select { font: inherit; color: inherit; }
 h1 { font: 700 64px/1.03 var(--font-head); letter-spacing: -.025em; }
 h2 { font: 700 48px/1.05 var(--font-head); letter-spacing: -.025em; }
 h3 { font: 700 24px/1.15 var(--font-head); letter-spacing: -.015em; }
+h1, h2, h3 { text-wrap: balance; }
+p, li, dd, figcaption { text-wrap: pretty; } /* no single word left alone on a paragraph's last line */
 
 .wrap { max-width: 1220px; margin: 0 auto; padding: 0 var(--gutter); }
 .wrap .wrap { padding: 0; } /* a wrap inside a wrap keeps one gutter */
@@ -40,11 +42,11 @@ h3 { font: 700 24px/1.15 var(--font-head); letter-spacing: -.015em; }
   border: 0;
   border-radius: 999px;
   box-shadow: 0 5px 0 var(--red-shadow);
-  transition: transform .12s ease, box-shadow .12s ease;
+  transition: transform .12s var(--ease-out), box-shadow .12s var(--ease-out);
 }
 .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--red-shadow); }
-.btn.ghost { background: #fff; color: var(--ink); box-shadow: 0 5px 0 var(--ghost-shadow); }
-.btn.ghost:active { box-shadow: 0 2px 0 var(--ghost-shadow); }
+.btn.ghost { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--field-line), 0 5px 0 var(--ghost-shadow); } /* the outline is 3:1 on the cream and amber bands, where white alone was 1.1:1 */
+.btn.ghost:active { box-shadow: inset 0 0 0 1.5px var(--field-line), 0 2px 0 var(--ghost-shadow); }
 
 /* White cards, numbered squares and the two status pills. */
 .card { background: #fff; border-radius: 22px; padding: 26px; box-shadow: var(--card-shadow); }
@@ -102,7 +104,7 @@ h3 { font: 700 24px/1.15 var(--font-head); letter-spacing: -.015em; }
   content: "";
   position: absolute;
   top: 50%;
-  transition: translate .15s ease;
+  transition: translate .15s var(--ease-out);
 }
 .arrow::before { right: .14em; width: .74em; margin-top: -1px; border-top: 2px solid; }  /* the shaft */
 .arrow::after {                                                                           /* the head */
@@ -114,8 +116,10 @@ h3 { font: 700 24px/1.15 var(--font-head); letter-spacing: -.015em; }
   border-right: 2px solid;
   transform: rotate(45deg);
 }
-a:hover .arrow::before,
-a:hover .arrow::after { translate: 3px 0; }
+@media (hover: hover) {
+  a:hover .arrow::before,
+  a:hover .arrow::after { translate: 3px 0; }
+}
 
 /* Keyboard focus is always visible. */
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
@@ -154,7 +158,17 @@ a:hover .arrow::after { translate: 3px 0; }
   .sec { padding: 54px 0; }
 }
 
+/* A paused sample board stops its live dots too (src/demo/pause.js sets data-paused). */
+[data-paused] *,
+[data-paused] *::before,
+[data-paused] *::after { animation: none !important; }
+
+/* Less motion: nothing slides, grows, pulses or loops, but colour and fade changes stay, so hover, focus and new
+   figures still show. The sample boards start paused (src/demo/pause.js). */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after { animation: none !important; transition: none !important; }
+  *, *::before, *::after {
+    animation: none !important;
+    transition-property: color, background-color, border-color, text-decoration-color, opacity, box-shadow !important;
+  }
 }

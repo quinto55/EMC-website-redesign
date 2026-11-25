@@ -3,8 +3,8 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import worker, { decide, MOVED } from '../deploy/cloudflare/worker.js';
-import { REDIRECTS } from '../scripts/check-live.mjs';
+import worker, { decide, MOVED, EVENT_SITES as WORKER_EVENT_SITES } from '../deploy/cloudflare/worker.js';
+import { REDIRECTS, EVENT_SITES } from '../scripts/check-live.mjs';
 import { namesFromZone, canon } from '../scripts/check-dns.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -71,6 +71,41 @@ describe('the Cloudflare worker answers', () => {
     const moved = await worker.fetch(new Request('https://emctickets.com/contact-us/'), env);
     expect(moved.status).toBe(301);
     expect(moved.headers.get('Location')).toBe('/contact/');
+  });
+});
+
+describe("the Cloudflare worker's not-found page", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const html404 = (body) => new Response(body, { status: 404, headers: { 'content-type': 'text/html; charset=UTF-8' } });
+  const env = { ASSETS: { fetch: vi.fn(async () => new Response('new 404', { headers: { 'content-type': 'text/html' } })) } };
+  const get = (path, init) => worker.fetch(new Request(`https://emctickets.com${path}`, init), env);
+
+  it('knows the same fair ticket sites as the check script', () => {
+    expect(WORKER_EVENT_SITES.map((s) => `/${s}/`)).toEqual(EVENT_SITES);
+  });
+
+  it("answers a missing page with the new site's own, still as a 404", async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => html404('old 404')));
+    const res = await get('/nope-xyz');
+    expect(res.status).toBe(404);
+    expect(await res.text()).toBe('new 404');
+    expect(new URL(env.ASSETS.fetch.mock.calls.at(-1)[0].url).pathname).toBe('/emc-site/404');
+    const head = await get('/nope-xyz', { method: 'HEAD' });
+    expect(head.status).toBe(404);
+    expect(await head.text()).toBe('');
+  });
+
+  it("leaves the old host's answer alone inside a fair's ticket site, for the API, for a form post and for real pages", async () => {
+    vi.stubGlobal('fetch', vi.fn(async (req) => {
+      const path = new URL(req.url).pathname;
+      if (path.startsWith('/wp-json/')) return new Response('{}', { status: 404, headers: { 'content-type': 'application/json' } });
+      if (path === '/event-list/') return new Response('old page', { headers: { 'content-type': 'text/html' } });
+      return html404('old 404');
+    }));
+    expect(await (await get('/flstatefair/nope/')).text()).toBe('old 404');
+    expect(await (await get('/wp-json/nope')).text()).toBe('{}');
+    expect(await (await get('/nope/', { method: 'POST', body: 'x' })).text()).toBe('old 404');
+    expect(await (await get('/event-list/')).text()).toBe('old page');
   });
 });
 

@@ -4,7 +4,8 @@ import { join } from 'node:path';
 import { PAGES } from '../build/pages.js';
 import { renderPage } from '../build/render.js';
 import { ROOT } from './helpers/pages.js';
-import { initAskForms, setAskVariant } from '../src/form/ask-form.js';
+import { initAskForms, setAskVariant, initAskSwitches } from '../src/form/ask-form.js';
+import { LIMITS } from '../src/form/lead.js';
 
 const contact = PAGES.find((p) => p.key === 'contact');
 const retail = PAGES.find((p) => p.key === 'retail');
@@ -65,8 +66,15 @@ describe('validation', () => {
       expect(el.getAttribute('aria-invalid')).toBe('true');
       const err = document.getElementById(el.getAttribute('aria-describedby'));
       expect(text(err)).toBe(msg);
+      // Right after the label, never inside it: inside, it was read twice (in the field's name and its description).
+      expect(el.closest('label').contains(err)).toBe(false);
+      expect(el.closest('label').nextElementSibling).toBe(err);
     }
     expect(document.activeElement).toBe(form.elements.name);
+  });
+  it("each field stops at the length the lead keeps, so nothing typed is cut off unseen", () => {
+    setup();
+    for (const [name, max] of Object.entries(LIMITS)) expect(form.elements[name].maxLength, name).toBe(max);
   });
   it('error ids are unique across forms and clear once fixed', () => {
     setup();
@@ -271,6 +279,20 @@ describe('setAskVariant', () => {
     expect(d.send.mock.calls[0][0].request).toBe('In-store mockup');
     setAskVariant(band, 'talk');
     expect(text(q('[data-ask-heading]'))).toBe("Let's talk about your fair.");
+  });
+  it('a switch link turns the form into its request; a plain link to the form afterwards puts it back', () => {
+    setup();
+    document.body.insertAdjacentHTML('afterbegin', '<a id="offer" href="#talk" data-ask-switch="mockup"><b>Offer</b></a><a id="plain" href="#talk">Talk</a>');
+    initAskSwitches(document);
+    const go = (id) => document.getElementById(id).dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    go('plain'); // before any switch, a plain link changes nothing
+    expect(band.getAttribute('data-ask-variant')).toBe('talk');
+    document.querySelector('#offer b').dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    expect(band.getAttribute('data-ask-variant')).toBe('mockup');
+    expect(text(button)).toBe('Request my mockup');
+    go('plain');
+    expect(band.getAttribute('data-ask-variant')).toBe('talk');
+    expect(text(button)).toBe('Send to Anthony');
   });
   it('ignores an unknown variant', () => {
     setup();

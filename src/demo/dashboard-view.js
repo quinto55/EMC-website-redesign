@@ -6,7 +6,7 @@ import {
 } from './dashboard-markup.js';
 import { count } from './board-engine.js';
 import { runWhileVisible } from './lifecycle.js';
-import { createPause, bindPauseButton } from './pause.js';
+import { createPause, bindPauseButton, reducedMotion } from './pause.js';
 
 const COUNT_UP_MS = 800;
 const COUNT_UP_FRAMES = 48;
@@ -20,7 +20,6 @@ function counterFrames(from, to, steps) {
   return Array.from({ length: n }, (_, i) => (i === n - 1 ? to : Math.round(from + (to - from) * (1 - (1 - (i + 1) / n) ** 3))));
 }
 
-const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches === true;
 const setText = (node, text) => {
   if (node && node.textContent !== text) node.textContent = text;
 };
@@ -80,7 +79,7 @@ export function createDashboardView(el, { pause = createPause() } = {}) {
   const sparks = new Map([...el.querySelectorAll('[data-gate]')].map((li) => [li.getAttribute('data-gate'), {
     li, flag: li.querySelector('.db-flag'), parts: new Map([...li.querySelectorAll('svg [data-c]')].map((n) => [n.getAttribute('data-c'), n])),
   }]));
-  const unbindPause = bindPauseButton(el.querySelector('[data-pause]'), pause);
+  const unbindPause = bindPauseButton(el.querySelector('[data-pause]'), pause, el);
   let chartSize = { ...CHART_SIZE };
   let snap = null;
   let destroyed = false;
@@ -257,12 +256,12 @@ export function createDashboardView(el, { pause = createPause() } = {}) {
  * panel. Ticks only while the board is on screen and the tab is showing; the tiles count up with animation frames
  * only while they are counting. After destroy() nothing runs.
  */
-export function mountDashboard(el, { intervalMs = 1700, rng = Math.random } = {}) {
+export function mountDashboard(el, { intervalMs = 1700, rng = Math.random, paused = reducedMotion() } = {}) {
   let state = createDashState();
   if (!el.querySelector('.db-screen')) {
     el.innerHTML = `<div class="db-screen">${renderDashboardInner(dashSnapshot(state))}</div><div class="db-stand" aria-hidden="true"></div>`;
   }
-  const pause = createPause();
+  const pause = createPause(paused); // paused from the start for a visitor who asks for less motion
   const view = createDashboardView(el, { pause });
   try {
     view.render(dashSnapshot(state)); // what the board already shows: this only fits the chart to its box

@@ -81,7 +81,9 @@
 }
 .iafe-closing-contact { display: flex; flex-wrap: wrap; gap: 4px 28px; font-weight: 600; }
 .iafe-closing-contact a { display: inline-flex; align-items: center; min-height: 44px; }
-.iafe-closing-contact a:hover { color: var(--red); }
+@media (hover: hover) {
+  .iafe-closing-contact a:hover { color: var(--red); }
+}
 .iafe-closing-contact small { font: 500 13px var(--font-mono); color: var(--mut); }
 
 @media (max-width: 1000px) {

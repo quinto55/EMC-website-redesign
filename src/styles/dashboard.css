@@ -140,7 +140,7 @@
   inset: 0;
   border: 2px solid var(--db-red);
   border-radius: 50%;
-  animation: db-ping 1.8s cubic-bezier(0, 0, .2, 1) infinite;
+  animation: db-ping 1.8s var(--ease-out) infinite;
 }
 @keyframes db-ping {
   0% { transform: scale(1); opacity: .9; }
@@ -180,8 +180,14 @@
   white-space: nowrap;
   cursor: pointer;
 }
-.db .db-btn:hover,
-.db .db-pause:hover { background: rgba(255, 255, 255, .06); }
+@media (hover: hover) {
+  .db .db-btn:hover,
+  .db .db-pause:hover { background: rgba(255, 255, 255, .06); }
+}
+.db .db-btn,
+.db .db-pause { transition: transform 160ms var(--ease-out); }
+.db .db-btn:active,
+.db .db-pause:active { transform: scale(.97); }
 .db .db-btn[hidden],
 .db .db-pause[hidden] { display: none; }
 
@@ -289,7 +295,7 @@
   inset: -.2em;
   border: 2px solid var(--db-amber);
   border-radius: 50%;
-  animation: db-ping 1.8s cubic-bezier(0, 0, .2, 1) infinite;
+  animation: db-ping 1.8s var(--ease-out) infinite;
 }
 
 /* ── Latest sales: ticket stubs ───────────────────────────────────────────────────────────────────────── */
@@ -332,8 +338,8 @@
 .db .db-stub__amount span { color: var(--db-muted); font-size: var(--db-small); white-space: nowrap; }
 /* A sale arriving drops in at the top; its total flashes gold. Only opacity and position move: growing its height
    from 0 made the whole panel shrink and regrow with every sale, which shifted the page under it on phones. */
-.db .db-arrive { animation: db-arrive 300ms cubic-bezier(.23, 1, .32, 1) both; }
-.db .db-arrive .db-stub__amount strong { animation: db-flash 1.6s ease-out both; }
+.db .db-arrive { animation: db-arrive 300ms var(--ease-out) both; }
+.db .db-arrive .db-stub__amount strong { animation: db-flash 1.6s var(--ease-out) both; }
 @keyframes db-arrive {
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: none; }
@@ -368,7 +374,7 @@
   stroke-width: 2;
   transform-box: fill-box;
   transform-origin: center;
-  animation: db-ping 2.2s cubic-bezier(0, 0, .2, 1) infinite;
+  animation: db-ping 2.2s var(--ease-out) infinite;
 }
 .db .db-label { fill: var(--db-text); font: 600 13px var(--font-text); }
 .db .db-label--muted { fill: var(--db-muted); font-weight: 500; }
@@ -611,6 +617,10 @@
   .db .db-gate { grid-template-columns: minmax(0, 1fr) minmax(3.5em, 6.5em) 4em; }
   .db .db-reg__figs { grid-template-columns: minmax(0, 1fr) auto; row-gap: .1em; }
   .db .db-brief { flex-wrap: wrap; row-gap: 2px; }
+  /* Nothing under 12px on a phone: the clock's AM/PM, the chart's axis and the brief's tag were 9 to 11px. */
+  .db .db-clock__period,
+  .db .db-axis,
+  .db .db-brief__tag { font-size: 12px; }
 }
 @media (max-width: 400px) {
   .db .db-fraud__counts { grid-template-columns: repeat(2, auto); justify-content: start; column-gap: 2.2em; }

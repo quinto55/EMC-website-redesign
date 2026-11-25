@@ -12,9 +12,11 @@
   background: #fff;
   box-shadow: var(--card-shadow);
   scroll-margin-top: 24px;
-  transition: transform .18s ease, box-shadow .18s ease;
+  transition: transform .18s var(--ease-out), box-shadow .18s var(--ease-out);
 }
-.tile:hover { transform: translateY(-4px); box-shadow: 0 0 0 1px var(--ghost-shadow), 0 20px 40px rgba(120, 80, 20, .16); }
+@media (hover: hover) {
+  .tile:hover { transform: translateY(-4px); box-shadow: 0 0 0 1px var(--ghost-shadow), 0 20px 40px rgba(120, 80, 20, .16); }
+}
 .tile h3 { margin: 20px 12px 0; font-size: 32px; letter-spacing: -.02em; }
 .tile p { margin: 6px 12px 0; font-size: 18px; color: var(--mut); }
 .tile-go { display: inline-flex; align-items: center; align-self: flex-start; min-height: 44px; margin: auto 12px 0; padding-top: 8px; font-weight: 700; color: var(--red); }
@@ -23,7 +25,7 @@
 .shot { position: relative; display: block; }
 .shot img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 16px; border: 1px solid var(--line); background: var(--cream); }
 .shot::before,
-.shot::after { content: ""; position: absolute; right: 16px; bottom: 16px; transition: transform .18s ease; }
+.shot::after { content: ""; position: absolute; right: 16px; bottom: 16px; transition: transform .18s var(--ease-out); }
 .shot::before { width: 58px; height: 58px; border-radius: 50%; background: var(--red); box-shadow: 0 5px 0 var(--red-shadow); }
 .shot::after { /* the triangle, drawn with borders */
   right: 35px;
@@ -32,8 +34,10 @@
   border-left: 18px solid #fff;
   border-right: 0;
 }
-a:hover .shot::before,
-a:hover .shot::after { transform: scale(1.08); }
+@media (hover: hover) {
+  a:hover .shot::before,
+  a:hover .shot::after { transform: scale(1.08); }
+}
 
 /* The retail tile's picture: the three store logos over the number of locations. */
 .logo-wall {
@@ -55,7 +59,6 @@ a:hover .shot::after { transform: scale(1.08); }
 /* ---------- the Fair services band ---------- */
 .svc-band { scroll-margin-top: 24px; padding: 44px 40px 40px; border-radius: 28px; background: var(--tint-amber); }
 .svc-band-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 20px 40px; margin-bottom: 30px; }
-.svc-band h2 { font-size: 56px; }
 .svc-band .lede { max-width: none; font-size: 20px; }
 
 /* ---------- points: a short heading and one sentence each ---------- */
@@ -74,7 +77,6 @@ a:hover .shot::after { transform: scale(1.08); }
   .logo-stat b { font-size: 56px; }
   .svc-band { margin-right: calc(-1 * var(--gutter)); margin-left: calc(-1 * var(--gutter)); padding: 34px var(--gutter) var(--gutter); }
   .svc-band-head { margin-bottom: 22px; }
-  .svc-band h2 { font-size: 38px; }
   .svc-band .lede { font-size: 18px; }
 }
 /* One tile under another on phones; tablets keep two across. */

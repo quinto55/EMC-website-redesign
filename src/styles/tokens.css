@@ -30,6 +30,10 @@
 
   --card-shadow: 0 0 0 1px var(--line), 0 12px 28px rgba(120, 80, 20, .08);
   --float-shadow: 0 0 0 1px var(--line), 0 24px 48px rgba(60, 35, 0, .2);
+  /* The site's three motion curves. Anything arriving or answering a press uses ease-out. */
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  --ease-in-out: cubic-bezier(.6, 0, .25, 1); /* something moving across the screen */
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1); /* the one overshoot: the 40+ count landing */
   --gutter: 40px;
   --focus: var(--ink); /* focus ring; set to white on red and photo backgrounds */
 }

@@ -27,7 +27,7 @@ describe('home page', () => {
     expect(byText(hero, 'a[href="/platform/"]', 'See it work')).not.toBeNull();
 
     // The live sample board sits in the hero with its chip.
-    expect(byText(hero, 'p, span', 'Running right now')).not.toBeNull();
+    expect(byText(hero, 'p, span', 'Live demo')).not.toBeNull();
     expect(hero.querySelector('[data-board][data-sample]')).not.toBeNull();
   });
 
@@ -129,7 +129,7 @@ describe('home page', () => {
     // The hero keeps its compact board and chip; each board keeps its own name; nothing is announced as it ticks.
     expect(hero.querySelector('[data-board]')).not.toBeNull();
     expect(hero.querySelector('[data-dashboard]')).toBeNull();
-    expect(byText(hero, 'p', 'Running right now')).not.toBeNull();
+    expect(byText(hero, 'p', 'Live demo')).not.toBeNull();
     const board = hero.querySelector('[data-board]');
     expect([board.getAttribute('role'), board.getAttribute('aria-label')]).toEqual(['group', 'Sample live sales board']);
     expect([dash[0].getAttribute('role'), dash[0].getAttribute('aria-label')]).toEqual(['group', 'Sample live board']);
@@ -259,16 +259,17 @@ describe('home page', () => {
     for (const img of sec.querySelectorAll('img')) expect(img.getAttribute('loading')).toBe('lazy');
   });
 
-  it("the retail page's offer sits under the pair and goes to that page's form", () => {
+  it("the retail offer sits under the pair and turns this page's form into the mockup request", () => {
     const offer = main.querySelector('section.reach a.offer');
     expect(offer).not.toBeNull();
-    expect(offer.getAttribute('href')).toBe('/retail-partners/#talk');
+    expect(offer.getAttribute('href')).toBe('#talk');
+    expect(offer.getAttribute('data-ask-switch')).toBe('mockup');
     expect(byText(offer, 'b', 'Get a free in-store mockup of your event.')).not.toBeNull();
     expect(byText(offer, 'span', 'See what your event looks like on a Walgreens counter.')).not.toBeNull();
     expect(text(offer.querySelector('.btn'))).toBe('Request my mockup');
     const follows = (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
     expect(follows(main.querySelector('section.reach .pair'), offer)).toBe(true);
-    // The same words as the retail page's own ask, which is where the link lands.
+    // The same words as the retail page's own ask, which the form here turns into.
     const retail = rendered.find((r) => r.page.key === 'retail').doc;
     const ask = retail.getElementById('talk');
     expect(text(ask.querySelector('[data-ask-heading]'))).toBe('Get a free in-store mockup of your event.');

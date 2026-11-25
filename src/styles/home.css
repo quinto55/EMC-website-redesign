@@ -1,18 +1,18 @@
 /* The home page (spec 5.3), from the approved mockup's .d2 and .bg-b ("full photo") rules. */
 
 /* ---------- the stage: the photo behind the header and the hero ----------
-   Three rows: the header, the hero, the rest of the page. <main> spans the last two as a
+   Four rows: the header, the hero, the rest of the page and the ask band. <main> spans the last three as a
    subgrid, so the photo (rows 1 and 2) ends exactly where the hero ends, however tall the
    header is (it grows on phones with JavaScript off), while the header stays outside <main>.
    A full-window cover can later sit over the same two rows. */
 .stage {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr auto auto;
 }
 .stage > .top { grid-row: 1; grid-column: 1; }
 .stage > main {
-  grid-row: 2 / 4;
+  grid-row: 2 / 5;
   grid-column: 1;
   display: grid;
   grid-template-rows: subgrid;
@@ -178,13 +178,15 @@
   color: var(--ink);
   text-wrap: balance;
 }
-.logos { justify-self: end; display: flex; align-items: center; gap: 24px; border-radius: 10px; transition: opacity .15s ease; } /* a link to the retail partners page */
-.logos:hover { opacity: .7; }
+.logos { justify-self: end; display: flex; align-items: center; gap: 24px; border-radius: 10px; transition: opacity .15s var(--ease-out); } /* a link to the retail partners page */
+@media (hover: hover) {
+  .logos:hover { opacity: .7; }
+}
 .logos img { width: auto; height: 26px; }
 
 /* The play, set by the script only as it runs. As the number starts counting, the logos fade in after 300 ms
    (500 ms, starting from hidden), so the card is never just a number. */
-.proof.is-armed .logos { animation: proof-fade-in .5s cubic-bezier(.2, .7, .3, 1) .3s both; }
+.proof.is-armed .logos { animation: proof-fade-in .5s var(--ease-out) .3s both; }
 @keyframes proof-fade-in { from { opacity: 0; } }
 /* Held back until the number lands. */
 .proof.is-armed .yrs-plus { opacity: 0; transform: scale(.6); }
@@ -195,13 +197,13 @@
 .proof.is-counted .yrs-plus {
   opacity: 1;
   transform: none;
-  transition: transform .25s cubic-bezier(.34, 1.56, .64, 1), opacity .1s linear;
+  transition: transform .25s var(--ease-spring), opacity .1s linear;
 }
-.proof.is-counted .yrs-num::before { transform: none; transition: transform .5s cubic-bezier(.6, 0, .25, 1) .1s; }
+.proof.is-counted .yrs-num::before { transform: none; transition: transform .5s var(--ease-in-out) .1s; }
 .proof.is-counted .yrs-words {
   opacity: 1;
   transform: none;
-  transition: opacity .4s ease .3s, transform .4s cubic-bezier(.2, .7, .3, 1) .3s;
+  transition: opacity .4s var(--ease-out) .3s, transform .4s var(--ease-out) .3s;
 }
 
 /* ---------- Live dashboard: the full sample board, under the proof strip ----------
@@ -264,9 +266,11 @@
   margin-top: 20px;
   padding: 24px 30px;
   border-radius: 26px;
-  transition: transform .18s ease, box-shadow .18s ease;
+  transition: transform .18s var(--ease-out), box-shadow .18s var(--ease-out);
 }
-.offer:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px var(--ghost-shadow), 0 20px 40px rgba(120, 80, 20, .16); }
+@media (hover: hover) {
+  .offer:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px var(--ghost-shadow), 0 20px 40px rgba(120, 80, 20, .16); }
+}
 .offer-text b { display: block; font: 700 30px/1.15 var(--font-head); letter-spacing: -.02em; }
 .offer-text span { display: block; margin-top: 4px; font-size: 18px; color: var(--mut); }
 
@@ -317,6 +321,7 @@
   .live-board > .db { margin: 24px 0 14px; }
 
   .mods { grid-template-columns: minmax(0, 1fr); }
+  .mod h3 { font-size: 30px; } /* under the 36px section heading */
   .feature-sec { padding-bottom: 54px; }
   .reach .pair { margin-top: 24px; }
   .offer { margin-top: 16px; padding: 20px; border-radius: 22px; }
@@ -324,18 +329,11 @@
   .offer-text span { font-size: 17px; }
   .offer .btn { flex: 1 1 100%; }
 }
-/* Tablets: the proof strip keeps its 72px years block on the left, with the fairs line over the logos beside it, so its
-   right half is not left empty. Phones (600px and under) stay stacked. */
+/* Tablets: the proof strip keeps the computer's layout, the years on the left and the logos at the right. Phones (600px
+   and under) stay stacked. */
 @media (min-width: 601px) and (max-width: 1000px) {
-  .proof {
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-areas: "yrs line" "yrs logos";
-    gap: 14px 32px;
-    padding: 24px 28px;
-  }
-  .yrs { grid-area: yrs; }
-  .proof-line { grid-area: line; align-self: end; }
-  .logos { grid-area: logos; align-self: start; }
+  .proof { grid-template-columns: auto minmax(0, 1fr); gap: 14px 32px; padding: 24px 28px; }
+  .logos { justify-self: end; }
 }
 
 /* A browser without subgrid cannot line the photo up with the end of the hero: the photo

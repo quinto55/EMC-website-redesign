@@ -26,7 +26,7 @@ const SENTENCES = {
     'Media buying', 'Radio, TV, billboards, web and mobile. We plan and place the media for your event.',
     'Promotions', 'Special promotions with local partners, built around your event.',
     'Ad production', 'Ad graphics and video for your campaigns.',
-    'Social media', "We manage your social media posts and answer your guests' questions and comments in a timely manner.",
+    'Social media', "We manage your social media posts and answer your guests' questions and comments quickly.",
     'Each event is unique. Tell us about yours.',
   ],
   about: [

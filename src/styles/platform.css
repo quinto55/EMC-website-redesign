@@ -35,10 +35,12 @@
   font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
-  transition: background-color .15s ease;
+  transition: background-color .15s var(--ease-out);
 }
 .jump a::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); }
-.jump a:hover { background: var(--hover); }
+@media (hover: hover) {
+  .jump a:hover { background: var(--hover); }
+}
 .jump .scan { --dot: var(--teal); }
 .jump .count { --dot: var(--amber); }
 .jump .guest { --dot: var(--live); }
@@ -122,8 +124,10 @@
 .stat b { font: 700 64px/1 var(--font-head); letter-spacing: -.03em; color: var(--red); }
 .strip-more .talk-link { margin-top: 4px; }
 /* The whole retail card goes to the retail partners page: its one link covers the card. */
-.retail { position: relative; transition: transform .18s ease, box-shadow .18s ease; }
-.retail:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px var(--ghost-shadow), 0 20px 40px rgba(120, 80, 20, .16); }
+.retail { position: relative; transition: transform .18s var(--ease-out), box-shadow .18s var(--ease-out); }
+@media (hover: hover) {
+  .retail:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px var(--ghost-shadow), 0 20px 40px rgba(120, 80, 20, .16); }
+}
 .card-link::after { content: ""; position: absolute; inset: 0; border-radius: 24px; }
 
 /* The fair map: a few points under its words, beside the video (phones: after the video). */

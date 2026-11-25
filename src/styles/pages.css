@@ -42,6 +42,8 @@
 }
 .proof-fairs .proof-line { font-size: 20px; color: var(--mut); }
 .proof-fairs .proof-line b { font-weight: 600; color: var(--ink); }
+/* On About it comes straight under the headline: the record first, then how we work. */
+.proof-fairs.about-proof { max-width: 680px; margin: 28px 0 0; }
 
 /* ---------- marketing ---------- */
 .service-sec { padding-top: 40px; }
@@ -93,7 +95,7 @@
 .legal__updated { margin-top: 12px; font: 500 13px var(--font-mono); color: var(--mut); }
 .legal h2 { margin: 40px 0 10px; font-size: 26px; letter-spacing: -.015em; }
 .legal p,
-.legal li { font-size: 17px; line-height: 1.65; }
+.legal li { max-width: 32em; font-size: 17px; line-height: 1.65; } /* about 70 characters a line; 70ch of the page font ran to 100 */
 .legal ul { list-style: disc; padding-left: 1.3em; }
 .legal li + li { margin-top: 10px; }
 .legal a { color: var(--red); text-decoration: underline; text-underline-offset: 3px; }
@@ -123,6 +125,7 @@
   .closing { font-size: 26px; }
   .prose p { font-size: 19px; }
   .proof-fairs { margin-bottom: 54px; padding: 20px; }
+  .proof-fairs.about-proof { margin: 22px 0 0; }
   .proof-fairs .proof-line { font-size: 18px; }
   .legal h1 { font-size: 38px; }
   .legal h2 { font-size: 23px; }
