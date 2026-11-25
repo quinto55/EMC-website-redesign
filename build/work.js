@@ -1,5 +1,6 @@
 // Work samples: real ads and ticket sale sites EMC made for fairs, festivals and rodeos. Every one of them was
-// already public on the old emctickets.com ("What we do"); the originals are kept in assets-src/work and
+// already public on the old emctickets.com ("What we do"), except the IAFE page's frame, which comes from the 2026 Coastal
+// Carolina Fair video ad in EMC's pitch deck (Anthony's OK, 2026-11-25); the originals are kept in assets-src/work and
 // `npm run work` (scripts/build-work.mjs) writes the web sizes into public/emc-site/work.
 //
 // Rules for adding one: it must be EMC's own published work; no performer's or celebrity's face, and no child as the
@@ -8,10 +9,12 @@ export const WORK_PUBLIC_DIR = 'public/emc-site/work';
 export const WORK_SOURCE_DIR = 'assets-src/work';
 const WORK_URL = '/emc-site/work';
 
-/** kind: 'ad' is a square, built 280 and 560 wide; 'site' is a wide device mockup, built 400 and 800 wide. */
+/** kind: 'ad' is a square, built 280 and 560 wide; 'site' is a wide device mockup, built 400 and 800 wide; 'frame' is a
+ *  still from a video ad, built 640 and 1280 wide. */
 const KINDS = {
   ad: { widths: [280, 560], ratio: [1, 1] },
   site: { widths: [400, 800], ratio: [8, 5] },
+  frame: { widths: [640, 1280], ratio: [16, 9] },
 };
 
 /** Each set is one row or grid on one page. `sizes` tells the browser how wide a picture is drawn. */
@@ -46,6 +49,13 @@ export const WORK_SETS = {
       { slug: 'promo-santa-es', source: 'general-2-ES_small.jpg', alt: "The same promotion for Santa's Enchanted Forest in Spanish: savings on every ticket bought at Walgreens." },
       { slug: 'promo-mecklenburg', source: 'BMCF-Half-Price-WG-v4.jpg', alt: 'Ad for the Big Mecklenburg County Fair: half-price gate tickets now on sale, only at Walgreens.' },
       { slug: 'promo-ccf-circle-k', source: 'CCF-save5-rides.jpg', alt: 'Ad for the Coastal Carolina Fair: save and skip the line with the Circle K fast lane.' },
+    ],
+  },
+  // IAFE page, beside the hero
+  iafe: {
+    kind: 'frame', sizes: '(max-width: 1000px) calc(100vw - 40px), 560px',
+    items: [
+      { slug: 'ccf-video-ad-rides', source: 'CCF2026-video-ad-rides-circle-k.jpg', alt: 'Ad for the Coastal Carolina Fair: unlimited-ride wristbands on sale at Circle K, over a swing ride against the sky.' },
     ],
   },
   // About page

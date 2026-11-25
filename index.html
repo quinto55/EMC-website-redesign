@@ -27,12 +27,17 @@
      window over it (the head script and src/styles/curtain.css, then src/curtain/curtain.js); it is never in this HTML. -->
 <div class="stage">
   <div class="hero-photo">
+    <!-- The photo fills a box as tall as the hero, so it is drawn wider than the window: about 1300px wide on tablets,
+         and the window's height times the photo's shape (209vh) on computers. Phones get a tall cut of their own. -->
     <picture>
-      <source type="image/avif" sizes="100vw"
+      <source media="(max-width: 560px)" type="image/avif" srcset="/emc-site/img/hero-tall-560.avif">
+      <source media="(max-width: 560px)" type="image/webp" srcset="/emc-site/img/hero-tall-560.webp">
+      <source media="(max-width: 560px)" srcset="/emc-site/img/hero-tall-560.jpg">
+      <source type="image/avif" sizes="(max-width: 1000px) 1300px, max(100vw, 209vh)"
         srcset="/emc-site/img/hero-800.avif 800w, /emc-site/img/hero-1280.avif 1280w, /emc-site/img/hero-1760.avif 1760w">
-      <source type="image/webp" sizes="100vw"
+      <source type="image/webp" sizes="(max-width: 1000px) 1300px, max(100vw, 209vh)"
         srcset="/emc-site/img/hero-800.webp 800w, /emc-site/img/hero-1280.webp 1280w, /emc-site/img/hero-1760.webp 1760w">
-      <img src="/emc-site/img/hero-1280.jpg" sizes="100vw"
+      <img src="/emc-site/img/hero-1280.jpg" sizes="(max-width: 1000px) 1300px, max(100vw, 209vh)"
         srcset="/emc-site/img/hero-800.jpg 800w, /emc-site/img/hero-1280.jpg 1280w, /emc-site/img/hero-1760.jpg 1760w"
         width="1760" height="844" alt="" fetchpriority="high">
     </picture>
@@ -49,6 +54,7 @@
           <a class="btn" href="#talk">Let's talk about your fair</a>
           <a class="btn ghost" href="/platform/">See it work</a>
         </div>
+        <p class="hero-proof">The <b>Florida State Fair</b>, <b>South Carolina State Fair</b> and <b>Coastal Carolina Fair</b> all run their retail ticketing through EMC.</p>
       </div>
       <div class="hero-board">
         <p class="chip">Running right now</p>
@@ -60,7 +66,6 @@
   <div class="wrap">
     <div class="proof">
       <p class="yrs"><b class="yrs-num" aria-hidden="true"><span class="yrs-digits" data-count-to="40">40</span><span class="yrs-plus">+</span></b><span class="visually-hidden">40+</span> <span class="yrs-words">years in the industry</span></p>
-      <p class="proof-line">The <b>Florida State Fair</b>, <b>South Carolina State Fair</b> and <b>Coastal Carolina Fair</b> all run their retail ticketing through EMC.</p>
       <a class="logos" href="/retail-partners/">
         <span class="visually-hidden">Tickets on sale at</span>
         <img src="/emc-site/logos/walgreens.png" width="720" height="150" alt="Walgreens">
@@ -74,6 +79,7 @@
       <h2 id="live-board-h">Every ticket, as it happens.</h2>
       <p class="lede">Real-time validation. 24/7 dashboard. Watch tickets sold, scanned in and sales as they happen.</p>
 <!--site:dashboard-->
+      <a class="talk-link db-more" href="/platform/#live-dashboard"><span class="arrow">See the whole dashboard</span></a>
       <a class="talk-link" href="#talk"><span class="arrow">Let's talk about your fair</span></a>
     </section>
 

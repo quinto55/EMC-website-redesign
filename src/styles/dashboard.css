@@ -330,12 +330,13 @@
 .db .db-stub__amount::after { bottom: -6px; }
 .db .db-stub__amount strong { font-weight: 600; }
 .db .db-stub__amount span { color: var(--db-muted); font-size: var(--db-small); white-space: nowrap; }
-/* A sale arriving drops in at the top; its total flashes gold. */
-.db .db-arrive { animation: db-arrive 700ms cubic-bezier(.2, .8, .2, 1) both; }
+/* A sale arriving drops in at the top; its total flashes gold. Only opacity and position move: growing its height
+   from 0 made the whole panel shrink and regrow with every sale, which shifted the page under it on phones. */
+.db .db-arrive { animation: db-arrive 300ms cubic-bezier(.23, 1, .32, 1) both; }
 .db .db-arrive .db-stub__amount strong { animation: db-flash 1.6s ease-out both; }
 @keyframes db-arrive {
-  from { max-height: 0; opacity: 0; transform: translateY(-12px) scale(.98); }
-  to { max-height: 8em; opacity: 1; transform: none; }
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: none; }
 }
 @keyframes db-flash {
   from { color: var(--db-gold-1); text-shadow: 0 0 14px rgba(255, 156, 61, .7); }

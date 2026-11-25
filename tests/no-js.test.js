@@ -150,7 +150,9 @@ describe('with JavaScript off', () => {
     const proof = home.doc.querySelector('main .proof');
     expect(proof).not.toBeNull();
     expect(proof.querySelector('.yrs-num').textContent).toBe('40+');
-    for (const s of ['years in the industry', 'Florida State Fair', 'all run their retail ticketing through EMC.']) expect(proof.textContent, s).toContain(s);
+    expect(proof.textContent).toContain('years in the industry');
+    const fairs = home.doc.querySelector('main .hero-proof'); // the fairs line sits in the hero, shown as served
+    for (const s of ['Florida State Fair', 'all run their retail ticketing through EMC.']) expect(fairs.textContent, s).toContain(s);
     expect(proof.querySelectorAll('.logos img')).toHaveLength(3);
     expect(proof.querySelector('[hidden]')).toBeNull();
     expect(proof.querySelector('[style]')).toBeNull();
@@ -274,7 +276,7 @@ describe('the IAFE page with JavaScript off', () => {
   it('shows the standard lead and the email fallback', () => {
     const { doc } = rendered.find((r) => r.page.key === 'iafe');
     expect(doc.querySelector('[data-iafe-lead="walgreens"]').hasAttribute('hidden')).toBe(true);
-    expect(doc.querySelector('h1').textContent).toBe('One system from first ticket to final report.');
+    expect(doc.querySelector('#iafe-heading').textContent).toBe('One system from first ticket to final report.');
     expect(doc.querySelector('[data-booth-line]').textContent).toContain('See us at Booth #410');
     expect(doc.querySelector('[data-ask]').getAttribute('data-ask-variant')).toBe('talk');
     expect(doc.querySelector('[data-ask] [data-ask-fallback] a[href^="mailto:anthony@emctickets.com"]')).not.toBeNull();

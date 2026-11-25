@@ -12,8 +12,8 @@ const parse = (html) => new DOMParser().parseFromString(`<body>${html}</body>`, 
 const allItems = Object.entries(WORK_SETS).flatMap(([setName, set]) => set.items.map((item) => ({ setName, item })));
 
 describe('the work samples list (build/work.js)', () => {
-  it('has four sets: eight ads and three sites for Marketing, four promotions for Retail, six ads for About', () => {
-    expect(Object.fromEntries(Object.entries(WORK_SETS).map(([k, v]) => [k, v.items.length]))).toEqual({ ads: 8, sites: 3, retail: 4, about: 6 });
+  it('has five sets: eight ads and three sites for Marketing, four promotions for Retail, one ad still for IAFE, six ads for About', () => {
+    expect(Object.fromEntries(Object.entries(WORK_SETS).map(([k, v]) => [k, v.items.length]))).toEqual({ ads: 8, sites: 3, retail: 4, iafe: 1, about: 6 });
   });
 
   it('every sample has its original in assets-src/work, and no sample or original is used twice', () => {
@@ -42,6 +42,7 @@ describe('the work samples list (build/work.js)', () => {
   it('ads are built square at two widths and sites wide at two widths', () => {
     expect(workFiles('ads', WORK_SETS.ads.items[0]).map((f) => [f.width, f.height])).toEqual([[280, 280], [560, 560]]);
     expect(workFiles('sites', WORK_SETS.sites.items[0]).map((f) => [f.width, f.height])).toEqual([[400, 250], [800, 500]]);
+    expect(workFiles('iafe', WORK_SETS.iafe.items[0]).map((f) => [f.width, f.height])).toEqual([[640, 360], [1280, 720]]);
   });
 });
 
@@ -113,9 +114,16 @@ describe('where the work samples show', () => {
     expect(pageDoc('marketing').getElementById('work')).not.toBeNull();
   });
 
-  it('no other page carries them: the home page and the IAFE page stay light', () => {
+  it('IAFE: the one ad still beside the hero, with a link to the rest of the work', () => {
+    const doc = pageDoc('iafe');
+    expect(sets(doc)).toEqual(['iafe']);
+    expect(doc.querySelectorAll('img[src^="/emc-site/work/"]')).toHaveLength(1);
+    expect(doc.querySelector('.iafe-hero figcaption a[href="/marketing/#work"]')).not.toBeNull();
+  });
+
+  it('no other page carries them: the home page stays light', () => {
     for (const { page, doc } of rendered) {
-      if (['marketing', 'retail', 'about'].includes(page.key)) continue;
+      if (['marketing', 'retail', 'about', 'iafe'].includes(page.key)) continue;
       expect(doc.querySelectorAll('.work-grid, img[src^="/emc-site/work/"]').length, page.file).toBe(0);
     }
   });

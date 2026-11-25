@@ -33,10 +33,11 @@ describe('the IAFE variant', () => {
 
   it('the page as served is the standard page', () => {
     expect(lead().hasAttribute('hidden')).toBe(true);
-    expect(document.querySelectorAll('h1').length).toBe(1);
-    expect(norm(document.querySelector('h1'))).toBe('One system from first ticket to final report.');
+    // one h1 shows: the Walgreens lead has its own, but it stays hidden on the standard page
+    expect([...document.querySelectorAll('h1')].filter((h) => !lead().contains(h)).length).toBe(1);
+    expect(norm(document.querySelector('#iafe-heading'))).toBe('One system from first ticket to final report.');
     expect(norm(document.querySelector('[data-booth-line]'))).toBe('See us at Booth #410 in Louisville, Nov 30 to Dec 1');
-    const hero = document.querySelector('h1').closest('section');
+    const hero = document.querySelector('#iafe-heading').closest('section');
     const ask = document.querySelector('[data-ask]');
     expect(ask.id).toBe('talk');
     expect(ask.getAttribute('data-ask-variant')).toBe('talk');
@@ -48,8 +49,8 @@ describe('the IAFE variant', () => {
   it('the Walgreens variant leads with the Walgreens story and asks for the mockup', () => {
     applyIafeVariant(document, 'walgreens');
     expect(lead().hasAttribute('hidden')).toBe(false);
-    expect(norm(lead().querySelector('h2'))).toBe('Sell your fair tickets at Walgreens.');
-    expect(lead().compareDocumentPosition(document.querySelector('h1')) & 4).toBeTruthy(); // the lead comes first
+    expect(norm(lead().querySelector('h1'))).toBe('Sell your fair tickets at Walgreens.'); // the page's first heading
+    expect(lead().compareDocumentPosition(document.querySelector('#iafe-heading')) & 4).toBeTruthy(); // the lead comes first
     expect(norm(document.querySelector('[data-ask-heading]'))).toBe('Get a free in-store mockup of your event.');
     expect(norm(document.querySelector('[data-ask-submit]'))).toBe('Request my mockup');
     expect(document.querySelector('[data-ask]').getAttribute('data-ask-variant')).toBe('mockup');
@@ -87,8 +88,13 @@ describe('the page body', () => {
     for (const s of ['Sell', 'Scan', 'Count', 'Online sales', 'Flash sales', 'Box office POS', 'Any gate, duplicates blocked', 'Barcode or QR',
       'RFID wristbands later in 2027', 'Real-time validation', 'Daily reports', '24/7 dashboard']) expect(t, s).toContain(s);
     const sum = document.querySelector('[data-iafe-summary]');
-    expect(norm(sum.querySelector('a[href="/platform/#online-sales"]'))).toContain('Watch it');
-    expect(norm(sum.querySelector('a[href="/platform/#live-dashboard"]'))).toContain('Try it');
+    // every item with a demo links to it; the rest stay plain rows with no arrow
+    const links = [...sum.querySelectorAll('a.row')].map((a) => [a.getAttribute('href'), norm(a.querySelector('.arrow'))]);
+    expect(links).toEqual([
+      ['/platform/#online-sales', 'Watch it'], ['/platform/#box-office', 'Watch it'], ['/platform/#gate-scanning', 'Try it'],
+      ['/platform/#daily-reports', 'See one'], ['/platform/#live-dashboard', 'Try it'],
+    ]);
+    for (const row of sum.querySelectorAll('span.row')) expect(row.querySelector('.arrow')).toBeNull();
     expect(norm(sum.querySelector('a[href="/platform/"]'))).toContain('See the whole platform');
     expect(sum.querySelectorAll('.arrow').length).toBeGreaterThanOrEqual(3);
   });
@@ -98,9 +104,11 @@ describe('the page body', () => {
     expect(items).toEqual(['RFID wristbands', 'Box office POS', 'Interactive fair map', 'Our ticket-buyer call line', 'Pip, our talking AI clown for the front gate']);
   });
 
-  it('the three demos with a video link to it: the map on the platform page, the call line and Pip on fair services', () => {
+  it('every booth demo links to where it shows: wristbands, the box office and the map on the platform page, the call line and Pip on fair services', () => {
     const links = [...document.querySelectorAll('[data-booth-demos] li a')].map((a) => [norm(a), a.getAttribute('href')]);
     expect(links).toEqual([
+      ['RFID wristbands', '/platform/#rfid'],
+      ['Box office POS', '/platform/#box-office'],
       ['Interactive fair map', '/platform/#guest-map'],
       ['Our ticket-buyer call line', '/fair-services/#call-line'],
       ['Pip, our talking AI clown for the front gate', '/fair-services/#pip'],
@@ -125,11 +133,21 @@ describe('the page body', () => {
     expect(norm(document.querySelector('[data-booth-line]'))).toBe("We're at Booth #410 today");
   });
 
-  it('loads no video, no board and no hero photo', () => {
+  it('loads no video and no board; its one picture is the ad still beside the hero, loaded lazily', () => {
     expect(document.querySelector('video')).toBeNull();
     expect(document.querySelector('[data-board], [data-dashboard]')).toBeNull();
-    expect(document.querySelector('picture')).toBeNull();
-    expect([...document.querySelectorAll('main img')].every((i) => lead().contains(i))).toBe(true);
+    const pictures = [...document.querySelectorAll('main picture')];
+    expect(pictures).toHaveLength(1);
+    expect(pictures[0].closest('.iafe-hero figure')).not.toBeNull();
+    expect(pictures[0].querySelector('img').getAttribute('loading')).toBe('lazy');
+    expect(norm(pictures[0].closest('figure').querySelector('figcaption'))).toContain('Coastal Carolina Fair');
+    expect([...document.querySelectorAll('main img')].every((i) => lead().contains(i) || pictures[0].contains(i))).toBe(true);
+  });
+
+  it('shows the track record in the hero, before the first button to the form', () => {
+    const proof = document.querySelector('.iafe-hero .iafe-proof');
+    expect(norm(proof)).toBe('40+ years in the industry. The Florida State Fair, South Carolina State Fair and Coastal Carolina Fair all run their retail ticketing through EMC.');
+    expect(proof.compareDocumentPosition(document.querySelector('.iafe-hero [data-iafe-cta]')) & 4).toBeTruthy();
   });
 
   it('the closing strip links back to the form', () => {
@@ -144,7 +162,7 @@ describe('the page body', () => {
   });
 
   it('the sections come in the planned order', () => {
-    const order = ['[data-iafe-lead]', 'h1', '[data-ask]', '[data-iafe-summary]', '[data-booth-demos]', '[data-iafe-closing]'];
+    const order = ['[data-iafe-lead]', '#iafe-heading', '[data-ask]', '[data-iafe-summary]', '[data-booth-demos]', '[data-iafe-closing]'];
     const nodes = order.map((s) => document.querySelector(s));
     for (let i = 1; i < nodes.length; i++) expect(nodes[i - 1].compareDocumentPosition(nodes[i]) & 4, order[i]).toBeTruthy();
   });

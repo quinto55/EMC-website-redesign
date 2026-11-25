@@ -81,6 +81,18 @@ describe('initNav', () => {
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
   });
 
+  it('focus moving out of the open menu closes it, so it never lands on the page hidden under the panel', () => {
+    document.body.insertAdjacentHTML('beforeend', '<a href="#after" id="after">After</a>');
+    toggle.click();
+    menu.querySelector('a').focus();
+    expect(menu.hidden).toBe(false); // focus inside the menu keeps it open
+    toggle.focus();
+    expect(menu.hidden).toBe(false); // and so does focus on the toggle
+    document.getElementById('after').focus();
+    expect(menu.hidden).toBe(true);
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+  });
+
   it('a click elsewhere on the page closes the menu', () => {
     toggle.click();
     document.querySelector('main p').click();

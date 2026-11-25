@@ -34,21 +34,27 @@ describe('home page', () => {
   it('the hero photo is a real image the browser can find early', () => {
     const picture = doc.querySelector('picture');
     expect(picture).not.toBeNull();
-    const sources = [...picture.querySelectorAll('source')];
+    const all = [...picture.querySelectorAll('source')];
+    // phones first: one tall cut at the source's full resolution, in each format
+    const tall = all.filter((s) => s.getAttribute('media') === '(max-width: 560px)');
+    expect(tall.map((s) => s.getAttribute('type'))).toEqual(['image/avif', 'image/webp', null]);
+    expect(all.slice(0, 3)).toEqual(tall);
+    for (const s of tall) expect(publicFile(s.getAttribute('srcset')), s.getAttribute('srcset')).toBe(true);
+    const sources = all.filter((s) => !s.hasAttribute('media'));
     expect(sources.map((s) => s.getAttribute('type'))).toEqual(['image/avif', 'image/webp']);
 
     const img = picture.querySelector('img');
     expect(img.getAttribute('alt')).toBe('');
     expect(img.getAttribute('fetchpriority')).toBe('high');
     expect(img.hasAttribute('loading')).toBe(false);
-    expect(img.getAttribute('sizes')).toBe('100vw');
+    expect(img.getAttribute('sizes')).toBe('(max-width: 1000px) 1300px, max(100vw, 209vh)');
     expect(Number(img.getAttribute('width'))).toBeGreaterThan(0);
     expect(Number(img.getAttribute('height'))).toBeGreaterThan(0);
     expect(publicFile(img.getAttribute('src')), img.getAttribute('src')).toBe(true);
 
     // Every candidate in every srcset is one of the built widths and exists.
     for (const el of [...sources, img]) {
-      expect(el.getAttribute('sizes')).toBe('100vw');
+      expect(el.getAttribute('sizes')).toBe('(max-width: 1000px) 1300px, max(100vw, 209vh)'); // drawn wider than the window: the box is as tall as the hero
       const candidates = el.getAttribute('srcset').split(',').map((c) => c.trim().split(/\s+/));
       expect(candidates.map(([, w]) => w)).toEqual(['800w', '1280w', '1760w']);
       for (const [url] of candidates) expect(publicFile(url), url).toBe(true);
@@ -57,14 +63,17 @@ describe('home page', () => {
 
   it('proof strip is exact', () => {
     const sentence = 'The Florida State Fair, South Carolina State Fair and Coastal Carolina Fair all run their retail ticketing through EMC.';
+    // The fairs line is in the hero, under the buttons, so it is on the first screen; the strip keeps "40+" and the logos.
     const p = byText(main, 'p', sentence);
     expect(p).not.toBeNull();
-    const proof = p.closest('.proof');
-    expect(proof).not.toBeNull();
+    expect(p.matches('.hero-copy > p.hero-proof')).toBe(true);
+    expect(p.previousElementSibling.matches('.cta')).toBe(true);
+    const proof = main.querySelector('.proof');
+    expect(proof.contains(p)).toBe(false);
     expect(byText(proof, '*', '40+')).not.toBeNull();
     expect(byText(proof, '*', 'years in the industry')).not.toBeNull();
-    // The years claim leads (phones stack the strip in this order), then the fairs line, then the logos.
-    expect([...proof.children].map((el) => el.className)).toEqual(['yrs', 'proof-line', 'logos']);
+    // The years claim leads (phones stack the strip in this order), then the logos.
+    expect([...proof.children].map((el) => el.className)).toEqual(['yrs', 'logos']);
 
     const label = [...proof.querySelectorAll('*')].find((el) => !el.children.length && text(el) === 'Tickets on sale at');
     expect(label).toBeTruthy();
@@ -113,7 +122,9 @@ describe('home page', () => {
     // No words but the approved ones around the board.
     const words = section.cloneNode(true);
     words.querySelector('[data-dashboard]').remove();
-    expect(text(words)).toBe("Live dashboard Every ticket, as it happens. Real-time validation. 24/7 dashboard. Watch tickets sold, scanned in and sales as they happen. Let's talk about your fair");
+    expect(text(words)).toBe("Live dashboard Every ticket, as it happens. Real-time validation. 24/7 dashboard. Watch tickets sold, scanned in and sales as they happen. See the whole dashboard Let's talk about your fair");
+    // Phones show the top of the board (home.css) and this link to the whole one on the Platform page.
+    expect(last.previousElementSibling.matches('a.db-more[href="/platform/#live-dashboard"]')).toBe(true);
 
     // The hero keeps its compact board and chip; each board keeps its own name; nothing is announced as it ticks.
     expect(hero.querySelector('[data-board]')).not.toBeNull();
@@ -295,6 +306,6 @@ describe('home page', () => {
 
   it('draws its arrows instead of typing them (the self-hosted fonts have no arrow glyph)', () => {
     expect(visibleText(doc)).not.toMatch(/[←-⇿⟰-⟿⤀-⥿]/);
-    expect(main.querySelectorAll('.arrow').length).toBe(12); // the six card rows, the live dashboard's link, and five in the two feature sections
+    expect(main.querySelectorAll('.arrow').length).toBe(13); // the six card rows, the live dashboard's two links, and five in the two feature sections
   });
 });

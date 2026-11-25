@@ -157,15 +157,11 @@ describe('the reveal order (home.css)', () => {
     return [...anim.matchAll(/([\d.]+)s\b/g)].map((m) => Number(m[1]));
   };
 
-  it('the fairs line and the logos fade in while the number counts, so the card is never just the number', () => {
-    const [lineFor, lineAfter] = timing('.proof.is-armed .proof-line');
+  it('the logos fade in while the number counts, so the card is never just the number', () => {
     const [logosFor, logosAfter] = timing('.proof.is-armed .logos');
-    expect(lineAfter).toBeGreaterThan(0);
-    expect(lineAfter).toBeLessThanOrEqual(0.2);
-    expect(logosAfter).toBeGreaterThan(lineAfter);
+    expect(logosAfter).toBeGreaterThan(0);
     expect(logosAfter).toBeLessThanOrEqual(0.35);
-    // both fully in well before the count (1.2 s) lands
-    expect(lineAfter + lineFor).toBeLessThanOrEqual(0.9);
+    // fully in well before the count (1.2 s) lands
     expect(logosAfter + logosFor).toBeLessThanOrEqual(0.9);
   });
 
