@@ -29,3 +29,14 @@ for (const width of WIDTHS) {
     console.log(`wrote public/emc-site/img/hero-${width}.${ext} (${info.width} x ${info.height}, ${kb} KB)`);
   }
 }
+
+// Phones draw the photo in a tall box, so a wide file is blown up to fill its height. This is the part a phone shows
+// (around the 30% mark the page centres it on), cut at the source's full resolution: as sharp as the photo gets.
+const { height: sourceHeight } = await sharp(SOURCE).metadata();
+const TALL = { width: 560, height: sourceHeight };
+const left = Math.round((sourceWidth - TALL.width) * 0.3);
+for (const [ext, encode] of Object.entries(FORMATS)) {
+  const file = join(OUT, `hero-tall-${TALL.width}.${ext}`);
+  const info = await encode(sharp(SOURCE).extract({ left, top: 0, ...TALL })).toFile(file);
+  console.log(`wrote public/emc-site/img/hero-tall-${TALL.width}.${ext} (${info.width} x ${info.height}, ${Math.round(statSync(file).size / 1024)} KB)`);
+}

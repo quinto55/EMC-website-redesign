@@ -14,7 +14,8 @@
   --tint-amber: #fff1cc;
 
   --hover: #fdeac4;        /* a menu link under the pointer, and the current page */
-  --ghost-shadow: #e3d3b8; /* the ghost button's hard shadow; form field borders */
+  --ghost-shadow: #e3d3b8; /* the ghost button's hard shadow */
+  --field-line: #9a8a6e; /* form field borders: 3.3:1 on the white card (WCAG 1.4.11 asks for 3:1) */
   --field: #fffdf8;
   --track: #f4ecdd;
   --live: #19b85a;

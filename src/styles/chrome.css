@@ -205,7 +205,7 @@
   width: 100%;
   margin-top: 4px;
   padding: 12px 14px;
-  border: 1.5px solid var(--ghost-shadow);
+  border: 1.5px solid var(--field-line);
   border-radius: 12px;
   background: var(--field);
   font: 400 16px/1.4 var(--font-text); /* 16px keeps phones from zooming in */

@@ -1,12 +1,14 @@
-/* The IAFE landing page: opened from a printed card on a phone. Text only, no photo, no board.
+/* The IAFE landing page: opened from a printed card on a phone. No video and no board, so it stays light on
+   convention-hall signal: one still from a video ad sits beside the hero (under it on phones).
    Builds on the site look; the Walgreens story reuses the Retail partners rules in pages.css. */
 
-.iafe-lead .page-intro h2 { font-size: 72px; letter-spacing: -.03em; line-height: 1.03; }
+.iafe-lead .page-intro h1 { font-size: 72px; letter-spacing: -.03em; line-height: 1.03; }
 .iafe-lead { padding-bottom: 36px; }
 .iafe-lead .cta { margin-top: 22px; }
 
 .iafe-hero { padding: 46px 0 40px; }
-.iafe-hero h1 { max-width: 14em; font-size: 72px; letter-spacing: -.03em; }
+.iafe-hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-items: center; }
+.iafe-hero h1 { max-width: 14em; font-size: 60px; letter-spacing: -.03em; text-wrap: balance; }
 .iafe-booth {
   display: inline-block;
   margin-bottom: 18px;
@@ -15,8 +17,18 @@
   background: var(--tint-red);
   color: var(--red);
   font: 500 14px/1.4 var(--font-mono);
+  text-wrap: balance; /* on phones it breaks into two even lines, not "Nov" alone at the end of the first */
 }
-.iafe-sub { max-width: 560px; margin: 18px 0 26px; font-size: 21px; color: var(--mut); }
+.iafe-sub { max-width: 560px; margin: 18px 0 16px; font-size: 21px; color: var(--mut); }
+/* The track record, before the ask: a fair board member sees who runs on EMC, not only what it does. */
+.iafe-proof { max-width: 560px; margin-bottom: 26px; padding-top: 16px; border-top: 1px dashed var(--line); font-size: 16px; line-height: 1.5; text-wrap: pretty; }
+
+/* The ad still: the work, not decoration, so it keeps its own words and a line saying what it is. */
+.iafe-work { margin: 0; }
+.iafe-work .work-grid { display: block; }
+.iafe-work .work-grid img { display: block; aspect-ratio: 16 / 9; border-radius: 22px; } /* over pages.css square crop */
+.iafe-work figcaption { margin-top: 12px; font: 500 13px/1.55 var(--font-mono); color: var(--mut); }
+.iafe-work figcaption a { display: inline-block; color: var(--red); text-decoration: underline; text-underline-offset: 3px; }
 
 /* Sell. Scan. Count. as a short list; the rules match the home page's cards. */
 .iafe-summary { padding-top: 24px; }
@@ -73,9 +85,13 @@
 .iafe-closing-contact small { font: 500 13px var(--font-mono); color: var(--mut); }
 
 @media (max-width: 1000px) {
-  .iafe-lead .page-intro h2 { font-size: 36px; }
+  .iafe-lead .page-intro h1 { font-size: 36px; }
   .iafe-hero { padding: 22px 0 22px; }
+  .iafe-hero-grid { grid-template-columns: minmax(0, 1fr); gap: 26px; }
   .iafe-hero h1 { font-size: 38px; }
+  .iafe-proof { margin-bottom: 20px; padding-top: 12px; font-size: 15px; }
+  .iafe-work .work-grid img { border-radius: 16px; }
+  .mod h3 { font-size: 30px; } /* below the section heading's 34px */
   .iafe-booth { margin-bottom: 12px; font-size: 13px; }
   .iafe-sub { margin: 12px 0 18px; font-size: 17px; }
   .iafe-summary h2,

@@ -96,6 +96,9 @@
 }
 .hero h1 .hl { color: var(--yellow); }
 .hero-sub { max-width: 480px; margin: 20px 0 32px; font-size: 20px; color: rgba(255, 255, 255, .92); }
+/* The track record, on the first screen: the fairs that already run on EMC, under the buttons. */
+.hero-proof { max-width: 470px; margin-top: 26px; font-size: 15px; line-height: 1.5; color: rgba(255, 255, 255, .86); text-wrap: pretty; }
+.hero-proof b { font-weight: 600; color: #fff; }
 .cta { display: flex; gap: 14px; }
 .hero .btn.ghost,
 .hero .btn.ghost:active {
@@ -124,16 +127,16 @@
 .hero .board { box-shadow: 0 30px 70px rgba(20, 8, 0, .5); }
 
 /* ---------- proof strip, overlapping the bottom of the photo ----------
-   "40+" leads, large and red on the site's yellow marker; the fairs line is the quiet second voice. As served this is
-   the final state. src/proof-count.js adds .is-armed (the starting state, and the fairs line and logos fading in while
-   the number counts) only in the task that starts the play, and .is-counted when the figures land on 40, which runs
-   the "+", the marker and the words below. Phones (600px and under) stack it; tablets and narrower computers put the
-   fairs line over the logos beside the years block. */
+   "40+" leads, large and red on the site's yellow marker, with the store logos beside it (the fairs line moved up into
+   the hero, so a fair board member reads it on the first screen). As served this is the final state.
+   src/proof-count.js adds .is-armed (the starting state, and the logos fading in while the number counts) only in the
+   task that starts the play, and .is-counted when the figures land on 40, which runs the "+", the marker and the words
+   below. Phones (600px and under) stack it. */
 .proof {
   position: relative;
   z-index: 4;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 40px;
   align-items: center;
   margin-top: -44px;
@@ -175,22 +178,12 @@
   color: var(--ink);
   text-wrap: balance;
 }
-.proof-line { max-width: 360px; font-size: 15px; line-height: 1.45; color: var(--mut); text-wrap: pretty; }
-.proof-line b { font-weight: 600; color: var(--ink); }
-.logos { display: flex; align-items: center; gap: 24px; border-radius: 10px; transition: opacity .15s ease; } /* a link to the retail partners page */
+.logos { justify-self: end; display: flex; align-items: center; gap: 24px; border-radius: 10px; transition: opacity .15s ease; } /* a link to the retail partners page */
 .logos:hover { opacity: .7; }
 .logos img { width: auto; height: 26px; }
-/* Narrower computers: the years block keeps its room, and the logos drop under the fairs line rather than squeeze it. */
-@media (min-width: 1001px) and (max-width: 1199px) {
-  .proof { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "yrs line" "yrs logos"; row-gap: 14px; }
-  .yrs { grid-area: yrs; }
-  .proof-line { grid-area: line; align-self: end; }
-  .logos { grid-area: logos; align-self: start; }
-}
 
-/* The play, set by the script only as it runs. As the number starts counting, the fairs line fades in after 150 ms
-   and the logos after 300 ms (each 500 ms, starting from hidden), so the card is never just a number. */
-.proof.is-armed .proof-line { animation: proof-fade-in .5s cubic-bezier(.2, .7, .3, 1) .15s both; }
+/* The play, set by the script only as it runs. As the number starts counting, the logos fade in after 300 ms
+   (500 ms, starting from hidden), so the card is never just a number. */
 .proof.is-armed .logos { animation: proof-fade-in .5s cubic-bezier(.2, .7, .3, 1) .3s both; }
 @keyframes proof-fade-in { from { opacity: 0; } }
 /* Held back until the number lands. */
@@ -218,6 +211,18 @@
 .live-board { padding-bottom: 0; }
 .live-board > .db { margin: 36px 0 26px; }
 .talk-link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; color: var(--red); }
+/* Phones get the top of the board: tiles, alerts, latest sales and the pace chart, then a link to the whole board on the
+   Platform page. The rest ran about 1,200px more on a phone, and its panels change height as the sample day runs. */
+.db-more { display: none; }
+@media (max-width: 600px) {
+  .live-board .db .db-fraud,
+  .live-board .db .db-types,
+  .live-board .db .db-gates,
+  .live-board .db .db-money,
+  .live-board .db .db-regs,
+  .live-board .db .db-brief { display: none; }
+  .live-board .db-more { display: inline-flex; margin-right: 24px; }
+}
 
 /* ---------- Sell. Scan. Count. ---------- */
 .mods { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 34px; }
@@ -306,8 +311,7 @@
   .proof { grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 8px; padding: 22px 20px; }
   .yrs-num { font-size: 72px; }
   .yrs-words { font-size: 19px; }
-  .proof-line { font-size: 14px; }
-  .logos { flex-wrap: wrap; gap: 14px 20px; }
+  .logos { justify-self: start; flex-wrap: wrap; gap: 14px 20px; }
   .logos img { height: 22px; }
 
   .live-board > .db { margin: 24px 0 14px; }
