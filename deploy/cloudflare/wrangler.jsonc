@@ -1,0 +1,20 @@
+// The new site on emctickets.com through Cloudflare. Steps: deploy/GO-LIVE-CLOUDFLARE.md.
+//   bash scripts/build-cloudflare.sh && npx wrangler deploy -c deploy/cloudflare/wrangler.jsonc
+{
+  "name": "emc-site",
+  "main": "worker.js",
+  "compatibility_date": "2026-11-01",
+  // One route for the whole domain: a route for "/" alone would miss /?fbclid=... and /?utm_source=... links.
+  // www is left to the old host, which already sends it to emctickets.com.
+  "routes": [{ "pattern": "emctickets.com/*", "zone_name": "emctickets.com" }],
+  // No second public copy at a workers.dev or preview address (there, passing to the old host has nowhere to go).
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": "../../dist-cf",
+    "binding": "ASSETS",
+    // The new site's files are served without running the Worker (free, and outside the daily request count);
+    // only the home page runs it first, to hand WordPress its own /?s= /?p= and POST requests.
+    "run_worker_first": ["/"]
+  }
+}
